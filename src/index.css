@@ -61,9 +61,20 @@ body {
   text-align: center;
   border-inline: 1px solid var(--border);
   min-height: 100svh;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+}
+
+/*
+ * 교안 에디터(.tistory-editor): A4(210mm) + 시트 여백보다 창을 더 줄이면 안쪽만 튀어나감.
+ * 브라우저 창 자체는 막을 수 없으므로, #root 최소 너비 + 가로 스크롤로 맞춤.
+ * 퀴즈(App)만 켤 때는 :has 조건이 안 맞아 기존처럼 좁은 뷰포트 허용.
+ */
+#root:has(> .tistory-editor) {
+  min-width: calc(210mm + 5rem);
+  overflow-x: auto;
 }
 
 h1,
