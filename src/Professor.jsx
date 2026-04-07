@@ -1,14 +1,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import './Professor.css'
 
-const CATEGORIES = [
-  { value: '', label: '카테고리' },
-  { value: 'general', label: '일반' },
-  { value: 'lecture', label: '수업 자료' },
-  { value: 'assignment', label: '과제 안내' },
-  { value: 'exam', label: '시험' },
-]
-
 const PARAGRAPH_STYLES = [
   { value: 'p', label: '본문' },
   { value: 'div', label: '본문2' },
@@ -50,6 +42,14 @@ function execCmd(command, value = null) {
   }
 }
 
+function isHtmlBodyEmpty(html) {
+  const d = document.createElement('div')
+  d.innerHTML = html || ''
+  return d.innerText.replace(/\u00a0/g, ' ').trim().length === 0
+}
+
+const emptyPage = () => ({ id: crypto.randomUUID(), html: '' })
+
 export default function Professor() {
   const formId = useId()
   const editorRef = useRef(null)
@@ -57,8 +57,9 @@ export default function Professor() {
   const forePickerRef = useRef(null)
   const backPickerRef = useRef(null)
 
-  const [category, setCategory] = useState('')
   const [title, setTitle] = useState('')
+  const [pages, setPages] = useState(() => [emptyPage()])
+  const [pageIndex, setPageIndex] = useState(0)
   const [paragraphStyle, setParagraphStyle] = useState(0)
   const [fontName, setFontName] = useState(FONT_NAMES[0].value)
   const [editorMode, setEditorMode] = useState('visual')
@@ -69,6 +70,12 @@ export default function Professor() {
   const [showMore, setShowMore] = useState(false)
   const [bodyEmpty, setBodyEmpty] = useState(true)
   const toastTimer = useRef(null)
+  const lastStableHtmlRef = useRef('')
+  const pendingInputRef = useRef(null)
+  const pageIndexRef = useRef(0)
+  const composingRef = useRef(false)
+
+  pageIndexRef.current = pageIndex
 
   const showToast = useCallback((msg) => {
     setToast(msg)
@@ -89,6 +96,140 @@ export default function Professor() {
     document.addEventListener('mousedown', onDocMouseDown)
     return () => document.removeEventListener('mousedown', onDocMouseDown)
   }, [])
+
+  useEffect(() => {
+    const html = pages[pageIndex]?.html ?? ''
+    setHtmlSource(html)
+    setBodyEmpty(isHtmlBodyEmpty(html))
+    lastStableHtmlRef.current = html
+    if (editorMode === 'visual' && editorRef.current) {
+      editorRef.current.innerHTML = html || ''
+      queueMicrotask(() => {
+        const el = editorRef.current
+        if (el) lastStableHtmlRef.current = el.innerHTML
+      })
+    }
+    // 페이지 전환 시에만 본문 교체. pages를 deps에 넣으면 입력할 때마다 커서가 초기화됨.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pages, editorMode는 전환 직후 렌더 스냅샷만 사용
+  }, [pageIndex])
+
+  const flushOverflowToNextPage = useCallback((appendPlain, toastMessage) => {
+    const idx = pageIndexRef.current
+    showToast(toastMessage || '한 페이지를 넘겨 다음 페이지로 옮겼어요.')
+    setPages((prev) => {
+      const stable = lastStableHtmlRef.current
+      const copy = prev.map((p, i) => (i === idx ? { ...p, html: stable } : p))
+      let ni = idx + 1
+      if (ni >= copy.length) {
+        copy.push(emptyPage())
+      }
+      const esc = (s) =>
+        s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
+      const tail = copy[ni].html || ''
+      const tailEmpty = !tail || tail === '<p><br></p>' || isHtmlBodyEmpty(tail)
+      let newHtml = tailEmpty ? '' : tail
+      if (appendPlain) {
+        newHtml = `<p>${esc(appendPlain)}</p>` + newHtml
+      }
+      if (!newHtml) newHtml = '<p><br></p>'
+      copy[ni] = { ...copy[ni], html: newHtml }
+      return copy
+    })
+    setPageIndex(idx + 1)
+  }, [showToast])
+
+  const handleVisualInput = useCallback(() => {
+    if (composingRef.current) return
+    const el = editorRef.current
+    if (!el) return
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const el2 = editorRef.current
+        if (!el2) return
+        if (el2.scrollHeight <= el2.clientHeight + 3) {
+          lastStableHtmlRef.current = el2.innerHTML
+          const html = el2.innerHTML
+          setHtmlSource(html)
+          setBodyEmpty(isHtmlBodyEmpty(html))
+          setPages((prev) =>
+            prev.map((p, i) => (i === pageIndexRef.current ? { ...p, html } : p)),
+          )
+          pendingInputRef.current = null
+          return
+        }
+        const pending = pendingInputRef.current
+        pendingInputRef.current = null
+        el2.innerHTML = lastStableHtmlRef.current
+        setBodyEmpty(isHtmlBodyEmpty(lastStableHtmlRef.current))
+        let surplus = ''
+        let customToast
+        if (pending?.inputType === 'insertText' && pending.data) {
+          surplus = pending.data
+        } else if (pending?.inputType === 'insertLineBreak') {
+          surplus = '\n'
+        } else if (pending?.inputType === 'insertFromPaste') {
+          customToast = '이 페이지는 가득 찼어요. 다음 페이지에서 붙여 넣어 주세요.'
+        } else if (pending?.inputType?.startsWith('insert')) {
+          customToast = '이 페이지는 가득 찼어요. 다음 페이지를 이용해 주세요.'
+        }
+        flushOverflowToNextPage(surplus, customToast)
+      })
+    })
+  }, [flushOverflowToNextPage])
+
+  const handleBeforeInput = (e) => {
+    if (editorMode !== 'visual') return
+    pendingInputRef.current = { inputType: e.inputType, data: e.data }
+  }
+
+  const handleHtmlTextareaChange = useCallback(
+    (e) => {
+      const ta = e.target
+      const full = ta.value
+      requestAnimationFrame(() => {
+        const ta2 = e.target
+        if (ta2.scrollHeight <= ta2.clientHeight + 3) {
+          setHtmlSource(full)
+          setBodyEmpty(isHtmlBodyEmpty(full))
+          setPages((prev) =>
+            prev.map((p, i) => (i === pageIndexRef.current ? { ...p, html: full } : p)),
+          )
+          return
+        }
+        const idx = pageIndexRef.current
+        let lo = 0
+        let hi = full.length
+        while (lo < hi) {
+          const mid = Math.ceil((lo + hi) / 2)
+          ta2.value = full.slice(0, mid)
+          if (ta2.scrollHeight > ta2.clientHeight + 3) {
+            hi = mid - 1
+          } else {
+            lo = mid
+          }
+        }
+        const kept = full.slice(0, lo)
+        const surplus = full.slice(lo)
+        ta2.value = kept
+        lastStableHtmlRef.current = kept
+        showToast('한 페이지를 넘겨 다음 페이지로 옮겼어요.')
+        setPages((prev) => {
+          const copy = prev.map((p, i) => (i === idx ? { ...p, html: kept } : p))
+          let ni = idx + 1
+          if (ni >= copy.length) {
+            copy.push(emptyPage())
+          }
+          const tail = copy[ni].html || ''
+          copy[ni] = { ...copy[ni], html: surplus + tail }
+          return copy
+        })
+        setHtmlSource(kept)
+        setBodyEmpty(isHtmlBodyEmpty(kept))
+        setPageIndex(idx + 1)
+      })
+    },
+    [showToast],
+  )
 
   const focusEditor = () => {
     editorRef.current?.focus()
@@ -158,8 +299,42 @@ export default function Professor() {
   const syncHtmlFromEditor = () => {
     const el = editorRef.current
     if (!el) return
-    setHtmlSource(el.innerHTML)
-    setBodyEmpty(el.innerText.replace(/\u00a0/g, ' ').trim().length === 0)
+    const html = el.innerHTML
+    lastStableHtmlRef.current = html
+    setHtmlSource(html)
+    setBodyEmpty(isHtmlBodyEmpty(html))
+    setPages((prev) => prev.map((p, i) => (i === pageIndex ? { ...p, html } : p)))
+  }
+
+  const selectPage = (nextIndex) => {
+    if (nextIndex === pageIndex || nextIndex < 0 || nextIndex >= pages.length) return
+    const raw = editorMode === 'html' ? htmlSource : editorRef.current?.innerHTML ?? ''
+    setPages((prev) => prev.map((p, i) => (i === pageIndex ? { ...p, html: raw } : p)))
+    setPageIndex(nextIndex)
+  }
+
+  const addPage = () => {
+    const raw = editorMode === 'html' ? htmlSource : editorRef.current?.innerHTML ?? ''
+    setPages((prev) => {
+      const updated = prev.map((p, i) => (i === pageIndex ? { ...p, html: raw } : p))
+      const next = [...updated, emptyPage()]
+      setPageIndex(next.length - 1)
+      return next
+    })
+  }
+
+  const removeCurrentPage = () => {
+    if (pages.length <= 1) return
+    const raw = editorMode === 'html' ? htmlSource : editorRef.current?.innerHTML ?? ''
+    const idx = pageIndex
+    setPages((prev) => {
+      if (prev.length <= 1) return prev
+      const merged = prev.map((p, i) => (i === idx ? { ...p, html: raw } : p))
+      const next = merged.filter((_, i) => i !== idx)
+      const newIndex = Math.min(idx > 0 ? idx - 1 : 0, next.length - 1)
+      setPageIndex(newIndex)
+      return next
+    })
   }
 
   const handleModeChange = (mode) => {
@@ -168,30 +343,30 @@ export default function Professor() {
     }
     if (mode === 'visual' && editorMode === 'html' && editorRef.current) {
       editorRef.current.innerHTML = htmlSource || '<p><br></p>'
-      queueMicrotask(() => syncHtmlFromEditor())
+      lastStableHtmlRef.current = editorRef.current.innerHTML
+      queueMicrotask(() => {
+        syncHtmlFromEditor()
+        handleVisualInput()
+      })
     }
     setEditorMode(mode)
   }
 
   const handleTempSave = () => {
-    syncHtmlFromEditor()
+    if (editorMode === 'visual') syncHtmlFromEditor()
     setDraftCount((n) => n + 1)
-    showToast('임시저장되었습니다. (브라우저에만 보관)')
+    showToast(`임시저장 · 총 ${pages.length}페이지 (브라우저에만 보관)`)
   }
 
   const handleComplete = () => {
-    syncHtmlFromEditor()
-    showToast('완료 처리되었습니다. 서버 전송은 추후 연동할 수 있어요.')
+    if (editorMode === 'visual') syncHtmlFromEditor()
+    showToast(`완료 · 총 ${pages.length}페이지 (서버 연동은 추후 가능)`)
   }
 
   return (
     <div className="tistory-editor">
       <header className="tistory-editor__masthead">
         <span className="tistory-editor__brand">교안 작성</span>
-        <div className="tistory-editor__user">
-          <span className="tistory-editor__user-name">교수</span>
-          <span className="tistory-editor__user-avatar" aria-hidden="true" />
-        </div>
       </header>
 
       <div className="tistory-editor__toolbar-wrap">
@@ -436,19 +611,6 @@ export default function Professor() {
 
       <main className="tistory-editor__canvas">
         <div className="tistory-editor__sheet">
-          <select
-            className="tistory-editor__category"
-            aria-label="카테고리"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c.value || 'empty'} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-
           <input
             className="tistory-editor__title-input"
             type="text"
@@ -460,27 +622,94 @@ export default function Professor() {
 
           <div className="tistory-editor__title-rule" aria-hidden />
 
-          {editorMode === 'visual' ? (
-            <div
-              ref={editorRef}
-              className={`tistory-editor__body${bodyEmpty ? ' tistory-editor__body--empty' : ''}`}
-              contentEditable
-              suppressContentEditableWarning
-              role="textbox"
-              aria-multiline="true"
-              aria-label="본문"
-              data-placeholder="내용을 입력하세요. 사진·표·링크는 위 도구를 사용하세요."
-              onInput={syncHtmlFromEditor}
-            />
-          ) : (
-            <textarea
-              className="tistory-editor__html"
-              value={htmlSource}
-              onChange={(e) => setHtmlSource(e.target.value)}
-              spellCheck={false}
-              aria-label="HTML 소스"
-            />
-          )}
+          <div
+            className="tistory-editor__page-frame"
+            data-paper="ISO-A4"
+            data-paper-width-mm="210"
+            data-paper-height-mm="297"
+          >
+            {editorMode === 'visual' ? (
+              <div
+                ref={editorRef}
+                className={`tistory-editor__body${bodyEmpty ? ' tistory-editor__body--empty' : ''}`}
+                contentEditable
+                suppressContentEditableWarning
+                role="textbox"
+                aria-multiline="true"
+                aria-label={`본문 (페이지 ${pageIndex + 1})`}
+                data-placeholder="이 페이지에 내용을 입력하세요. 사진·표·링크는 위 도구를 사용하세요."
+                onBeforeInput={handleBeforeInput}
+                onCompositionStart={() => {
+                  composingRef.current = true
+                }}
+                onCompositionEnd={() => {
+                  composingRef.current = false
+                  queueMicrotask(() => handleVisualInput())
+                }}
+                onInput={() => {
+                  if (!composingRef.current) {
+                    handleVisualInput()
+                  }
+                }}
+              />
+            ) : (
+              <textarea
+                className="tistory-editor__html"
+                value={htmlSource}
+                onChange={handleHtmlTextareaChange}
+                spellCheck={false}
+                aria-label={`HTML (페이지 ${pageIndex + 1})`}
+              />
+            )}
+            <div className="tistory-editor__page-footer" aria-hidden>
+              — {pageIndex + 1} —
+            </div>
+          </div>
+
+          <nav className="tistory-editor__page-bar" aria-label="페이지">
+            <div className="tistory-editor__page-bar-balance" aria-hidden="true" />
+            <div className="tistory-editor__page-nav">
+              <button
+                type="button"
+                className="tistory-editor__page-arrow"
+                aria-label="이전 페이지"
+                disabled={pageIndex <= 0}
+                onClick={() => selectPage(pageIndex - 1)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M15 6l-6 6 6 6" />
+                </svg>
+              </button>
+              <span className="tistory-editor__page-meta" aria-live="polite">
+                {pageIndex + 1} / {pages.length}
+              </span>
+              <button
+                type="button"
+                className="tistory-editor__page-arrow"
+                aria-label="다음 페이지"
+                disabled={pageIndex >= pages.length - 1}
+                onClick={() => selectPage(pageIndex + 1)}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M9 6l6 6-6 6" />
+                </svg>
+              </button>
+            </div>
+            <div className="tistory-editor__page-actions">
+              <button type="button" className="tistory-editor__page-add" onClick={addPage}>
+                + 추가
+              </button>
+              <button
+                type="button"
+                className="tistory-editor__page-remove"
+                disabled={pages.length <= 1}
+                title={pages.length <= 1 ? '마지막 페이지는 삭제할 수 없습니다' : '현재 페이지 삭제'}
+                onClick={removeCurrentPage}
+              >
+                삭제
+              </button>
+            </div>
+          </nav>
         </div>
       </main>
 
