@@ -8,7 +8,6 @@ const PARAGRAPH_STYLES = [
   { value: 'h2', label: '중제목' },
   { value: 'h1', label: '큰 제목' },
 ]
-
 const FONT_NAMES = [
   { value: 'Malgun Gothic', label: '기본서체' },
   { value: 'Apple SD Gothic Neo', label: '애플 고딕' },
