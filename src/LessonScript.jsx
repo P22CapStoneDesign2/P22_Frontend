@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react'
 import './LessonScript.css'
 
 const PARAGRAPH_STYLES = [
@@ -22,8 +22,6 @@ const EDITOR_MODES = [
   { value: 'visual', label: '기본모드' },
   { value: 'html', label: 'HTML' },
 ]
-
-const EMOJI_PICK = ['😀', '📌', '✅', '❓', '💡', '📎', '⭐', '🔔', '📝', '🎯', '👍', '📚']
 
 function readFileAsDataURL(file) {
   return new Promise((resolve, reject) => {
@@ -66,8 +64,6 @@ export default function LessonScript() {
   const [htmlSource, setHtmlSource] = useState('')
   const [draftCount, setDraftCount] = useState(0)
   const [toast, setToast] = useState('')
-  const [showEmoji, setShowEmoji] = useState(false)
-  const [showMore, setShowMore] = useState(false)
   const [bodyEmpty, setBodyEmpty] = useState(true)
   const toastTimer = useRef(null)
   const lastStableHtmlRef = useRef('')
@@ -86,32 +82,22 @@ export default function LessonScript() {
     }, 2600)
   }, [])
 
-  useEffect(() => {
-    const onDocMouseDown = (e) => {
-      const t = e.target
-      if (t instanceof Node && t.closest('.tistory-editor__popover-wrap')) return
-      setShowEmoji(false)
-      setShowMore(false)
-    }
-    document.addEventListener('mousedown', onDocMouseDown)
-    return () => document.removeEventListener('mousedown', onDocMouseDown)
-  }, [])
-
-  useEffect(() => {
+  // 페이지·모드 전환 시에만 본문을 주입한다. pages를 deps에 넣지 않아 입력 중 커서가 초기화되지 않는다.
+  useLayoutEffect(() => {
     const html = pages[pageIndex]?.html ?? ''
     setHtmlSource(html)
     setBodyEmpty(isHtmlBodyEmpty(html))
     lastStableHtmlRef.current = html
-    if (editorMode === 'visual' && editorRef.current) {
-      editorRef.current.innerHTML = html || ''
-      queueMicrotask(() => {
-        const el = editorRef.current
-        if (el) lastStableHtmlRef.current = el.innerHTML
-      })
-    }
-    // 페이지 전환 시에만 본문 교체. pages를 deps에 넣으면 입력할 때마다 커서가 초기화됨.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pages, editorMode는 전환 직후 렌더 스냅샷만 사용
-  }, [pageIndex])
+    if (editorMode !== 'visual') return
+    const el = editorRef.current
+    if (!el) return
+    el.innerHTML = html || ''
+    queueMicrotask(() => {
+      const el2 = editorRef.current
+      if (el2) lastStableHtmlRef.current = el2.innerHTML
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pages는 의도적으로 제외 (위와 동일)
+  }, [pageIndex, editorMode])
 
   const flushOverflowToNextPage = useCallback((appendPlain, toastMessage) => {
     const idx = pageIndexRef.current
@@ -290,12 +276,6 @@ export default function LessonScript() {
     execCmd('formatBlock', 'blockquote')
   }
 
-  const insertEmoji = (ch) => {
-    focusEditor()
-    execCmd('insertText', ch)
-    setShowEmoji(false)
-  }
-
   const syncHtmlFromEditor = () => {
     const el = editorRef.current
     if (!el) return
@@ -340,14 +320,6 @@ export default function LessonScript() {
   const handleModeChange = (mode) => {
     if (mode === 'html' && editorMode === 'visual') {
       syncHtmlFromEditor()
-    }
-    if (mode === 'visual' && editorMode === 'html' && editorRef.current) {
-      editorRef.current.innerHTML = htmlSource || '<p><br></p>'
-      lastStableHtmlRef.current = editorRef.current.innerHTML
-      queueMicrotask(() => {
-        syncHtmlFromEditor()
-        handleVisualInput()
-      })
     }
     setEditorMode(mode)
   }
@@ -500,31 +472,6 @@ export default function LessonScript() {
               <span className="tistory-editor__quote-icon">“</span>
             </button>
 
-            <div className="tistory-editor__popover-wrap">
-              <button
-                type="button"
-                className="tistory-editor__icon-btn"
-                title="이모지"
-                aria-expanded={showEmoji}
-                aria-label="이모지"
-                onClick={() => {
-                  setShowEmoji((v) => !v)
-                  setShowMore(false)
-                }}
-              >
-                <span className="tistory-editor__emoji-trigger">😊</span>
-              </button>
-              {showEmoji ? (
-                <div className="tistory-editor__popover" role="listbox">
-                  {EMOJI_PICK.map((ch) => (
-                    <button key={ch} type="button" className="tistory-editor__emoji-item" onClick={() => insertEmoji(ch)}>
-                      {ch}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-
             <button type="button" className="tistory-editor__icon-btn" title="표" aria-label="표 넣기" onClick={insertTable}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 <rect x="3" y="3" width="18" height="18" rx="1" />
@@ -548,48 +495,6 @@ export default function LessonScript() {
             <button type="button" className="tistory-editor__icon-btn" title="구분선" aria-label="구분선" onClick={insertHr}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M4 11h16v2H4v-2z" /></svg>
             </button>
-
-            <div className="tistory-editor__popover-wrap">
-              <button
-                type="button"
-                className="tistory-editor__icon-btn"
-                title="더보기"
-                aria-expanded={showMore}
-                aria-label="더보기"
-                onClick={() => {
-                  setShowMore((v) => !v)
-                  setShowEmoji(false)
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden><circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" /></svg>
-              </button>
-              {showMore ? (
-                <div className="tistory-editor__popover tistory-editor__popover--menu">
-                  <button
-                    type="button"
-                    className="tistory-editor__menu-item"
-                    onClick={() => {
-                      focusEditor()
-                      execCmd('removeFormat')
-                      setShowMore(false)
-                    }}
-                  >
-                    서식 지우기
-                  </button>
-                  <button
-                    type="button"
-                    className="tistory-editor__menu-item"
-                    onClick={() => {
-                      focusEditor()
-                      execCmd('undo')
-                      setShowMore(false)
-                    }}
-                  >
-                    실행 취소
-                  </button>
-                </div>
-              ) : null}
-            </div>
 
             <div className="tistory-editor__toolbar-spacer" />
 
