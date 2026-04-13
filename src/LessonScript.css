@@ -682,12 +682,12 @@
   }
 }
 
-.tistory-editor__body .professor-editor-table td {
+.tistory-editor__body .lesson-script-editor-table td {
   border-color: #e5e7eb;
 }
 
 @media (prefers-color-scheme: dark) {
-  .tistory-editor__body .professor-editor-table td {
+  .tistory-editor__body .lesson-script-editor-table td {
     border-color: #45454f;
   }
 }
