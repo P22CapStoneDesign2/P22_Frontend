@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import './Professor.css'
+import './LessonScript.css'
 
 const PARAGRAPH_STYLES = [
   { value: 'p', label: '본문' },
@@ -50,7 +50,7 @@ function isHtmlBodyEmpty(html) {
 
 const emptyPage = () => ({ id: crypto.randomUUID(), html: '' })
 
-export default function Professor() {
+export default function LessonScript() {
   const formId = useId()
   const editorRef = useRef(null)
   const imageInputRef = useRef(null)
@@ -270,7 +270,7 @@ export default function Professor() {
   const insertTable = () => {
     focusEditor()
     const html =
-      '<table class="professor-editor-table" border="1" style="border-collapse:collapse;width:100%;margin:12px 0"><tr><td style="padding:8px;min-width:80px">&nbsp;</td><td style="padding:8px">&nbsp;</td></tr><tr><td style="padding:8px">&nbsp;</td><td style="padding:8px">&nbsp;</td></tr></table><p><br></p>'
+      '<table class="lesson-script-editor-table" border="1" style="border-collapse:collapse;width:100%;margin:12px 0"><tr><td style="padding:8px;min-width:80px">&nbsp;</td><td style="padding:8px">&nbsp;</td></tr><tr><td style="padding:8px">&nbsp;</td><td style="padding:8px">&nbsp;</td></tr></table><p><br></p>'
     execCmd('insertHTML', html)
   }
 
