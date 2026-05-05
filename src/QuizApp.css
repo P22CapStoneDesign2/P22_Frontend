@@ -1,4 +1,5 @@
 /* 퀴즈 앱: 카드형 3단 레이아웃, 좌·중·우 패널 고정 폭 감각으로 무너짐 방지 */
+@import './shared/styles/index.css';
 
 .quiz-app {
   box-sizing: border-box;
@@ -315,55 +316,6 @@
   font-size: 0.85rem;
   color: #71717a;
   margin-top: 8px;
-}
-
-.quiz-btn {
-  font: inherit;
-  cursor: pointer;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
-}
-
-.quiz-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.quiz-btn--primary {
-  background: #2563eb;
-  color: #fff;
-}
-
-.quiz-btn--primary:hover:not(:disabled) {
-  background: #1d4ed8;
-}
-
-.quiz-btn--accent {
-  background: #0d9488;
-  color: #fff;
-}
-
-.quiz-btn--accent:hover:not(:disabled) {
-  background: #0f766e;
-}
-
-.quiz-btn--ghost {
-  background: #fff;
-  color: #334155;
-  border-color: #e2e8f0;
-}
-
-.quiz-btn--ghost:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-}
-
-.quiz-btn--block {
-  width: 100%;
 }
 
 .quiz-score-card {
