@@ -11,6 +11,9 @@
   padding: clamp(1rem, 3.5vh, 1.85rem) clamp(16px, 4vw, 40px)
     clamp(3.5rem, 12vh, 5.75rem);
   overflow-y: auto;
+  overflow-x: hidden;
+  /* #root { text-align: center } 상속으로 입력/힌트가 가운데로 몰리는 것 방지 */
+  text-align: left;
   background: var(--edu-login-bg);
   font-family: var(--edu-font-sans);
   color: #1e293b;
@@ -505,4 +508,25 @@
   margin-top: 0;
   width: min(360px, 100%);
   box-sizing: border-box;
+}
+
+/* 좁은 화면: 비밀번호 확인 + 오류 문구가 한 줄에 갇혀 옆으로 밀리지 않도록 */
+@media (max-width: 520px) {
+  .edu-signup__confirm-side-row {
+    flex-wrap: wrap;
+  }
+
+  .edu-signup__confirm-side-row > .edu-signup__field-error {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .edu-signup__email-row--mail-line {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .edu-signup__email-row--mail-line .edu-signup__send-code-btn {
+    width: 100%;
+  }
 }

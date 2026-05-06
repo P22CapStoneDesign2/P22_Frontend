@@ -1,3 +1,7 @@
+/*회원가입 화면*/
+
+import { signup } from './api/auth'
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from './shared/constants/routes.js'
@@ -16,12 +20,12 @@ function isValidEmail(value) {
 }
 
 function isValidNickname(value) {
-  if (value.length < 3 || value.length > 8) return false
+  if (value.length < 8 || value.length > 20) return false
   return /^[0-9A-Za-z가-힣]+$/.test(value)
 }
 
 function isValidSignUpPassword(value) {
-  if (value.length < 4 || value.length > 12) return false
+  if (value.length < 8 || value.length > 20) return false
   if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(value)) return false
   if (!/[A-Za-z]/.test(value) || !/[0-9]/.test(value) || !/[^A-Za-z0-9]/.test(value)) return false
   return true
@@ -120,7 +124,7 @@ export default function SignUpPage() {
     setCodeVerified(true)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!name.trim()) {
       window.alert('이름을 입력해 주세요.')
@@ -139,11 +143,11 @@ export default function SignUpPage() {
       return
     }
     if (!isValidNickname(nickname)) {
-      window.alert('닉네임은 특수문자를 제외한 3~8자로 입력해 주세요.')
+      window.alert('닉네임은 특수문자를 제외한 8~20자로 입력해 주세요.')
       return
     }
     if (!isValidSignUpPassword(password)) {
-      window.alert('비밀번호는 영문, 숫자, 특수문자를 모두 포함한 4~12자로 입력해 주세요.')
+      window.alert('비밀번호는 영문, 숫자, 특수문자를 모두 포함한 8~20자로 입력해 주세요.')
       return
     }
     if (password !== passwordConfirm) {
@@ -154,8 +158,22 @@ export default function SignUpPage() {
       window.alert('개인정보 활용에 동의해 주세요.')
       return
     }
-    window.alert('가입이 완료되었습니다.')
-    navigate(ROUTES.home)
+  
+    try {
+      await signup({
+        username: name,
+        email,
+        nickname,
+        password,
+        passwordConfirm,
+        role: 'PROFESSOR',
+      })
+      window.alert('가입이 완료되었습니다.')
+      navigate(ROUTES.home)
+    } catch (error) {
+      const message = error.response?.data?.message
+      window.alert(message || '회원가입 중 오류가 발생했습니다.')
+    }
   }
 
   const sendCodeDisabled = mailVerified
@@ -274,13 +292,14 @@ export default function SignUpPage() {
                 name="nickname"
                 autoComplete="username"
                 placeholder="닉네임"
+                maxLength={20}
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
                 aria-invalid={nickStatus === 'bad'}
               />
               <SignUpFieldStatusIcon status={nickStatus} />
             </div>
-            <p className="edu-signup__hint">특수문자를 제외한 3~8자</p>
+            <p className="edu-signup__hint">특수문자를 제외한 8~20자</p>
           </label>
 
           <label className="edu-signup__field edu-signup__field--narrow">
@@ -292,6 +311,7 @@ export default function SignUpPage() {
                 name="password"
                 autoComplete="new-password"
                 placeholder="비밀번호"
+                maxLength={20}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 aria-invalid={passwordStatus === 'bad'}
@@ -307,7 +327,7 @@ export default function SignUpPage() {
               </button>
               <SignUpFieldStatusIcon status={passwordStatus} />
             </div>
-            <p className="edu-signup__hint">영문·숫자·특수문자를 모두 포함한 4~12자</p>
+            <p className="edu-signup__hint">영문·숫자·특수문자를 모두 포함한 8~20자</p>
           </label>
 
           <label className="edu-signup__field edu-signup__field--confirm-row">
@@ -320,6 +340,7 @@ export default function SignUpPage() {
                   name="passwordConfirm"
                   autoComplete="new-password"
                   placeholder="비밀번호 다시 입력"
+                  maxLength={20}
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   aria-invalid={passwordConfirmStatus === 'bad'}

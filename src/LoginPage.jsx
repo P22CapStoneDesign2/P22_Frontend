@@ -1,4 +1,6 @@
 /*로그인 화면*/
+import { login } from './api/auth'
+
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from './shared/constants/routes.js'
@@ -29,21 +31,31 @@ export default function LoginPage() {
   const professorFormFilled =
     email.trim().length > 0 && password.trim().length > 0
 
-  const handleProfessorSubmit = (e) => {
-    e.preventDefault()
-    if (!professorFormFilled) {
-      window.alert('아이디와 비밀번호를 모두 입력해 주세요.')
-      return
-    }
-    if (!isValidEmail(email)) {
-      window.alert('이메일 형식이 올바르지 않습니다.')
-      return
-    }
-    navigate(ROUTES.workspace)
+  const handleProfessorSubmit = async (e) => {
+      e.preventDefault()
+      if (!professorFormFilled) {
+        window.alert('아이디와 비밀번호를 모두 입력해 주세요.')
+        return
+      }
+      if (!isValidEmail(email)) {
+        window.alert('이메일 형식이 올바르지 않습니다.')
+        return
+      }
+    
+      try {
+        const res = await login(email, password)
+        const { accessToken, refreshToken } = res.data.data
+        localStorage.setItem('accessToken', accessToken)
+        localStorage.setItem('refreshToken', refreshToken)
+        navigate(ROUTES.workspace)
+      } catch (error) {
+        const message = error.response?.data?.message
+        window.alert(message || '로그인 중 오류가 발생했습니다.')
+      }
   }
 
   const handleKakaoClick = () => {
-    navigate(ROUTES.workspace)
+    window.location.href = 'https://api.example.com/oauth2/authorization/kakao'
   }
 
   return (
