@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { ROUTES } from '../shared/constants/routes.js';
 
-const instance = axios.create({ baseURL: 'https://api.example.com' });
+const instance = axios.create({ baseURL: 'http://localhost:8080' }); //백엔드 주소(배포 시 바꿔야함)
 
 // 요청 인터셉터 - accessToken 자동 첨부
 instance.interceptors.request.use((config) => {
