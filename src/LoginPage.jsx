@@ -55,7 +55,7 @@ export default function LoginPage() {
   }
 
   const handleKakaoClick = () => {
-    window.location.href = 'https://api.example.com/oauth2/authorization/kakao'
+    window.location.href = 'https://api.example.com/oauth2/authorization/kakao' //이것도 교체가능성
   }
 
   return (

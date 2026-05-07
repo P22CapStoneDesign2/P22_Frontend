@@ -160,13 +160,12 @@ export default function SignUpPage() {
     }
   
     try {
+      /* 명세: { username(닉네임), email, password, passwordConfirm } */
       await signup({
-        username: name,
+        username: nickname,
         email,
-        nickname,
         password,
         passwordConfirm,
-        role: 'PROFESSOR',
       })
       window.alert('가입이 완료되었습니다.')
       navigate(ROUTES.home)
