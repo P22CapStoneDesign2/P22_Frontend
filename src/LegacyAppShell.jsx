@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import App from './App.jsx'
 import LessonScript from './LessonScript.jsx'
-import './AppLayout.css'
+import './LegacyAppShell.css'
 
 const VIEW_ORDER = ['lesson', 'quiz-create', 'quiz-stats', 'overview']
 
@@ -23,7 +23,7 @@ function PlaceholderScreen({ title, description }) {
   )
 }
 
-export default function AppLayout() {
+export default function LegacyAppShell() {
   const [view, setView] = useState('lesson')
   const [menuOpen, setMenuOpen] = useState(false)
   const rootRef = useRef(null)

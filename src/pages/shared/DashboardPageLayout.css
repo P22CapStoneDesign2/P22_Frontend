@@ -1,0 +1,34 @@
+.edu-dashboard-app-layout-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-dashboard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: clamp(24px, 5vw, 48px) 24px;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+}
+
+.edu-dashboard__heading {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  text-align: center;
+}
+
+.edu-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 640px;
+}

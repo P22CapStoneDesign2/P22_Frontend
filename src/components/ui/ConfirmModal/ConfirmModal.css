@@ -1,0 +1,94 @@
+.edu-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.edu-modal-panel {
+  width: min(100%, 400px);
+  padding: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+  box-sizing: border-box;
+  font-family: system-ui, 'Segoe UI', 'Malgun Gothic', sans-serif;
+  text-align: left;
+}
+
+.edu-modal-title {
+  margin: 0 0 10px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.edu-modal-message {
+  margin: 0 0 20px;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #374151;
+}
+
+.edu-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.edu-modal-btn {
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.edu-modal-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.edu-modal-btn:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.edu-modal-btn--primary {
+  background: #2563eb;
+  color: #fff;
+  border-color: #1d4ed8;
+}
+
+.edu-modal-btn--primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.edu-modal-btn--secondary {
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.edu-modal-btn--secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.edu-modal-btn--danger {
+  background: #dc2626;
+  color: #fff;
+  border-color: #b91c1c;
+}
+
+.edu-modal-btn--danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+

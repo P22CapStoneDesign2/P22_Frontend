@@ -1,0 +1,87 @@
+/* 학생 퀴즈 — 강의·교안 선택: 중앙 카드, 연한 하늘색 배경 (flex/grid만 사용) */
+
+.edu-stu-quiz-mat-app-layout-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-stu-quiz-mat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(24px, 4vw, 40px) 20px 48px;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+}
+
+.edu-stu-quiz-mat__card {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: clamp(22px, 3vw, 32px);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.edu-stu-quiz-mat__title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  text-align: center;
+}
+
+.edu-stu-quiz-mat__intro {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #64748b;
+}
+
+.edu-stu-quiz-mat__filters {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 560px) {
+  .edu-stu-quiz-mat__filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+  }
+}
+
+.edu-stu-quiz-mat__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.edu-stu-quiz-mat__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.edu-stu-quiz-mat__select {
+  width: 100%;
+}
+
+.edu-stu-quiz-mat__actions {
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+

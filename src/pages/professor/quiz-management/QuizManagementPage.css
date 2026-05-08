@@ -1,0 +1,104 @@
+/* 교안별 퀴즈 관리: 대시보드와 동일 계열 연한 하늘색 배경 + 중앙 카드 */
+
+.edu-quiz-mgmt-app-layout-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-quiz-mgmt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(24px, 4vw, 40px) 20px 48px;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+}
+
+.edu-quiz-mgmt__card {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 28px);
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.edu-quiz-mgmt__title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  text-align: center;
+}
+
+.edu-quiz-mgmt__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 20px;
+  align-items: end;
+}
+
+.edu-quiz-mgmt__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.edu-quiz-mgmt__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.edu-quiz-mgmt__select {
+  width: 100%;
+}
+
+.edu-quiz-mgmt__info-bar {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.edu-quiz-mgmt__info-bar--muted {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+.edu-quiz-mgmt__info-prefix {
+  font-weight: 500;
+}
+
+.edu-quiz-mgmt__info-strong {
+  font-weight: 700;
+}
+
+.edu-quiz-mgmt__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.edu-quiz-mgmt__hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+

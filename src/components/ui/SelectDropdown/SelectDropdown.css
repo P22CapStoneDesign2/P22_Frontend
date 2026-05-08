@@ -1,0 +1,112 @@
+.edu-select {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  font-family: system-ui, 'Segoe UI', 'Malgun Gothic', sans-serif;
+}
+
+.edu-select--disabled {
+  opacity: 0.55;
+}
+
+.edu-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: #111827;
+  cursor: pointer;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.edu-select__trigger:hover:not(:disabled) {
+  border-color: #9ca3af;
+}
+
+.edu-select__trigger:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.edu-select__trigger:disabled {
+  cursor: not-allowed;
+}
+
+.edu-select__trigger-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edu-select__chevron {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/*
+ * 트리거 버튼 아래에 절대 위치로 펼쳐지는 옵션 패널.
+ * - .edu-select 가 position: relative 라 같은 너비로 깔끔하게 떨어집니다.
+ * - 다른 카드/테이블 위로 떠야 하므로 z-index 를 충분히 높게 (모달보다는 낮게).
+ * - max-height + overflow-y: auto 로 긴 목록도 인플레이스 스크롤.
+ */
+.edu-select__list-wrap {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 60;
+}
+
+.edu-select__list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+}
+
+.edu-select__option {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.9375rem;
+  text-align: left;
+  color: #111827;
+  cursor: pointer;
+}
+
+.edu-select__option:hover {
+  background: #f3f4f6;
+}
+
+.edu-select__option--selected {
+  background: #eff6ff;
+  font-weight: 600;
+}
+
+.edu-select__empty {
+  padding: 14px 12px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+

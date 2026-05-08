@@ -1,0 +1,13 @@
+/*
+ * 카드 하단 우측 정렬 액션 영역 (이전 / 다음 / 제출 및 종료).
+ * 카드가 flex column + min-height 라 margin-top: auto 로 자연스럽게 카드 바닥에 붙음.
+ */
+.edu-quiz-solve-nav-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 8px;
+  margin-top: auto;
+  border-top: 1px solid #e2e8f0;
+}

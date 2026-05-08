@@ -1,0 +1,58 @@
+.edu-quiz-result-sa {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edu-quiz-result-sa__label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+/*
+ * 사용자 답 / 정답 박스.
+ * 기본 톤: 흰색 배경 + 연한 회색 보더.
+ * 사용자 정답(ok): 연한 초록 / 사용자 오답(bad): 연한 빨강.
+ * 정답 박스(correct): 항상 연한 초록.
+ */
+.edu-quiz-result-sa__user,
+.edu-quiz-result-sa__correct {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 10px;
+  align-items: start;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.edu-quiz-result-sa__user--ok {
+  border-color: #86efac;
+  background: #ecfdf5;
+}
+
+.edu-quiz-result-sa__user--bad {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.edu-quiz-result-sa__correct {
+  border-color: #86efac;
+  background: #ecfdf5;
+}
+
+.edu-quiz-result-sa__key {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.edu-quiz-result-sa__val {
+  font-size: 0.95rem;
+  color: #0f172a;
+  line-height: 1.45;
+  word-break: break-word;
+}

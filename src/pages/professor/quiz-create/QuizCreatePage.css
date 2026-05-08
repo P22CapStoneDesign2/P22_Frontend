@@ -1,0 +1,99 @@
+/* 퀴즈 생성 페이지: 본문 배경 + 그리드(폼 목록 | sticky 네비) */
+
+.edu-quiz-create-app-layout-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-quiz-create-page {
+  flex: 1;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: clamp(20px, 3vw, 32px) 20px 48px;
+  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+}
+
+.edu-quiz-create-page__header {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto 20px;
+  text-align: center;
+}
+
+.edu-quiz-create-page__title {
+  margin: 0 0 10px;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.edu-quiz-create-page__meta {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.edu-quiz-create-page__meta-label {
+  font-weight: 600;
+}
+
+.edu-quiz-create-page__meta-code {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.edu-quiz-create-page__meta-sep {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.edu-quiz-create-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 180px);
+  gap: 24px;
+  /*
+   * align-items 의 기본값(stretch)을 그대로 사용합니다.
+   * aside가 그리드 행 전체 높이만큼 늘어나야 내부의 sticky 네비가
+   * 본문 카드 옆에서 스크롤을 따라옵니다 (start로 두면 aside가 자식 높이만큼만
+   * 잡혀 sticky가 사실상 동작하지 않습니다).
+   */
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.edu-quiz-create-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.edu-quiz-create-aside {
+  min-width: 0;
+  /* 스티키 자식이 행 전체에서 자유롭게 따라올 수 있도록 한 자식만 둠 */
+  display: block;
+}
+
+.edu-quiz-form-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .edu-quiz-create-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .edu-quiz-create-aside {
+    order: -1;
+  }
+}
