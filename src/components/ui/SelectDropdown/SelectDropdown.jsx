@@ -16,6 +16,7 @@ import './SelectDropdown.css'
  * @param {(option: T) => string} [props.getOptionLabel]
  * @param {string} [props.className]
  * @param {string} [props.listMaxHeight] CSS length, e.g. '240px'
+ * @param {{ label: string, onSelect: () => void }} [props.footerAction] 목록 하단 구분선 + 액션 (예: 강의 추가)
  */
 export default function SelectDropdown({
   options = [],
@@ -30,6 +31,7 @@ export default function SelectDropdown({
   getOptionLabel = (o) => (o.label != null ? String(o.label) : String(getOptionValue(o))),
   className = '',
   listMaxHeight = '240px',
+  footerAction = null,
 }) {
   const rootRef = useRef(null)
   const listId = useId()
@@ -60,6 +62,14 @@ export default function SelectDropdown({
     onOpenChange(false)
   }
 
+  const handleFooterClick = () => {
+    onOpenChange(false)
+    footerAction?.onSelect?.()
+  }
+
+  const showEmptyOnly = options.length === 0 && !footerAction
+  const showOptionList = options.length > 0
+
   return (
     <div
       ref={rootRef}
@@ -86,30 +96,50 @@ export default function SelectDropdown({
           role="listbox"
           style={{ maxHeight: listMaxHeight }}
         >
-          {options.length === 0 ? (
+          {showEmptyOnly ? (
             <div className="edu-select__empty" role="presentation">
               {emptyMessage}
             </div>
           ) : (
-            <ul className="edu-select__list">
-              {options.map((opt, i) => {
-                const v = getOptionValue(opt)
-                const isSelected = selVal != null && v === selVal
-                return (
-                  <li key={`${String(v)}-${i}`} role="presentation">
+            <>
+              {showOptionList ? (
+                <ul className="edu-select__list">
+                  {options.map((opt, i) => {
+                    const v = getOptionValue(opt)
+                    const isSelected = selVal != null && v === selVal
+                    return (
+                      <li key={`${String(v)}-${i}`} role="presentation">
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          className={`edu-select__option${isSelected ? ' edu-select__option--selected' : ''}`}
+                          onClick={() => handleSelect(opt)}
+                        >
+                          {getOptionLabel(opt)}
+                        </button>
+                      </li>
+                    )
+                  })}
+                </ul>
+              ) : null}
+              {footerAction ? (
+                <>
+                  {showOptionList ? (
+                    <div className="edu-select__divider" role="separator" aria-hidden />
+                  ) : null}
+                  <div className="edu-select__footer">
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={isSelected}
-                      className={`edu-select__option${isSelected ? ' edu-select__option--selected' : ''}`}
-                      onClick={() => handleSelect(opt)}
+                      className="edu-select__option edu-select__option--action"
+                      onClick={handleFooterClick}
                     >
-                      {getOptionLabel(opt)}
+                      {footerAction.label}
                     </button>
-                  </li>
-                )
-              })}
-            </ul>
+                  </div>
+                </>
+              ) : null}
+            </>
           )}
         </div>
       ) : null}

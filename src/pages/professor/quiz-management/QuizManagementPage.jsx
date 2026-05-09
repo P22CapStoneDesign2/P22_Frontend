@@ -17,6 +17,7 @@ export default function QuizManagementPage() {
         onLogout: () => navigate('/professor'),
         logoHref: '/professor',
         logoLabel: 'EDU HUB',
+        breadcrumbItems: [{ label: '교안별 퀴즈 관리' }],
       }}
       contentClassName="edu-quiz-mgmt-app-layout-content"
     >

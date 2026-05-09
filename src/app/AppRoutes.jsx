@@ -8,19 +8,19 @@ import QuizEditPage from '../pages/professor/quiz-edit/QuizEditPage.jsx'
 import QuizMaterialSelectPage from '../pages/student/quiz-material-select/QuizMaterialSelectPage.jsx'
 import QuizSolvePage from '../pages/student/quiz-solve/QuizSolvePage.jsx'
 import QuizResultPage from '../pages/student/quiz-result/QuizResultPage.jsx'
+import ProfessorMaterialPage from '../pages/professor/materials/ProfessorMaterialPage.jsx'
 
 /**
  * EDU HUB 앱 라우팅
  *
- * - `/` : 공통 UI 컴포넌트 검증용 셸 (기존 유지)
- * - `/professor`, `/student` : 각 역할 대시보드
+ * - `/`, `/professor` : 교수 대시보드(임시 시작 화면)
+ * - `/dev/common-shell` : 공통 UI 컴포넌트 검증용 셸
+ * - `/student` : 학생 대시보드
  * - 교수 영역: 퀴즈 관리·생성·수정 구현
  * - 학생 영역: 퀴즈 풀기·결과 구현
  *
- * 교안 관련 경로 (`/professor/materials`, `/student/materials`)는
- * 다른 팀원이 담당하므로 본 파일에서 라우트를 정의하지 않습니다.
- * 대시보드 메뉴 카드의 `to` 값은 그대로 두어, 추후 담당자가 해당 경로에
- * `<Route>` 만 추가하면 곧바로 연결됩니다.
+ * 교안 파일 관리: `/professor/materials` (교수)
+ * 학생 교안 보기(`/student/materials`)는 별도 담당.
  *
  * 주의: `/student/quiz/materials`는 정적 경로이므로,
  *       동적 경로 `/student/quiz/:materialId`보다 위에 두어 `materials`가 ID로 오인되지 않게 합니다.
@@ -29,21 +29,18 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* ─── 공통 UI 데모 (루트) ─── */}
-        <Route path="/" element={<EduHubCommonShell />} />
-
-        {/* ─── 교수 영역 ─── */}
-        {/* 교수 대시보드: 메뉴 카드(퀴즈 관리, 교안 관리 등) */}
+        {/* ─── 교수 영역 (루트 = 임시 시작 화면) ─── */}
+        <Route path="/" element={<ProfessorDashboardPage />} />
         <Route path="/professor" element={<ProfessorDashboardPage />} />
+        {/* 공통 UI 데모 (개발용) */}
+        <Route path="/dev/common-shell" element={<EduHubCommonShell />} />
         {/* 교안별 퀴즈 관리 (강의·교안 선택, 목록, 생성/편집 이동) */}
         <Route path="/professor/quizzes" element={<QuizManagementPage />} />
         {/* 특정 퀴즈 수정 (mock preload + 공통 QuizEditorContent) */}
         <Route path="/professor/quizzes/:quizId/edit" element={<QuizEditPage />} />
-        {/*
-          교안 관리(`/professor/materials`)는 다른 팀원 담당.
-          여기서는 라우트를 정의하지 않으며, 담당자가 컴포넌트와 함께 `<Route>` 를 추가합니다.
-        */}
-        {/* 특정 교안에서 새 퀴즈 생성 */}
+        {/* 교안 PDF 파일 관리 (mock 상태) */}
+        <Route path="/professor/materials" element={<ProfessorMaterialPage />} />
+        {/* 특정 교안에서 새 퀴즈 생성 — 반드시 정적 `/professor/materials` 아래가 아닌 동적 세그먼트 조합 */}
         <Route path="/professor/materials/:materialId/quizzes/create" element={<QuizCreatePage />} />
 
         {/* ─── 학생 영역 ─── */}

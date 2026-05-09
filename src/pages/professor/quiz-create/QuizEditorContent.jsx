@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import QuizQuestionFormList from './QuizQuestionFormList.jsx'
@@ -15,6 +15,7 @@ import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quiz
  * @param {string} props.materialId
  * @param {string | null} [props.quizId] 수정 시에만 전달
  * @param {Array<object> | null} [props.initialQuestions] 있으면 preload (복사본으로 state 초기화)
+ * @param {string | null} [props.initialActiveQuestionId] 수정 진입 시 활성·스크롤 대상 문항 id
  * @param {string} props.confirmMessage
  * @param {(materialId: string, questions: object[], quizId: string | null) => object} props.buildDto
  */
@@ -22,6 +23,7 @@ export default function QuizEditorContent({
   materialId,
   quizId = null,
   initialQuestions = null,
+  initialActiveQuestionId = null,
   confirmMessage,
   buildDto,
 }) {
@@ -35,14 +37,29 @@ export default function QuizEditorContent({
     return [createNewQuestion()]
   })
 
-  const [activeQuestionId, setActiveQuestionId] = useState(questions[0].id)
+  const [activeQuestionId, setActiveQuestionId] = useState(() => {
+    const qs =
+      initialQuestions != null && initialQuestions.length > 0
+        ? cloneQuestionsForState(initialQuestions)
+        : [createNewQuestion()]
+    const preferred = initialActiveQuestionId
+    if (preferred != null && preferred !== '' && qs.some((q) => q.id === preferred)) {
+      return preferred
+    }
+    return qs[0].id
+  })
 
   const [saveModalOpen, setSaveModalOpen] = useState(false)
 
-  const scrollToQuestion = (questionId) => {
+  const scrollToQuestion = (questionId, behavior = 'smooth') => {
     const el = formRefs.current[questionId]
-    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    el?.scrollIntoView({ behavior, block: 'start' })
   }
+
+  useLayoutEffect(() => {
+    if (initialActiveQuestionId == null || initialActiveQuestionId === '') return
+    scrollToQuestion(initialActiveQuestionId, 'instant')
+  }, [initialActiveQuestionId])
 
   const handleQuestionNavigate = (questionId) => {
     setActiveQuestionId(questionId)

@@ -23,6 +23,7 @@ export default function ProfessorDashboardPage() {
         userEmail: 'professor@school.edu',
         onLogout: () => {},
         logoHref: '/professor',
+        logoLabel: 'EDU HUB',
       }}
       menuItems={PROFESSOR_MENU_ITEMS}
     />

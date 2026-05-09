@@ -14,6 +14,7 @@ export default function QuizEditPage() {
   const bundle = getMockQuizEditBundle(quizId)
   const materialId = bundle.materialId
   const initialQuestions = bundle.questions
+  const initialActiveQuestionId = bundle.initialActiveQuestionId
 
   return (
     <AppLayout
@@ -22,6 +23,10 @@ export default function QuizEditPage() {
         onLogout: () => navigate('/professor'),
         logoHref: '/professor',
         logoLabel: 'EDU HUB',
+        breadcrumbItems: [
+          { label: '교안별 퀴즈 관리', to: '/professor/quizzes' },
+          { label: '퀴즈 수정' },
+        ],
       }}
       contentClassName="edu-quiz-create-app-layout-content"
     >
@@ -42,6 +47,7 @@ export default function QuizEditPage() {
           quizId={quizId ?? ''}
           materialId={materialId}
           initialQuestions={initialQuestions}
+          initialActiveQuestionId={initialActiveQuestionId}
         />
       </div>
     </AppLayout>

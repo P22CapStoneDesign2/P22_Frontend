@@ -67,11 +67,9 @@ export default function QuizManagementContent() {
   /** 강의 목록 (mock: 이후 API로 교체) */
   const [courses] = useState(MOCK_COURSES)
 
-  const [selectedCourse, setSelectedCourse] = useState(() => MOCK_COURSES[0] ?? null)
+  const [selectedCourse, setSelectedCourse] = useState(null)
 
-  const [materials, setMaterials] = useState(() =>
-    selectedCourse ? materialsForCourse(selectedCourse.value) : [],
-  )
+  const [materials, setMaterials] = useState([])
 
   const [selectedMaterial, setSelectedMaterial] = useState(null)
 
@@ -105,7 +103,8 @@ export default function QuizManagementContent() {
     navigate(`/professor/quizzes/${quizId}/edit`)
   }
 
-  const materialSelectDisabled = !selectedCourse || materials.length === 0
+  const materialSelectDisabled = !selectedCourse
+  const materialPlaceholder = selectedCourse ? '교안을 선택하세요' : '먼저 강의를 선택하세요'
 
   return (
     <div className="edu-quiz-mgmt">
@@ -137,7 +136,7 @@ export default function QuizManagementContent() {
               className="edu-quiz-mgmt__select"
               options={materials}
               selected={selectedMaterial}
-              placeholder={materialSelectDisabled ? '먼저 강의를 선택하세요' : '교안을 선택하세요'}
+              placeholder={materialPlaceholder}
               isOpen={materialDropdownOpen}
               onOpenChange={setMaterialDropdownOpen}
               onSelect={handleMaterialSelect}

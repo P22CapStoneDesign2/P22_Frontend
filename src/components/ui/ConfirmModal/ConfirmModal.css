@@ -35,6 +35,10 @@
   color: #374151;
 }
 
+.edu-modal-extra {
+  margin: 0 0 20px;
+}
+
 .edu-modal-actions {
   display: flex;
   flex-wrap: wrap;

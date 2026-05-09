@@ -104,6 +104,25 @@
   font-weight: 600;
 }
 
+.edu-select__divider {
+  height: 1px;
+  margin: 4px 10px;
+  background: #e5e7eb;
+}
+
+.edu-select__footer {
+  padding: 0 6px 6px;
+}
+
+.edu-select__option--action {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.edu-select__option--action:hover {
+  background: #eff6ff;
+}
+
 .edu-select__empty {
   padding: 14px 12px;
   font-size: 0.875rem;

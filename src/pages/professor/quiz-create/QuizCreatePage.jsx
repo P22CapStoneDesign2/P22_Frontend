@@ -18,6 +18,10 @@ export default function QuizCreatePage() {
         onLogout: () => navigate('/professor'),
         logoHref: '/professor',
         logoLabel: 'EDU HUB',
+        breadcrumbItems: [
+          { label: '교안별 퀴즈 관리', to: '/professor/quizzes' },
+          { label: '퀴즈 생성' },
+        ],
       }}
       contentClassName="edu-quiz-create-app-layout-content"
     >

@@ -46,7 +46,8 @@ function ModalOverlay({ onClick, children }) {
 /**
  * @param {object} props
  * @param {boolean} props.isOpen
- * @param {string} props.message
+ * @param {string} [props.message] 본문 문단 (children과 병행 가능)
+ * @param {import('react').ReactNode} [props.children] 메시지 아래·액션 위 추가 본문 (예: 입력 필드)
  * @param {string} [props.title]
  * @param {string} [props.confirmText]
  * @param {string} [props.cancelText]
@@ -61,6 +62,7 @@ function ModalOverlay({ onClick, children }) {
 export default function ConfirmModal({
   isOpen,
   message,
+  children,
   title,
   confirmText = '확인',
   cancelText = '취소',
@@ -96,6 +98,13 @@ export default function ConfirmModal({
     if (closeOnOverlayClick) onCancel()
   }
 
+  const descIds = [
+    message ? 'edu-modal-desc' : null,
+    children ? 'edu-modal-extra' : null,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return createPortal(
     <ModalOverlay onClick={overlayClick}>
       <div
@@ -103,7 +112,7 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'edu-modal-title' : undefined}
-        aria-describedby="edu-modal-desc"
+        aria-describedby={descIds || undefined}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {title ? (
@@ -111,9 +120,16 @@ export default function ConfirmModal({
             {title}
           </h2>
         ) : null}
-        <p id="edu-modal-desc" className="edu-modal-message">
-          {message}
-        </p>
+        {message ? (
+          <p id="edu-modal-desc" className="edu-modal-message">
+            {message}
+          </p>
+        ) : null}
+        {children ? (
+          <div id="edu-modal-extra" className="edu-modal-extra">
+            {children}
+          </div>
+        ) : null}
         <div className="edu-modal-actions">
           <ModalActionButton variant="secondary" onClick={onCancel} disabled={isConfirmLoading}>
             {cancelText}
