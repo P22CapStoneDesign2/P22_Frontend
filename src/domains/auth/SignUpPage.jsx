@@ -10,6 +10,7 @@ import {
   EduHubEyeClosedIcon,
   EduHubEyeOpenIcon,
 } from '../../shared/icons/eduHubIcons.jsx'
+import { isValidDisplayNickname, isValidSignupUsername } from '../../shared/validation/signUpProfile.js'
 import './SignUpPage.css'
 
 
@@ -19,11 +20,6 @@ function isValidEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
 }
 
-function isValidNickname(value) {
-  if (value.length < 8 || value.length > 20) return false
-  return /^[0-9A-Za-z가-힣]+$/.test(value)
-}
-
 function isValidSignUpPassword(value) {
   if (value.length < 8 || value.length > 20) return false
   if (/[가-힣ㄱ-ㅎㅏ-ㅣ]/.test(value)) return false
@@ -31,9 +27,14 @@ function isValidSignUpPassword(value) {
   return true
 }
 
+function nameFieldStatus(value) {
+  if (!value) return 'none'
+  return isValidSignupUsername(value) ? 'ok' : 'bad'
+}
+
 function nicknameFieldStatus(value) {
   if (!value) return 'none'
-  return isValidNickname(value) ? 'ok' : 'bad'
+  return isValidDisplayNickname(value) ? 'ok' : 'bad'
 }
 
 function passwordFieldStatus(value) {
@@ -63,7 +64,7 @@ function SignUpFieldStatusIcon({ status }) {
 
 const PRIVACY_POLICY_TEXT = `EDU HUB 개인정보 처리 방침 (요약)
 
-1. 수집 항목: 이름, 이메일, 닉네임 등 서비스 제공에 필요한 최소 정보
+1. 수집 항목: 이름, 닉네임, 이메일 등 서비스 제공에 필요한 최소 정보
 2. 이용 목적: 회원 식별, 강의·퀴즈 서비스 운영, 공지 전달
 3. 보유 기간: 회원 탈퇴 시 지체 없이 파기(법령에 따른 예외는 제외)
 4. 동의 철회: 언제든지 동의를 철회할 수 있으며, 철회 시 일부 서비스 이용이 제한될 수 있습니다.
@@ -73,11 +74,11 @@ const PRIVACY_POLICY_TEXT = `EDU HUB 개인정보 처리 방침 (요약)
 export default function SignUpPage() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
+  const [nickname, setNickname] = useState('')
   const [email, setEmail] = useState('')
   const [mailSent, setMailSent] = useState(false)
   const [codeVerified, setCodeVerified] = useState(false)
   const [verifyCode, setVerifyCode] = useState('')
-  const [nickname, setNickname] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [passwordVisible, setPasswordVisible] = useState(false)
@@ -86,6 +87,7 @@ export default function SignUpPage() {
 
   const mailVerified = mailSent && codeVerified
 
+  const nameStatus = nameFieldStatus(name)
   const nickStatus = nicknameFieldStatus(nickname)
   const passwordStatus = passwordFieldStatus(password)
   const passwordConfirmStatus = passwordConfirmFieldStatus(password, passwordConfirm)
@@ -93,11 +95,11 @@ export default function SignUpPage() {
     passwordConfirm.length > 0 && password !== passwordConfirm
 
   const canSubmit =
-    name.trim().length > 0 &&
+    isValidSignupUsername(name) &&
+    isValidDisplayNickname(nickname) &&
     isValidEmail(email) &&
     mailSent &&
     mailVerified &&
-    isValidNickname(nickname) &&
     isValidSignUpPassword(password) &&
     password === passwordConfirm &&
     agreePrivacy
@@ -126,8 +128,12 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!name.trim()) {
-      window.alert('이름을 입력해 주세요.')
+    if (!isValidSignupUsername(name)) {
+      window.alert('이름은 2~20자이며, 숫자·한글·영문·공백만 사용할 수 있습니다.')
+      return
+    }
+    if (!isValidDisplayNickname(nickname)) {
+      window.alert('닉네임은 특수문자를 제외한 2~20자로 입력해 주세요.')
       return
     }
     if (!isValidEmail(email)) {
@@ -140,10 +146,6 @@ export default function SignUpPage() {
     }
     if (!mailVerified) {
       window.alert('인증번호를 확인해 주세요.')
-      return
-    }
-    if (!isValidNickname(nickname)) {
-      window.alert('닉네임은 특수문자를 제외한 8~20자로 입력해 주세요.')
       return
     }
     if (!isValidSignUpPassword(password)) {
@@ -160,9 +162,9 @@ export default function SignUpPage() {
     }
   
     try {
-      /* 명세: { username(닉네임), email, password, passwordConfirm } */
       await signup({
-        username: nickname,
+        username: name.trim(),
+        nickname: nickname.trim(),
         email,
         password,
         passwordConfirm,
@@ -209,14 +211,38 @@ export default function SignUpPage() {
 
           <label className="edu-signup__field edu-signup__field--narrow">
             <span className="edu-signup__label">이름</span>
-            <input
-              className="edu-signup__input"
-              name="name"
-              autoComplete="name"
-              placeholder="이름을 입력하세요"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <div className="edu-signup__input-wrap">
+              <input
+                className="edu-signup__input"
+                name="name"
+                autoComplete="name"
+                placeholder="이름을 입력하세요"
+                maxLength={20}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                aria-invalid={nameStatus === 'bad'}
+              />
+              <SignUpFieldStatusIcon status={nameStatus} />
+            </div>
+            <p className="edu-signup__hint">가입 시 등록되는 이름입니다. 2~20자, 숫자·한글·영문·공백</p>
+          </label>
+
+          <label className="edu-signup__field edu-signup__field--narrow">
+            <span className="edu-signup__label">닉네임</span>
+            <div className="edu-signup__input-wrap">
+              <input
+                className="edu-signup__input"
+                name="nickname"
+                autoComplete="nickname"
+                placeholder="닉네임"
+                maxLength={20}
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                aria-invalid={nickStatus === 'bad'}
+              />
+              <SignUpFieldStatusIcon status={nickStatus} />
+            </div>
+            <p className="edu-signup__hint">표시용 닉네임입니다. 특수문자를 제외한 2~20자</p>
           </label>
 
           <div className="edu-signup__field">
@@ -282,24 +308,6 @@ export default function SignUpPage() {
               <p className="edu-signup__hint edu-signup__hint--sent">확인 메일이 전송되었습니다.</p>
             ) : null}
           </div>
-
-          <label className="edu-signup__field edu-signup__field--narrow">
-            <span className="edu-signup__label">닉네임</span>
-            <div className="edu-signup__input-wrap">
-              <input
-                className="edu-signup__input"
-                name="nickname"
-                autoComplete="username"
-                placeholder="닉네임"
-                maxLength={20}
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                aria-invalid={nickStatus === 'bad'}
-              />
-              <SignUpFieldStatusIcon status={nickStatus} />
-            </div>
-            <p className="edu-signup__hint">특수문자를 제외한 8~20자</p>
-          </label>
 
           <label className="edu-signup__field edu-signup__field--narrow">
             <span className="edu-signup__label">비밀번호</span>

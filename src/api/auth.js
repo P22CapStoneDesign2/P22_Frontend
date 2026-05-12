@@ -4,7 +4,7 @@
 import instance from './axios';
 import { APP_PUBLIC_URL } from '../config/env.js';
 
-/* POST /api/auth/signup — { username, email, password, passwordConfirm } */
+/* POST /api/auth/signup — { username(이름), nickname, email, password, passwordConfirm } */
 export const signup = (data) => instance.post('/api/auth/signup', data);
 
 /* POST /api/auth/login — { email, password } */
@@ -35,11 +35,11 @@ export const logout = (refreshToken) =>
   instance.post('/api/auth/logout', { refreshToken });
 
 /* GET /api/users/me (인증 필요) — 회원 정보 조회
- * 카카오 최초 로그인 후 username(닉네임) 존재 여부로 신규/기존 사용자 판별에 사용한다.
+ * 카카오 등에서 username(이름)·nickname(닉네임) 설정 여부 판별에 사용한다.
  */
 export const getMe = () => instance.get('/api/users/me');
 
-/* PATCH /api/users/me (인증 필요) — 회원 정보 수정 (닉네임 등 부분 갱신) */
+/* PATCH /api/users/me (인증 필요) — 회원 정보 수정 (username=이름, nickname=닉네임 등) */
 export const updateMe = (data) => instance.patch('/api/users/me', data);
 
 /* DELETE /api/users/me (인증 필요) — 회원 탈퇴 */

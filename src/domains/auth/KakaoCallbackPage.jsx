@@ -3,8 +3,9 @@
  *
  * 명세에 isNewUser 같은 신규 가입 플래그가 없으므로,
  *  1) 토큰 저장 후 GET /api/users/me 로 회원 정보를 조회
- *  2) username(닉네임)이 비어 있으면 → 닉네임 등록 화면
- *     아니면 → 워크스페이스
+ *  2) provider가 KAKAO이고 username(이름) 또는 nickname(닉네임)이 비어 있으면
+ *     → 최초 1회 이름·닉네임 등록 화면(/oauth2/signup)
+ *     그 외 → 워크스페이스
  */
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -44,15 +45,17 @@ export default function KakaoCallbackPage() {
       try {
         const res = await getMe()
         const me = res.data?.data ?? {}
-        /* 명세: username 이 곧 닉네임 */
         const username = (me.username ?? '').trim()
-        if (!username) {
+        const nickname = (me.nickname ?? '').trim()
+        const isKakao = String(me.provider ?? '').toUpperCase() === 'KAKAO'
+        const needsKakaoProfile = isKakao && (!username || !nickname)
+        if (needsKakaoProfile) {
           navigate(ROUTES.kakaoSignup, { replace: true })
         } else {
           navigate(ROUTES.workspace, { replace: true })
         }
       } catch {
-        /* 회원 정보 조회 실패 시: 일단 닉네임 입력 화면으로 보내 신규 가입 흐름을 유도 */
+        /* 회원 정보 조회 실패 시: 일단 추가 정보 입력 화면으로 보내 신규 가입 흐름을 유도 */
         navigate(ROUTES.kakaoSignup, { replace: true })
       }
     })()
