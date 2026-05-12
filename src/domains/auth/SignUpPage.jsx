@@ -1,15 +1,15 @@
 /*회원가입 화면*/
 
-import { signup } from './api/auth'
+import { signup } from '../../api/auth'
 
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ROUTES } from './shared/constants/routes.js'
+import { ROUTES } from '../../shared/constants/routes.js'
 import {
   EduHubBookIcon,
   EduHubEyeClosedIcon,
   EduHubEyeOpenIcon,
-} from './shared/icons/eduHubIcons.jsx'
+} from '../../shared/icons/eduHubIcons.jsx'
 import './SignUpPage.css'
 
 

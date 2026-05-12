@@ -1,5 +1,5 @@
 /*로그인 화면*/
-@import './shared/styles/index.css';
+@import '../../shared/styles/index.css';
 
 .edu-login {
   position: fixed;

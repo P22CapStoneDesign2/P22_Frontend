@@ -8,8 +8,8 @@
  */
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { getMe } from './api/auth'
-import { ROUTES } from './shared/constants/routes.js'
+import { getMe } from '../../api/auth'
+import { ROUTES } from '../../shared/constants/routes.js'
 
 export default function KakaoCallbackPage() {
   const navigate = useNavigate()

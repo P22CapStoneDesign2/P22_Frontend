@@ -1,4 +1,4 @@
-@import './shared/styles/index.css';
+@import '../../shared/styles/index.css';
 
 .kakao-signup {
   position: fixed;

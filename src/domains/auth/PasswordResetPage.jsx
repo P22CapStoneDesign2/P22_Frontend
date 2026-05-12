@@ -4,11 +4,11 @@
  * 백엔드가 메일에 넣을 프론트 URL 예시 (쿼리는 팀 합의 후 조정):
  *   {프론트 Origin}{ROUTES.passwordReset}?email={URL인코딩}&token={재설정토큰}
  */
-import { confirmPasswordReset } from './api/auth'
+import { confirmPasswordReset } from '../../api/auth'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ROUTES } from './shared/constants/routes.js'
-import { EduHubBookIcon, EduHubEyeClosedIcon, EduHubEyeOpenIcon } from './shared/icons/eduHubIcons.jsx'
+import { ROUTES } from '../../shared/constants/routes.js'
+import { EduHubBookIcon, EduHubEyeClosedIcon, EduHubEyeOpenIcon } from '../../shared/icons/eduHubIcons.jsx'
 import './PasswordResetPage.css'
 
 function isValidSignUpPassword(value) {

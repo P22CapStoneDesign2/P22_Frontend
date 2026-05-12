@@ -1,8 +1,8 @@
 /* 우측 전체 높이 툴바입니다. 공통으로 사용하면 될 듯 합니다. */
 
 import { useEffect, useRef, useState } from 'react'
-import App from './App.jsx'
-import LessonScript from './LessonScript.jsx'
+import App from '../App.jsx'
+import LessonScript from '../domains/professor/page/LessonScript.jsx'
 import './LegacyAppShell.css'
 
 const VIEW_ORDER = ['lesson', 'quiz-create', 'quiz-stats', 'overview']

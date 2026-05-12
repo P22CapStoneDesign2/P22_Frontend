@@ -1,10 +1,10 @@
 /*로그인 화면*/
-import { login } from './api/auth'
-import { KAKAO_OAUTH_AUTHORIZATION_URL } from './config/env.js'
+import { login } from '../../api/auth'
+import { KAKAO_OAUTH_AUTHORIZATION_URL } from '../../config/env.js'
 
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ROUTES } from './shared/constants/routes.js'
+import { ROUTES } from '../../shared/constants/routes.js'
 import FindPasswordModal from './FindPasswordModal.jsx'
 import {
   EduHubBookIcon,
@@ -15,7 +15,7 @@ import {
   EduHubEyeOpenIcon,
   EduHubEyeClosedIcon,
   EduHubKakaoIcon,
-} from './shared/icons/eduHubIcons.jsx'
+} from '../../shared/icons/eduHubIcons.jsx'
 import './LoginPage.css'
 
 function isValidEmail(value) {

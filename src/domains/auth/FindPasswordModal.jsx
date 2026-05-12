@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { requestPasswordReset } from './api/auth'
+import { requestPasswordReset } from '../../api/auth'
 import './FindPasswordModal.css'
 
 function isValidEmail(value) {

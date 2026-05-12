@@ -7,9 +7,9 @@
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { updateMe } from './api/auth'
-import { ROUTES } from './shared/constants/routes.js'
-import { EduHubBookIcon } from './shared/icons/eduHubIcons.jsx'
+import { updateMe } from '../../api/auth'
+import { ROUTES } from '../../shared/constants/routes.js'
+import { EduHubBookIcon } from '../../shared/icons/eduHubIcons.jsx'
 import './KakaoSignUpPage.css'
 
 /* 명세: username(닉네임)은 2~20자 */
