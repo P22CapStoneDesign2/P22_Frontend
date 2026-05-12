@@ -6,6 +6,8 @@ export const ROUTES = {
   login: '/login',
   workspace: '/workspace',
   signup: '/signup',
+  /** 메일 링크로 진입하는 비밀번호 재설정 (?email=&token= 등 — 백엔드와 쿼리 키 합의) */
+  passwordReset: '/reset-password',
   /* 백엔드가 OAuth 성공 후 redirect 시키는 경로 (명세: /oauth2/callback?accessToken=...&refreshToken=...) */
   kakaoCallback: '/oauth2/callback',
   /* 카카오 최초 로그인 시 닉네임 입력 화면 */

@@ -4,6 +4,7 @@ import LoginPage from '../LoginPage.jsx'
 import SignUpPage from '../SignUpPage.jsx'
 import KakaoCallbackPage from '../KakaoCallbackPage.jsx'
 import KakaoSignUpPage from '../KakaoSignUpPage.jsx'
+import PasswordResetPage from '../PasswordResetPage.jsx'
 import LegacyAppShell from '../LegacyAppShell.jsx'
 import EduHubCommonShell from './EduHubCommonShell.jsx'
 import ProfessorDashboardPage from '../domains/professor/ProfessorDashboardPage.jsx'
@@ -21,6 +22,7 @@ import ProfessorMaterialPage from '../domains/professor/materials/ProfessorMater
  *
  * - /login : 로그인 (ROUTES.login)
  * - /signup : 일반 회원가입 (ROUTES.signup)
+ * - /reset-password : 메일 링크 비밀번호 재설정 (ROUTES.passwordReset)
  * - /oauth2/callback, /oauth2/signup : 카카오 OAuth (ROUTES.kakaoCallback, ROUTES.kakaoSignup)
  * - /workspace : 레거시 워크스페이스 FAB (ROUTES.workspace)
  * - `/`, `/professor` : 교수 대시보드(임시 시작 화면)
@@ -41,6 +43,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path={ROUTES.login} element={<LoginPage />} />
         <Route path={ROUTES.signup} element={<SignUpPage />} />
+        <Route path={ROUTES.passwordReset} element={<PasswordResetPage />} />
         <Route path={ROUTES.kakaoCallback} element={<KakaoCallbackPage />} />
         <Route path={ROUTES.kakaoSignup} element={<KakaoSignUpPage />} />
         <Route path={ROUTES.workspace} element={<LegacyAppShell />} />

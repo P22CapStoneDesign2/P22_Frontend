@@ -1,6 +1,6 @@
 /**
- * Vite 환경 변수 중앙 관리 (VITE_ 접두사 필수).
- * API·외부 링크 URL은 이 모듈에서만 import.meta.env를 읽도록 유지합니다.
+ * Vite 환경 변수 중앙 관리 (`VITE_` 접두사 필수).
+ * API 베이스·프론트 공개 URL·OAuth 등 환경마다 바뀌는 URL/호스트는 이 모듈에서만 `import.meta.env`를 읽고 export합니다.
  */
 const raw = import.meta.env.VITE_API_BASE_URL
 
@@ -28,3 +28,13 @@ export const KAKAO_OAUTH_AUTHORIZATION_URL =
     : API_BASE_URL
       ? `${API_BASE_URL}${kakaoAuthPath}`
       : ''
+
+/**
+ * 브라우저에서 접근하는 프론트 주소(끝 `/` 없음).
+ * 비밀번호 재설정 메일 링크 등 백엔드에 넘길 때 사용 — 하드코딩 금지, `.env`에만 둠.
+ */
+const appPublicRaw = import.meta.env.VITE_APP_PUBLIC_URL
+export const APP_PUBLIC_URL =
+  typeof appPublicRaw === 'string' && appPublicRaw.length > 0
+    ? appPublicRaw.replace(/\/$/, '')
+    : ''

@@ -13,12 +13,13 @@
 
 ```bash
 npm install        # 의존성 설치
-npm run dev        # 개발 서버 (기본 포트 5173)
+npm run dev        # 개발 서버 (포트는 vite.config.js, 기본 5174)
 npm run build      # 프로덕션 빌드
 npm run lint       # ESLint 검사
 ```
 
-환경변수: `.env`에 `VITE_API_BASE_URL` 설정 필요 (예: `http://localhost:8080`)
+환경별 URL·호스트는 **소스에 하드코딩하지 않고** `.env`의 `VITE_*`만 사용합니다. 읽기·가공·export는 **`src/config/env.js` 한 곳**에서 하고, 나머지 코드는 여기서 보낸 상수만 import합니다.  
+예: API 베이스 **`VITE_API_BASE_URL`**, 프론트 공개 주소(메일 링크·백엔드에 넘기는 origin 등) **`VITE_APP_PUBLIC_URL`**, 카카오 시작 URL은 `VITE_KAKAO_OAUTH_AUTHORIZATION_URL` 또는 API 베이스 + `VITE_OAUTH2_KAKAO_AUTHORIZATION_PATH` 조합(키 목록은 `.env.example` 참고).
 
 ## 핵심 불변 규칙
 
@@ -27,12 +28,14 @@ npm run lint       # ESLint 검사
 3. Access/Refresh Token은 `localStorage`에만 저장 (`accessToken`, `refreshToken` 키)
 4. 401 처리·토큰 재발급은 `src/api/axios.js` 인터셉터에서만 담당 — 컴포넌트·페이지 레벨 중복 처리 금지
 5. UI 텍스트(레이블, 메시지, 오류 안내)는 항상 **한국어**
+6. API 베이스·프론트 공개 URL·OAuth 등 **환경에 따라 바뀌는 URL/호스트**는 `.env`의 `VITE_*`와 `src/config/env.js` export만 사용 — 컴포넌트·`src/api/*`에 `http(s)://…` 호스트 하드코딩 금지
 
 ## 문서 지도
 
 | 문서 | 내용 |
 |------|------|
 | `docs/ARCHITECTURE.md` | 컴포넌트·페이지 구조, 라우팅, API 레이어 |
+| `docs/API-SPEC.md` | 백엔드 REST API 명세 (인증·사용자·교안·퀴즈 요약) |
 | `docs/PRD.md` | 서비스 기획, 사용자 시나리오 (프론트엔드 관점) |
 | `docs/QUALITY.md` | 화면·레이어별 품질 등급 및 개선 우선순위 |
 | `docs/SECURITY.md` | 프론트엔드 보안 체크리스트 |

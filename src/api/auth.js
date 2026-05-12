@@ -1,7 +1,8 @@
 /* 인증·사용자 API
- * 명세 기준: Base URL https://api.example.com, JWT Bearer (axios 인터셉터에서 자동 첨부)
+ * API Base URL은 `VITE_API_BASE_URL` → `src/config/env.js` — JWT Bearer는 axios 인터셉터에서 첨부
  */
 import instance from './axios';
+import { APP_PUBLIC_URL } from '../config/env.js';
 
 /* POST /api/auth/signup — { username, email, password, passwordConfirm } */
 export const signup = (data) => instance.post('/api/auth/signup', data);
@@ -10,9 +11,20 @@ export const signup = (data) => instance.post('/api/auth/signup', data);
 export const login = (email, password) =>
   instance.post('/api/auth/login', { email, password });
 
-/** 비밀번호 재설정 메일 요청 — 백엔드 경로는 합의 후 수정 */
-export const requestPasswordReset = (email) =>
-  instance.post('/api/auth/password/reset-request', { email });
+/**
+ * 비밀번호 재설정 메일 요청.
+ * `frontendBaseUrl`은 메일 링크 조립용 — 백엔드 DTO 필드명이 다르면 여기 키만 변경.
+ * 값은 `.env`의 `VITE_APP_PUBLIC_URL` (끝 `/` 없이, 예: http://localhost:5174)
+ */
+export const requestPasswordReset = (email) => {
+  const body = { email }
+  if (APP_PUBLIC_URL) body.frontendBaseUrl = APP_PUBLIC_URL
+  return instance.post('/api/auth/password/reset-request', body)
+}
+
+/** 메일의 재설정 링크 클릭 후 — 토큰·새 비밀번호 전송 (백엔드 DTO에 맞게 필드명 조정) */
+export const confirmPasswordReset = (data) =>
+  instance.post('/api/auth/password/reset', data);
 
 /* POST /api/auth/reissue — { refreshToken } */
 export const reissue = (refreshToken) =>
