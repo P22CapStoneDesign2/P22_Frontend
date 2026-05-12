@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { ROUTES } from '../shared/constants/routes.js';
 
-const instance = axios.create({ baseURL: 'http://localhost:8080' }); //백엔드 주소(배포 시 바꿔야함)
+const instance = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL });
 
 // 요청 인터셉터 - accessToken 자동 첨부
 instance.interceptors.request.use((config) => {
@@ -10,7 +10,6 @@ instance.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
-
 // 응답 인터셉터 - 401 시 토큰 재발급 후 재시도
 instance.interceptors.response.use(
   (res) => res,
