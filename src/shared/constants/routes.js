@@ -2,6 +2,8 @@
 
 export const ROUTES = {
   home: '/',
+  /** 이메일·카카오 로그인 화면 */
+  login: '/login',
   workspace: '/workspace',
   signup: '/signup',
   /* 백엔드가 OAuth 성공 후 redirect 시키는 경로 (명세: /oauth2/callback?accessToken=...&refreshToken=...) */

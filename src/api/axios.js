@@ -1,8 +1,9 @@
 /*axios 인스턴스 생성, 인터셉터 세팅*/
 import axios from 'axios';
+import { API_BASE_URL } from '../config/env.js';
 import { ROUTES } from '../shared/constants/routes.js';
 
-const instance = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL });
+const instance = axios.create({ baseURL: API_BASE_URL || undefined });
 
 // 요청 인터셉터 - accessToken 자동 첨부
 instance.interceptors.request.use((config) => {

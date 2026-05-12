@@ -1,4 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ROUTES } from '../shared/constants/routes.js'
+import LoginPage from '../LoginPage.jsx'
+import SignUpPage from '../SignUpPage.jsx'
+import KakaoCallbackPage from '../KakaoCallbackPage.jsx'
+import KakaoSignUpPage from '../KakaoSignUpPage.jsx'
+import LegacyAppShell from '../LegacyAppShell.jsx'
 import EduHubCommonShell from './EduHubCommonShell.jsx'
 import ProfessorDashboardPage from '../domains/professor/ProfessorDashboardPage.jsx'
 import StudentDashboardPage from '../domains/student/StudentDashboardPage.jsx'
@@ -13,6 +19,10 @@ import ProfessorMaterialPage from '../domains/professor/materials/ProfessorMater
 /**
  * EDU HUB 앱 라우팅
  *
+ * - /login : 로그인 (ROUTES.login)
+ * - /signup : 일반 회원가입 (ROUTES.signup)
+ * - /oauth2/callback, /oauth2/signup : 카카오 OAuth (ROUTES.kakaoCallback, ROUTES.kakaoSignup)
+ * - /workspace : 레거시 워크스페이스 FAB (ROUTES.workspace)
  * - `/`, `/professor` : 교수 대시보드(임시 시작 화면)
  * - `/dev/common-shell` : 공통 UI 컴포넌트 검증용 셸
  * - `/student` : 학생 대시보드
@@ -29,8 +39,13 @@ export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path={ROUTES.login} element={<LoginPage />} />
+        <Route path={ROUTES.signup} element={<SignUpPage />} />
+        <Route path={ROUTES.kakaoCallback} element={<KakaoCallbackPage />} />
+        <Route path={ROUTES.kakaoSignup} element={<KakaoSignUpPage />} />
+        <Route path={ROUTES.workspace} element={<LegacyAppShell />} />
         {/* ─── 교수 영역 (루트 = 임시 시작 화면) ─── */}
-        <Route path="/" element={<ProfessorDashboardPage />} />
+        <Route path={ROUTES.home} element={<ProfessorDashboardPage />} />
         <Route path="/professor" element={<ProfessorDashboardPage />} />
         {/* 공통 UI 데모 (개발용) */}
         <Route path="/dev/common-shell" element={<EduHubCommonShell />} />

@@ -1,9 +1,11 @@
 /*로그인 화면*/
 import { login } from './api/auth'
+import { KAKAO_OAUTH_AUTHORIZATION_URL } from './config/env.js'
 
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from './shared/constants/routes.js'
+import FindPasswordModal from './FindPasswordModal.jsx'
 import {
   EduHubBookIcon,
   EduHubProfessorIcon,
@@ -24,6 +26,7 @@ function isValidEmail(value) {
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const [findPasswordOpen, setFindPasswordOpen] = useState(false)
   const [role, setRole] = useState('professor')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -55,11 +58,18 @@ export default function LoginPage() {
   }
 
   const handleKakaoClick = () => {
-    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/kakao`
+    if (!KAKAO_OAUTH_AUTHORIZATION_URL) {
+      window.alert(
+        '카카오 로그인 주소가 설정되지 않았습니다. .env의 VITE_API_BASE_URL(또는 VITE_KAKAO_OAUTH_AUTHORIZATION_URL)을 확인해 주세요.',
+      )
+      return
+    }
+    window.location.href = KAKAO_OAUTH_AUTHORIZATION_URL
   }
 
   return (
     <div className="edu-login">
+      <FindPasswordModal isOpen={findPasswordOpen} onClose={() => setFindPasswordOpen(false)} />
       <div className="edu-login__panel">
         <header className="edu-login__header">
           <h1 className="edu-login__title" aria-label="EDU HUB">
@@ -131,9 +141,13 @@ export default function LoginPage() {
                 </button>
               </label>
               <div className="edu-login__row-link">
-                <a className="edu-login__text-link" href="#find-password">
+                <button
+                  type="button"
+                  className="edu-login__text-link"
+                  onClick={() => setFindPasswordOpen(true)}
+                >
                   비밀번호 찾기
-                </a>
+                </button>
               </div>
               <button type="submit" className="btn btn--surface btn--md btn--block edu-login__submit">
                 로그인

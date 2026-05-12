@@ -234,6 +234,15 @@
   text-underline-offset: 3px;
 }
 
+button.edu-login__text-link {
+  font: inherit;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: inherit;
+}
+
 .edu-login__text-link:hover {
   color: #1d4ed8;
 }

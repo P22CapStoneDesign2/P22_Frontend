@@ -10,6 +10,10 @@ export const signup = (data) => instance.post('/api/auth/signup', data);
 export const login = (email, password) =>
   instance.post('/api/auth/login', { email, password });
 
+/** 비밀번호 재설정 메일 요청 — 백엔드 경로는 합의 후 수정 */
+export const requestPasswordReset = (email) =>
+  instance.post('/api/auth/password/reset-request', { email });
+
 /* POST /api/auth/reissue — { refreshToken } */
 export const reissue = (refreshToken) =>
   instance.post('/api/auth/reissue', { refreshToken });

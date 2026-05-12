@@ -168,7 +168,7 @@ export default function SignUpPage() {
         passwordConfirm,
       })
       window.alert('가입이 완료되었습니다.')
-      navigate(ROUTES.home)
+      navigate(ROUTES.login)
     } catch (error) {
       const message = error.response?.data?.message
       window.alert(message || '회원가입 중 오류가 발생했습니다.')
@@ -180,7 +180,7 @@ export default function SignUpPage() {
   return (
     <div className="edu-signup">
       <div className="edu-signup__logo-corner">
-        <Link to={ROUTES.home} className="edu-signup__brand" aria-label="EDU HUB, 로그인으로">
+        <Link to={ROUTES.login} className="edu-signup__brand" aria-label="EDU HUB, 로그인으로">
           <EduHubBookIcon />
         </Link>
       </div>
