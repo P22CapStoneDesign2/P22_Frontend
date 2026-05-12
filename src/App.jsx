@@ -160,12 +160,12 @@ function QuestionCenter({
       ) : null}
 
       <div className="quiz-nav">
-        <button type="button" className="quiz-btn quiz-btn--ghost" onClick={onPrev} disabled={currentQuestionIndex === 0}>
+        <button type="button" className="btn btn--ghost btn--sm" onClick={onPrev} disabled={currentQuestionIndex === 0}>
           이전 문제
         </button>
         <button
           type="button"
-          className="quiz-btn quiz-btn--ghost"
+          className="btn btn--ghost btn--sm"
           onClick={onNext}
           disabled={currentQuestionIndex === quizData.length - 1}
         >
@@ -216,10 +216,10 @@ function RightPanel({
         <>
           <h2 className="quiz-panel__title">제출 · 채점</h2>
           <p className="quiz-panel__hint">현재 문제의 답은 아래에서 확정할 수 있습니다.</p>
-          <button type="button" className="quiz-btn quiz-btn--primary quiz-btn--block" onClick={onSubmitAnswer}>
+          <button type="button" className="btn btn--primary btn--sm btn--block" onClick={onSubmitAnswer}>
             정답 제출
           </button>
-          <button type="button" className="quiz-btn quiz-btn--accent quiz-btn--block" onClick={onGradeQuiz}>
+          <button type="button" className="btn btn--accent btn--sm btn--block" onClick={onGradeQuiz}>
             퀴즈 채점하기
           </button>
         </>

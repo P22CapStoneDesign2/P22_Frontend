@@ -1,3 +1,4 @@
+/* 교안 에디터 화면 */
 import { useCallback, useId, useLayoutEffect, useRef, useState } from 'react'
 import './LessonScript.css'
 
@@ -620,11 +621,11 @@ export default function LessonScript() {
       <footer className="tistory-editor__footer">
         <p className="tistory-editor__footer-note">교안 에디터 · 로컬 초안</p>
         <div className="tistory-editor__footer-actions">
-          <button type="button" className="tistory-editor__btn-draft" onClick={handleTempSave}>
+          <button type="button" className="btn btn--editor-draft" onClick={handleTempSave}>
             임시저장
             {draftCount > 0 ? <span className="tistory-editor__draft-badge">{draftCount}</span> : null}
           </button>
-          <button type="button" className="tistory-editor__btn-done" onClick={handleComplete}>
+          <button type="button" className="btn btn--editor-done" onClick={handleComplete}>
             완료
           </button>
         </div>
