@@ -39,6 +39,13 @@
   color: #64748b;
 }
 
+.edu-common-shell__env-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-family: ui-monospace, monospace;
+  color: #475569;
+}
+
 .edu-common-shell__section {
   display: flex;
   flex-direction: column;

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './EduHubCommonShell.css'
+import { API_BASE_URL } from '@/config/env'
 import { AppLayout } from '../components/layout/index.js'
 import { Button, ConfirmModal, MenuCard, SelectDropdown } from '../components/ui/index.js'
 import { PdfViewerSection } from '../components/media/index.js'
@@ -33,6 +34,9 @@ export default function EduHubCommonShell() {
           <h1 className="edu-common-shell__title">공통 UI 뼈대</h1>
           <p className="edu-common-shell__desc">
             AppLayout · Header · Button · MenuCard · SelectDropdown · ConfirmModal · PdfViewerSection
+          </p>
+          <p className="edu-common-shell__env-hint" aria-label="Configured API base URL">
+            VITE_API_BASE_URL: {API_BASE_URL || '(empty)'}
           </p>
         </header>
 

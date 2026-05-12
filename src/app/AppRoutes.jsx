@@ -1,14 +1,14 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import EduHubCommonShell from './EduHubCommonShell.jsx'
-import ProfessorDashboardPage from '../pages/professor/ProfessorDashboardPage.jsx'
-import StudentDashboardPage from '../pages/student/StudentDashboardPage.jsx'
-import QuizManagementPage from '../pages/professor/quiz-management/QuizManagementPage.jsx'
-import QuizCreatePage from '../pages/professor/quiz-create/QuizCreatePage.jsx'
-import QuizEditPage from '../pages/professor/quiz-edit/QuizEditPage.jsx'
-import QuizMaterialSelectPage from '../pages/student/quiz-material-select/QuizMaterialSelectPage.jsx'
-import QuizSolvePage from '../pages/student/quiz-solve/QuizSolvePage.jsx'
-import QuizResultPage from '../pages/student/quiz-result/QuizResultPage.jsx'
-import ProfessorMaterialPage from '../pages/professor/materials/ProfessorMaterialPage.jsx'
+import ProfessorDashboardPage from '../domains/professor/ProfessorDashboardPage.jsx'
+import StudentDashboardPage from '../domains/student/StudentDashboardPage.jsx'
+import QuizManagementPage from '../domains/professor/quiz-management/QuizManagementPage.jsx'
+import QuizCreatePage from '../domains/professor/quiz-create/QuizCreatePage.jsx'
+import QuizEditPage from '../domains/professor/quiz-edit/QuizEditPage.jsx'
+import QuizMaterialSelectPage from '../domains/student/quiz-material-select/QuizMaterialSelectPage.jsx'
+import QuizSolvePage from '../domains/student/quiz-solve/QuizSolvePage.jsx'
+import QuizResultPage from '../domains/student/quiz-result/QuizResultPage.jsx'
+import ProfessorMaterialPage from '../domains/professor/materials/ProfessorMaterialPage.jsx'
 
 /**
  * EDU HUB 앱 라우팅
