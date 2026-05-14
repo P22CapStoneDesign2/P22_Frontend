@@ -10,6 +10,8 @@ const AUTH_REFRESH_EXCLUDED_PATHS = new Set([
   '/api/auth/login',
   '/api/auth/signup',
   '/api/auth/reissue',
+  '/api/auth/email/send',
+  '/api/auth/email/verify',
   '/api/auth/password/reset-request',
   '/api/auth/password/reset',
 ])

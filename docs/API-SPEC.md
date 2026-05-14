@@ -44,6 +44,8 @@
 | Method | URL | 인증 | 설명 |
 |--------|-----|:----:|------|
 | `POST` | `/api/auth/signup` | ❌ | 회원가입 |
+| `POST` | `/api/auth/email/send` | ❌ | 회원가입용 이메일 인증번호 발송 |
+| `POST` | `/api/auth/email/verify` | ❌ | 이메일 인증번호 확인 |
 | `POST` | `/api/auth/login` | ❌ | 일반 로그인 |
 | `GET` | `/oauth2/authorization/kakao` | ❌ | Kakao 소셜 로그인 |
 | `POST` | `/api/auth/reissue` | ❌ | Access Token 재발급 |
@@ -101,6 +103,28 @@
 | 성공 | `201` | 회원가입 성공 |
 | 이메일 중복 | `409` | 이미 사용 중인 이메일입니다. |
 | 유효성 실패 | `400` | 비밀번호 형식이 올바르지 않습니다. |
+| 이메일 미인증 | `403` | `EMAIL_NOT_VERIFIED` 등 — Redis `ev:verified:{email}` 없이 가입 시도 시 |
+
+### 이메일 인증 (Redis)
+
+이메일 키 suffix는 **trim + 소문자** 정규화 값과 일치한다.
+
+**POST** `/api/auth/email/send` — Request: `{ "email": "test@example.com" }`  
+성공 시 `success: true` 등(백엔드 공통 래퍼와 병행 가능). 개발 시 서버 로그·메일 목에서 6자리 코드 확인.
+
+**POST** `/api/auth/email/verify` — Request: `{ "email": "...", "code": "123456" }`
+
+#### verify 실패 시 (예시)
+
+| 상황 | HTTP | `errorCode` |
+|------|------|-------------|
+| 코드 불일치(한도 내) | `401` | `VERIFICATION_CODE_MISMATCH` |
+| 코드 없음·만료 | `404` | `VERIFICATION_NOT_FOUND_OR_EXPIRED` |
+| 잠금(`ev:lock`) | `423` | `VERIFICATION_LOCKED` |
+| 최대 실패 직후 잠금 | `423` | `VERIFICATION_ATTEMPTS_EXCEEDED` |
+
+성공 본문 예: `{ "success": true, "message": "이메일 인증이 완료되었습니다." }`  
+실패: `{ "success": false, "message": "…", "errorCode": "…" }` — `data`는 `null`이면 생략될 수 있음.
 
 ---
 
