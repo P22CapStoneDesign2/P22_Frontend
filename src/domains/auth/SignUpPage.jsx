@@ -1,6 +1,6 @@
 /*회원가입 화면*/
 
-import { signup } from '../../api/auth'
+import { signup, sendEmailVerification, verifyEmailCode } from '../../api/auth'
 
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -78,6 +78,8 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('')
   const [mailSent, setMailSent] = useState(false)
   const [codeVerified, setCodeVerified] = useState(false)
+  const [sendMailLoading, setSendMailLoading] = useState(false)
+  const [verifyLoading, setVerifyLoading] = useState(false)
   const [verifyCode, setVerifyCode] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -104,17 +106,26 @@ export default function SignUpPage() {
     password === passwordConfirm &&
     agreePrivacy
 
-  const handleSendMail = () => {
+  const handleSendMail = async () => {
     if (!isValidEmail(email)) {
       window.alert('이메일 형식이 올바르지 않습니다.')
       return
     }
-    setMailSent(true)
-    setCodeVerified(false)
-    setVerifyCode('')
+    setSendMailLoading(true)
+    try {
+      await sendEmailVerification(email)
+      setMailSent(true)
+      setCodeVerified(false)
+      setVerifyCode('')
+    } catch (error) {
+      const message = error.response?.data?.message
+      window.alert(message || '인증 메일 발송에 실패했습니다.')
+    } finally {
+      setSendMailLoading(false)
+    }
   }
 
-  const handleVerifyCode = () => {
+  const handleVerifyCode = async () => {
     if (!mailSent) {
       window.alert('먼저 인증번호 받기를 눌러 주세요.')
       return
@@ -123,7 +134,16 @@ export default function SignUpPage() {
       window.alert('인증번호 6자리를 입력해 주세요.')
       return
     }
-    setCodeVerified(true)
+    setVerifyLoading(true)
+    try {
+      await verifyEmailCode(email, verifyCode)
+      setCodeVerified(true)
+    } catch (error) {
+      const message = error.response?.data?.message
+      window.alert(message || '인증번호 확인에 실패했습니다.')
+    } finally {
+      setVerifyLoading(false)
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -173,11 +193,16 @@ export default function SignUpPage() {
       navigate(ROUTES.login)
     } catch (error) {
       const message = error.response?.data?.message
+      const errorCode = error.response?.data?.errorCode
+      if (error.response?.status === 403 && errorCode === 'EMAIL_NOT_VERIFIED') {
+        window.alert(message || '이메일 인증을 완료한 뒤 다시 시도해 주세요.')
+        return
+      }
       window.alert(message || '회원가입 중 오류가 발생했습니다.')
     }
   }
 
-  const sendCodeDisabled = mailVerified
+  const sendCodeDisabled = mailVerified || sendMailLoading
 
   return (
     <div className="edu-signup">
@@ -264,7 +289,7 @@ export default function SignUpPage() {
                   disabled={sendCodeDisabled}
                   onClick={handleSendMail}
                 >
-                  인증번호 받기
+                  {sendMailLoading ? '발송 중…' : '인증번호 받기'}
                 </button>
                 {mailSent ? (
                   <span className="edu-signup__sent-mark" aria-hidden="true">
@@ -296,10 +321,10 @@ export default function SignUpPage() {
                   <button
                     type="button"
                     className="btn btn--surface btn--sm edu-signup__verify-confirm-btn"
-                    disabled={codeVerified || !mailSent}
+                    disabled={codeVerified || !mailSent || verifyLoading}
                     onClick={handleVerifyCode}
                   >
-                    확인
+                    {verifyLoading ? '확인 중…' : '확인'}
                   </button>
                 </div>
               </div>

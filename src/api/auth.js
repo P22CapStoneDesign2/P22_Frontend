@@ -4,12 +4,35 @@
 import instance from './axios';
 import { APP_PUBLIC_URL } from '../config/env.js';
 
+/** 백엔드 Redis 키와 동일하게 trim + 소문자 */
+export function normalizeSignupEmail(email) {
+  return String(email ?? '').trim().toLowerCase()
+}
+
+/* POST /api/auth/email/send — { email } */
+export const sendEmailVerification = (email) =>
+  instance.post('/api/auth/email/send', { email: normalizeSignupEmail(email) });
+
+/* POST /api/auth/email/verify — { email, code } (6자리) */
+export const verifyEmailCode = (email, code) =>
+  instance.post('/api/auth/email/verify', {
+    email: normalizeSignupEmail(email),
+    code: String(code ?? '').trim(),
+  });
+
 /* POST /api/auth/signup — { username(이름), nickname, email, password, passwordConfirm } */
-export const signup = (data) => instance.post('/api/auth/signup', data);
+export const signup = (data) =>
+  instance.post('/api/auth/signup', {
+    ...data,
+    email: normalizeSignupEmail(data.email),
+  });
 
 /* POST /api/auth/login — { email, password } */
 export const login = (email, password) =>
-  instance.post('/api/auth/login', { email, password });
+  instance.post('/api/auth/login', {
+    email: normalizeSignupEmail(email),
+    password,
+  });
 
 /**
  * 비밀번호 재설정 메일 요청.
