@@ -5,6 +5,26 @@ import { ROUTES } from '../shared/constants/routes.js';
 
 const instance = axios.create({ baseURL: API_BASE_URL || undefined });
 
+/** 401이어도 access 재발급을 시도하지 않는 URL (공개 인증 API·재발급 실패 등) */
+const AUTH_REFRESH_EXCLUDED_PATHS = new Set([
+  '/api/auth/login',
+  '/api/auth/signup',
+  '/api/auth/reissue',
+  '/api/auth/password/reset-request',
+  '/api/auth/password/reset',
+])
+
+function requestPathWithoutQuery(config) {
+  if (!config?.url) return ''
+  const raw = String(config.url).split('?')[0]
+  return raw.startsWith('/') ? raw : `/${raw}`
+}
+
+function isRefreshSkippedRequest(config) {
+  if (!config || config.skipAuthRefresh) return true
+  return AUTH_REFRESH_EXCLUDED_PATHS.has(requestPathWithoutQuery(config))
+}
+
 // 요청 인터셉터 - accessToken 자동 첨부
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -17,12 +37,26 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true; // 무한 재시도 방지
+    const shouldRefresh =
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isRefreshSkippedRequest(originalRequest)
+
+    if (shouldRefresh) {
+      originalRequest._retry = true; // 동일 요청 무한 재시도 방지
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        const res = await instance.post('/api/auth/reissue', { refreshToken });
+        if (!refreshToken) {
+          throw new Error('no refresh token')
+        }
+        // 재발급 요청은 인터셉터에서 다시 401 처리하지 않도록 제외(재귀 방지)
+        const res = await instance.post(
+          '/api/auth/reissue',
+          { refreshToken },
+          { skipAuthRefresh: true },
+        );
 
         const { accessToken, refreshToken: newRefreshToken } = res.data.data;
         localStorage.setItem('accessToken', accessToken);
@@ -32,7 +66,7 @@ instance.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return instance(originalRequest);
 
-      } catch (e) {
+      } catch {
         // 재발급도 실패 → 로그아웃 처리
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
