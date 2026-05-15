@@ -1,16 +1,17 @@
 import DashboardPageLayout from '../shared/DashboardPageLayout.jsx'
+import { ROUTES } from '../../shared/constants/routes.js'
 
 const STUDENT_MENU_ITEMS = [
   {
     id: 'materials-view',
     title: '교안 보기',
-    to: '/student/materials',
+    to: ROUTES.studentMaterials,
     icon: '📖',
   },
   {
     id: 'quiz-solve',
     title: '퀴즈 풀기',
-    to: '/student/quiz/materials',
+    to: ROUTES.studentQuizMaterials,
     icon: '✏️',
   },
 ]

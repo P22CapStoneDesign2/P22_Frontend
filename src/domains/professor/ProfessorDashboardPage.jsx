@@ -1,16 +1,17 @@
 import DashboardPageLayout from '../shared/DashboardPageLayout.jsx'
+import { ROUTES } from '../../shared/constants/routes.js'
 
 const PROFESSOR_MENU_ITEMS = [
   {
     id: 'quiz-manage',
     title: '교안별 퀴즈 관리',
-    to: '/professor/quizzes',
+    to: ROUTES.professorQuizzes,
     icon: '❓',
   },
   {
     id: 'material-manage',
     title: '교안 관리',
-    to: '/professor/materials',
+    to: ROUTES.professorMaterials,
     icon: '📄',
   },
 ]
@@ -22,7 +23,7 @@ export default function ProfessorDashboardPage() {
       headerProps={{
         userEmail: 'professor@school.edu',
         onLogout: () => {},
-        logoHref: '/professor',
+        logoHref: ROUTES.professorDashboard,
         logoLabel: 'EDU HUB',
       }}
       menuItems={PROFESSOR_MENU_ITEMS}

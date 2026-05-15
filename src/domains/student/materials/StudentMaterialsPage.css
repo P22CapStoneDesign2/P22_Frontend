@@ -1,0 +1,65 @@
+.edu-stu-mat-list-app-layout-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-stu-mat-list {
+  flex: 1;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: clamp(24px, 5vw, 48px) 24px;
+  max-width: 560px;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+}
+
+.edu-stu-mat-list__title {
+  margin: 0 0 8px;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.edu-stu-mat-list__intro {
+  margin: 0 0 24px;
+  font-size: 0.9375rem;
+  color: #475569;
+}
+
+.edu-stu-mat-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edu-stu-mat-list__link {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+  text-decoration: none;
+  color: inherit;
+}
+
+.edu-stu-mat-list__link:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.12);
+}
+
+.edu-stu-mat-list__link-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.edu-stu-mat-list__link-meta {
+  font-size: 0.8125rem;
+  color: #64748b;
+}

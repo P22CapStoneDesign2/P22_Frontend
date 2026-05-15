@@ -2,6 +2,7 @@
 
 export const ROUTES = {
   home: '/',
+  professorDashboard: '/professor',
   /** 이메일·카카오 로그인 화면 */
   login: '/login',
   workspace: '/workspace',
@@ -12,4 +13,44 @@ export const ROUTES = {
   kakaoCallback: '/oauth2/callback',
   /* 카카오 최초 로그인 시 이름·닉네임 입력 화면 */
   kakaoSignup: '/oauth2/signup',
+
+  professorQuizzes: '/professor/quizzes',
+  professorMaterials: '/professor/materials',
+  /** `<Route path={ROUTES.professorMaterialViewer} />` — `:materialId` 는 `useParams` */
+  professorMaterialViewer: '/professor/materials/:materialId/viewer',
+
+  studentDashboard: '/student',
+  studentMaterials: '/student/materials',
+  /** `<Route path={ROUTES.studentMaterialViewer} />` */
+  studentMaterialViewer: '/student/materials/:materialId/viewer',
+
+  studentQuizMaterials: '/student/quiz/materials',
+  /** `<Route path={ROUTES.studentQuizSolve} />` */
+  studentQuizSolve: '/student/quiz/:materialId',
+  /** `/student/quiz/:materialId` 의 공통 접두 (표시·조립용) */
+  studentQuizRoot: '/student/quiz',
+}
+
+/**
+ * @param {string|number} materialId
+ * @returns {string}
+ */
+export function studentQuizSolvePath(materialId) {
+  return `${ROUTES.studentQuizRoot}/${encodeURIComponent(String(materialId))}`
+}
+
+/**
+ * @param {string|number} materialId
+ * @returns {string}
+ */
+export function studentMaterialViewerPath(materialId) {
+  return `${ROUTES.studentMaterials}/${encodeURIComponent(String(materialId))}/viewer`
+}
+
+/**
+ * @param {string|number} materialId
+ * @returns {string}
+ */
+export function professorMaterialViewerPath(materialId) {
+  return `${ROUTES.professorMaterials}/${encodeURIComponent(String(materialId))}/viewer`
 }

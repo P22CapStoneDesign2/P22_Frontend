@@ -33,6 +33,7 @@
 | 403 | 권한 없음 |
 | 404 | 리소스 없음 |
 | 409 | 중복 데이터 |
+| 423 | 잠금(예: 이메일 인증 시도 초과) |
 | 500 | 서버 내부 오류 |
 
 ---
@@ -64,6 +65,18 @@
 | `PUT` | `/api/lessons/{id}` | ✅ | PROF(본인)/ADMIN | 교안 수정 |
 | `DELETE` | `/api/lessons/{id}` | ✅ | PROF(본인)/ADMIN | 교안 삭제 |
 | `GET` | `/api/admin/lessons` | ✅ | ADMIN | 전체 교안 목록 조회 (페이지네이션) |
+
+### 교안 PDF 뷰어 (Material)
+
+| Method | URL | 인증 | 설명 |
+|--------|-----|:----:|------|
+| `GET` | `/api/lectures/{lectureId}/materials` | ✅ | 수강 강의의 교안(자료) 목록 |
+| `GET` | `/api/materials/{materialId}` | ✅ | 교안(자료) 상세 |
+| `GET` | `/api/materials/{materialId}/viewer` | ✅ | PDF 뷰어용 URL·메타 |
+| `GET` | `/api/materials/{materialId}/pages/{pageNumber}` | ✅ | 페이지별 이미지 URL |
+| `POST` | `/api/materials/{materialId}/progress` | ✅ | 학습 진행도(현재 페이지) 저장 |
+
+권한(학생·교수·관리자)은 §15.6 참고.
 
 ### 퀴즈
 
@@ -105,26 +118,119 @@
 | 유효성 실패 | `400` | 비밀번호 형식이 올바르지 않습니다. |
 | 이메일 미인증 | `403` | `EMAIL_NOT_VERIFIED` 등 — Redis `ev:verified:{email}` 없이 가입 시도 시 |
 
-### 이메일 인증 (Redis)
+### 이메일 인증 API (Redis)
 
-이메일 키 suffix는 **trim + 소문자** 정규화 값과 일치한다.
+회원가입 전 **이메일 소유 확인**용. 이메일 키 suffix는 항상 **trim + 소문자** 정규화 값이다.
 
-**POST** `/api/auth/email/send` — Request: `{ "email": "test@example.com" }`  
-성공 시 `success: true` 등(백엔드 공통 래퍼와 병행 가능). 개발 시 서버 로그·메일 목에서 6자리 코드 확인.
+#### Redis 키 요약
 
-**POST** `/api/auth/email/verify` — Request: `{ "email": "...", "code": "123456" }`
+| 논리 | Redis 키 패턴 | 값 | TTL(설정 키 예시) |
+|------|---------------|-----|-------------------|
+| 코드 + 실패 횟수 | `ev:code:{정규화이메일}` | `{failedAttempts}:{hmacHex}` | `app.email-verification.code-ttl-seconds` (기본 300초) |
+| 재발송 쿨다운 | `ev:cooldown:{email}` | `1` | `resend-cooldown-seconds` |
+| 발송 횟수 | `ev:send:{email}` | 숫자 문자열 | `send-window-seconds` |
+| 잠금 | `ev:lock:{email}` | `1` | `lock-duration-seconds` |
+| 인증 완료 | `ev:verified:{email}` | `1` | `verified-ttl-seconds` |
 
-#### verify 실패 시 (예시)
+#### 엔드포인트
+
+**POST** `/api/auth/email/send`
+
+- Request Body: `{ "email": "test@example.com" }`
+- 성공: `success: true` 등(백엔드 공통 래퍼와 병행 가능). 개발 시 **콘솔·메일 목(mock)** 에서 6자리 코드 확인.
+
+**POST** `/api/auth/email/verify`
+
+- Request Body: `{ "email": "test@example.com", "code": "123456" }`
+
+#### 응답 형식 (예시)
+
+성공:
+
+```json
+{
+  "success": true,
+  "message": "이메일 인증이 완료되었습니다."
+}
+```
+
+실패:
+
+```json
+{
+  "success": false,
+  "message": "…",
+  "errorCode": "VERIFICATION_CODE_MISMATCH"
+}
+```
+
+`data` 필드는 `null`이면 JSON에서 **생략**될 수 있다.
+
+#### verify 관련 `errorCode`
 
 | 상황 | HTTP | `errorCode` |
 |------|------|-------------|
 | 코드 불일치(한도 내) | `401` | `VERIFICATION_CODE_MISMATCH` |
 | 코드 없음·만료 | `404` | `VERIFICATION_NOT_FOUND_OR_EXPIRED` |
 | 잠금(`ev:lock`) | `423` | `VERIFICATION_LOCKED` |
-| 최대 실패 직후 잠금 | `423` | `VERIFICATION_ATTEMPTS_EXCEEDED` |
+| 최대 실패로 잠금 처리 직후 | `423` | `VERIFICATION_ATTEMPTS_EXCEEDED` |
 
-성공 본문 예: `{ "success": true, "message": "이메일 인증이 완료되었습니다." }`  
-실패: `{ "success": false, "message": "…", "errorCode": "…" }` — `data`는 `null`이면 생략될 수 있음.
+#### Postman 테스트 시나리오 (순서)
+
+1. **인증번호 발송** — `POST` `{BASE}/api/auth/email/send`, Body `{ "email": "test@example.com" }` → `success: true`, 콘솔/목에서 6자리 코드 확인.
+2. **Redis 코드 키** — `GET ev:code:test@example.com` → 값은 `0:{해시}` 형태.
+3. **잘못된 코드** — `POST` `/api/auth/email/verify`, Body `{ "email": "test@example.com", "code": "000000" }` → `401`, `errorCode: VERIFICATION_CODE_MISMATCH`, 메시지에 남은 시도 횟수.
+4. **실패 횟수 증가** — `GET ev:code:test@example.com` → 앞자리 숫자가 `1`, `2`, … 증가하는지 확인.
+5. **올바른 코드** — 발송 시 나온 6자리로 verify → `200`, `success: true`, 메시지 `"이메일 인증이 완료되었습니다."`
+6. **verified** — `GET ev:verified:test@example.com` → `1`, TTL 존재. `GET ev:code:test@example.com` → `(nil)` (성공 시 코드 키 삭제).
+
+#### Windows + Docker Redis 디버깅
+
+컨테이너 이름을 `redis`로 가정한다.
+
+```bash
+docker exec -it redis redis-cli
+```
+
+키 목록(패턴):
+
+```redis
+KEYS ev:*
+```
+
+운영·대용량에서는 `KEYS` 대신 **`SCAN`** 권장:
+
+```redis
+SCAN 0 MATCH ev:* COUNT 100
+```
+
+특정 이메일 예시(`test@example.com`):
+
+```redis
+GET ev:code:test@example.com
+TTL ev:code:test@example.com
+GET ev:verified:test@example.com
+TTL ev:verified:test@example.com
+GET ev:lock:test@example.com
+TTL ev:lock:test@example.com
+GET ev:cooldown:test@example.com
+TTL ev:cooldown:test@example.com
+GET ev:send:test@example.com
+TTL ev:send:test@example.com
+```
+
+키 삭제(초기화):
+
+```redis
+DEL ev:code:test@example.com ev:verified:test@example.com ev:lock:test@example.com ev:cooldown:test@example.com ev:send:test@example.com
+```
+
+#### 회원가입과의 관계
+
+백엔드 예시: `SignupUserService.registerEmailAfterVerification("test@example.com")` 호출 시
+
+- Redis에 **`ev:verified:{email}` 없으면** → `403` + `EMAIL_NOT_VERIFIED`.
+- 성공 시 DB에 사용자 저장 후 **`ev:verified:`** 키 삭제.
 
 ---
 
@@ -454,7 +560,235 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 15. 퀴즈 세트 생성
+## 15. 교안 PDF 뷰어 (Material)
+
+강의(`lecture`) 단위 **교안 자료(Material)** 및 **PDF 뷰어**용 API. 기존 **`/api/lessons`** 기반 교안 CRUD(§9~§14)와 URL·도메인이 다를 수 있으니, 백엔드 구현·통합 기준을 따른다.
+
+### 개요 (기능)
+
+- 수강 강의의 교안(자료) 목록 조회  
+- 교안(자료) 상세 조회  
+- PDF 뷰어용 파일 URL·메타 조회  
+- 페이지(이미지) 단건 조회  
+- 학습 진행도(현재 페이지) 저장  
+- 역할별 권한 검증  
+
+**인증:** 아래 API는 모두 `Authorization: Bearer {accessToken}` 가정.
+
+---
+
+### 15.1 교안 목록 조회 (강의별)
+
+**목적:** 사용자가 수강 중인 강의의 교안(자료) 목록 조회  
+
+**GET** `/api/lectures/{lectureId}/materials`
+
+#### Path Variable
+
+| 변수 | 타입 | 설명 |
+|------|------|------|
+| `lectureId` | Long | 강의 ID |
+
+#### Response (예시)
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "materialId": 1,
+      "title": "1주차 자료구조",
+      "pageCount": 32,
+      "thumbnailUrl": "https://cdn.example.com/thumb/1.png",
+      "uploadedAt": "2026-05-14T12:00:00"
+    }
+  ]
+}
+```
+
+> `thumbnailUrl` 등은 **예시**이며, 실제 CDN·스토리지 URL은 환경에 따른다.
+
+---
+
+### 15.2 교안 상세 조회
+
+**목적:** 교안(자료) 기본 정보 조회  
+
+**GET** `/api/materials/{materialId}`
+
+#### Path Variable
+
+| 변수 | 타입 | 설명 |
+|------|------|------|
+| `materialId` | Long | 자료 ID |
+
+#### Response (예시)
+
+```json
+{
+  "success": true,
+  "data": {
+    "materialId": 1,
+    "title": "1주차 자료구조",
+    "description": "스택과 큐 개념 학습",
+    "pageCount": 32,
+    "aspectRatio": "16:9",
+    "createdBy": "교수명",
+    "createdAt": "2026-05-14T12:00:00"
+  }
+}
+```
+
+---
+
+### 15.3 PDF 뷰어용 파일 조회
+
+**목적:** PDF 파일 URL 및 뷰어에 필요한 메타 정보 조회  
+
+**GET** `/api/materials/{materialId}/viewer`
+
+#### Path Variable
+
+| 변수 | 타입 | 설명 |
+|------|------|------|
+| `materialId` | Long | 자료 ID |
+
+#### Response (예시)
+
+```json
+{
+  "success": true,
+  "data": {
+    "materialId": 1,
+    "pdfUrl": "https://cdn.example.com/pdf/material-1.pdf",
+    "pageCount": 32,
+    "aspectRatio": "16:9",
+    "allowDownload": false
+  }
+}
+```
+
+프론트는 `pdfUrl`을 `iframe` 등으로 표시할 수 있다. `allowDownload`가 `false`면 다운로드 UI 비활성화 등 정책에 맞춘다.
+
+---
+
+### 15.4 특정 페이지(이미지) 조회
+
+**목적:** PDF를 페이지 단위 이미지로 조회  
+
+**GET** `/api/materials/{materialId}/pages/{pageNumber}`
+
+#### Path Variable
+
+| 변수 | 타입 | 설명 |
+|------|------|------|
+| `materialId` | Long | 자료 ID |
+| `pageNumber` | Integer | 페이지 번호(1부터 등 — 백엔드 규칙에 따름) |
+
+#### Response (예시)
+
+```json
+{
+  "success": true,
+  "data": {
+    "pageNumber": 3,
+    "imageUrl": "https://cdn.example.com/materials/1/page-3.png"
+  }
+}
+```
+
+---
+
+### 15.5 학습 진행도 저장
+
+**목적:** 사용자의 현재 학습 페이지 저장  
+
+**POST** `/api/materials/{materialId}/progress`  
+**Content-Type:** `application/json`
+
+#### Path Variable
+
+| 변수 | 타입 | 설명 |
+|------|------|------|
+| `materialId` | Long | 자료 ID |
+
+#### Request Body
+
+```json
+{
+  "currentPage": 12
+}
+```
+
+#### Response (예시)
+
+```json
+{
+  "success": true,
+  "message": "학습 진행도가 저장되었습니다."
+}
+```
+
+---
+
+### 15.6 권한 정책
+
+| 역할 | 권한 |
+|------|------|
+| 학생(USER) | 자신이 **수강 중인 강의**의 교안만 조회·진행도 저장 가능 |
+| 교수(PROF) | 자신이 **업로드한** 교안 조회 가능 |
+| 관리자(ADMIN) | **전체** 조회 가능 |
+
+#### 권한 실패 응답 (예시)
+
+```json
+{
+  "success": false,
+  "errorCode": "ACCESS_DENIED",
+  "message": "해당 교안에 접근할 권한이 없습니다."
+}
+```
+
+---
+
+### 추천 DB 구조 (Material)
+
+| 컬럼(논리) | 설명 |
+|------------|------|
+| `id` | PK |
+| `lecture_id` | 소속 강의 FK |
+| `title` | 제목 |
+| `description` | 설명 |
+| `pdf_url` | 원본 또는 변환 PDF 위치 |
+| `page_count` | 총 페이지 수 |
+| `aspect_ratio` | 예: `16:9` |
+| `created_at` | 생성 시각 |
+
+> 실제 테이블명·컬럼명은 백엔드 DDL과 일치시킨다. (기존 문서의 `lecture_material` 등과 통합 여부는 팀 합의)
+
+---
+
+### 화면 흐름 (참고)
+
+1. 교안 목록 화면  
+2. 교안 선택  
+3. **viewer** API 호출 → `pdfUrl` 등 수신  
+4. PDF(또는 페이지 이미지) 렌더링  
+5. 이전/다음 페이지 이동  
+6. **progress** API로 현재 페이지 저장  
+
+---
+
+### 역할 분리
+
+| 구분 | 담당 |
+|------|------|
+| 프론트엔드 | PDF/이미지 화면 렌더링, 페이지 이동 UI, 현재 페이지 상태 관리 |
+| 백엔드 | 권한 검증, PDF·이미지 URL 발급, 진행도 저장, 교안 메타데이터 관리 |
+
+---
+
+## 16. 퀴즈 세트 생성
 
 **POST** `/api/quiz` — 인증 필요, PROF
 
@@ -488,7 +822,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 16. 퀴즈 목록 조회
+## 17. 퀴즈 목록 조회
 
 **GET** `/api/quiz` — 인증 필요
 
@@ -531,7 +865,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 17. 퀴즈 상세 조회
+## 18. 퀴즈 상세 조회
 
 **GET** `/api/quiz/{quizId}` — 인증 필요
 
@@ -573,7 +907,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 18. 퀴즈 수정
+## 19. 퀴즈 수정
 
 **PUT** `/api/quiz/{quizId}` — 인증 필요, PROF(본인)/ADMIN
 
@@ -590,7 +924,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 19. 퀴즈 삭제
+## 20. 퀴즈 삭제
 
 **DELETE** `/api/quiz/{quizId}` — 인증 필요, PROF(본인)/ADMIN
 
@@ -602,7 +936,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 20. 문제 추가
+## 21. 문제 추가
 
 **POST** `/api/quiz/{quizId}/questions` — 인증 필요, PROF(본인)/ADMIN
 
@@ -682,7 +1016,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 21. 문제 수정
+## 22. 문제 수정
 
 **PUT** `/api/quiz/{quizId}/questions/{questionId}` — 인증 필요, PROF(본인)/ADMIN
 
@@ -707,7 +1041,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 22. 문제 삭제
+## 23. 문제 삭제
 
 **DELETE** `/api/quiz/{quizId}/questions/{questionId}` — 인증 필요, PROF(본인)/ADMIN
 
@@ -719,7 +1053,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 23. 퀴즈 제출
+## 24. 퀴즈 제출
 
 **POST** `/api/quiz/{quizId}/submit` — 인증 필요, USER
 
@@ -774,7 +1108,7 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 
 ---
 
-## 24. 오답 목록 조회
+## 25. 오답 목록 조회
 
 **GET** `/api/quiz/wrong-answers` — 인증 필요, USER
 
@@ -859,6 +1193,21 @@ Refresh Token Rotation 적용 — 재발급 시 기존 토큰 폐기.
 | `professor_id` | BIGINT | FK → users |
 | `title` | VARCHAR(200) | 교안 제목 |
 | `description` | TEXT | 교안 설명 |
+
+### materials (PDF 뷰어 API 연동 권장)
+
+교안 PDF 뷰어(§15)와 연동하는 **자료(Material)** 엔티티 예시. 실제 스키마는 백엔드와 일치시킨다.
+
+| 컬럼명 | 타입 | 설명 |
+|--------|------|------|
+| `id` | BIGINT | PK |
+| `lecture_id` | BIGINT | FK → lecture (강의) |
+| `title` | VARCHAR(200) | 자료 제목 |
+| `description` | TEXT | 설명 |
+| `pdf_url` | VARCHAR(500) | PDF 저장 위치(URL) |
+| `page_count` | INT | 총 페이지 수 |
+| `aspect_ratio` | VARCHAR(20) | 예: `16:9` |
+| `created_at` | TIMESTAMPTZ | 생성 시각 |
 
 ### quiz (퀴즈 세트)
 

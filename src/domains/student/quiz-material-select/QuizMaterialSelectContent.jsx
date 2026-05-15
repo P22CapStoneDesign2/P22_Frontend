@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
+import { studentQuizSolvePath } from '../../../shared/constants/routes.js'
 import './QuizMaterialSelectPage.css'
 
 /** mock: 강의 (SelectDropdown 옵션: value, label) */
@@ -59,7 +60,7 @@ export default function QuizMaterialSelectContent() {
 
   const handleStartQuiz = () => {
     if (!selectedMaterial) return
-    navigate(`/student/quiz/${selectedMaterial.value}`)
+    navigate(studentQuizSolvePath(selectedMaterial.value))
   }
 
   return (
