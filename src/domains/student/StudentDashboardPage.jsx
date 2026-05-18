@@ -18,14 +18,6 @@ const STUDENT_MENU_ITEMS = [
 
 export default function StudentDashboardPage() {
   return (
-    <DashboardPageLayout
-      heading="메뉴를 선택하세요"
-      headerProps={{
-        userEmail: 'student@school.edu',
-        onLogout: () => {},
-        logoHref: '/student',
-      }}
-      menuItems={STUDENT_MENU_ITEMS}
-    />
+    <DashboardPageLayout heading="메뉴를 선택하세요" menuItems={STUDENT_MENU_ITEMS} />
   )
 }

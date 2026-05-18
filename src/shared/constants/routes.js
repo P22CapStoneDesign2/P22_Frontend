@@ -1,9 +1,10 @@
 /** 앱 라우트 경로 — 로그인·이동 처리에서 공통 사용 */
 
 export const ROUTES = {
+  /** 앱 진입·미인증 리다이렉트 대상 (로그인) */
   home: '/',
   professorDashboard: '/professor',
-  /** 이메일·카카오 로그인 화면 */
+  /** 로그인 화면 (`home`과 동일 컴포넌트, 북마크용 경로) */
   login: '/login',
   workspace: '/workspace',
   signup: '/signup',

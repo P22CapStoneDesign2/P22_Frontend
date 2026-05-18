@@ -18,15 +18,6 @@ const PROFESSOR_MENU_ITEMS = [
 
 export default function ProfessorDashboardPage() {
   return (
-    <DashboardPageLayout
-      heading="메뉴를 선택하세요"
-      headerProps={{
-        userEmail: 'professor@school.edu',
-        onLogout: () => {},
-        logoHref: ROUTES.professorDashboard,
-        logoLabel: 'EDU HUB',
-      }}
-      menuItems={PROFESSOR_MENU_ITEMS}
-    />
+    <DashboardPageLayout heading="메뉴를 선택하세요" menuItems={PROFESSOR_MENU_ITEMS} />
   )
 }
