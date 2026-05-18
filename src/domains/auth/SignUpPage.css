@@ -265,6 +265,16 @@
   min-width: 6.75rem;
   max-width: 100%;
   flex-shrink: 0;
+
+
+
+
+
+
+
+
+
+  
   text-align: center;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
@@ -432,6 +442,34 @@
 .edu-signup__hint--sent {
   color: #dc2626;
   font-weight: 600;
+}
+
+.edu-signup__hint--ok {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* 닉네임 입력칸 + 중복 확인 버튼 한 줄 배치 */
+.edu-signup__nickname-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.edu-signup__input-wrap--grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.edu-signup__nickname-check-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.edu-signup__nickname-check-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .edu-signup__email-row .edu-signup__check {

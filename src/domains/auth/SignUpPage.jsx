@@ -1,6 +1,11 @@
 /*회원가입 화면*/
 
-import { signup, sendEmailVerification, verifyEmailCode } from '../../api/auth'
+import {
+  checkNickname,
+  sendEmailCode,
+  signup,
+  verifyEmailCode,
+} from '../../api/auth'
 
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -30,11 +35,6 @@ function isValidSignUpPassword(value) {
 function nameFieldStatus(value) {
   if (!value) return 'none'
   return isValidSignupUsername(value) ? 'ok' : 'bad'
-}
-
-function nicknameFieldStatus(value) {
-  if (!value) return 'none'
-  return isValidDisplayNickname(value) ? 'ok' : 'bad'
 }
 
 function passwordFieldStatus(value) {
@@ -75,11 +75,15 @@ export default function SignUpPage() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [nickname, setNickname] = useState('')
+  const [nicknameChecked, setNicknameChecked] = useState(false)
+  const [nicknameCheckMessage, setNicknameCheckMessage] = useState('')
+  const [nicknameChecking, setNicknameChecking] = useState(false)
   const [email, setEmail] = useState('')
   const [mailSent, setMailSent] = useState(false)
+  const [mailSending, setMailSending] = useState(false)
   const [codeVerified, setCodeVerified] = useState(false)
-  const [sendMailLoading, setSendMailLoading] = useState(false)
-  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [codeVerifying, setCodeVerifying] = useState(false)
+  const [codeVerifyMessage, setCodeVerifyMessage] = useState('')
   const [verifyCode, setVerifyCode] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -90,7 +94,7 @@ export default function SignUpPage() {
   const mailVerified = mailSent && codeVerified
 
   const nameStatus = nameFieldStatus(name)
-  const nickStatus = nicknameFieldStatus(nickname)
+  const nickStatus = !nicknameCheckMessage ? 'none' : nicknameChecked ? 'ok' : 'bad'
   const passwordStatus = passwordFieldStatus(password)
   const passwordConfirmStatus = passwordConfirmFieldStatus(password, passwordConfirm)
   const passwordMismatch =
@@ -99,6 +103,7 @@ export default function SignUpPage() {
   const canSubmit =
     isValidSignupUsername(name) &&
     isValidDisplayNickname(nickname) &&
+    nicknameChecked &&
     isValidEmail(email) &&
     mailSent &&
     mailVerified &&
@@ -111,17 +116,19 @@ export default function SignUpPage() {
       window.alert('이메일 형식이 올바르지 않습니다.')
       return
     }
-    setSendMailLoading(true)
+    if (mailSending) return
+    setMailSending(true)
+    setCodeVerifyMessage('')
     try {
-      await sendEmailVerification(email)
+      await sendEmailCode(email)
       setMailSent(true)
       setCodeVerified(false)
       setVerifyCode('')
     } catch (error) {
       const message = error.response?.data?.message
-      window.alert(message || '인증 메일 발송에 실패했습니다.')
+      window.alert(message || '인증번호 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.')
     } finally {
-      setSendMailLoading(false)
+      setMailSending(false)
     }
   }
 
@@ -134,16 +141,53 @@ export default function SignUpPage() {
       window.alert('인증번호 6자리를 입력해 주세요.')
       return
     }
-    setVerifyLoading(true)
+    if (codeVerifying) return
+    setCodeVerifying(true)
+    setCodeVerifyMessage('')
     try {
-      await verifyEmailCode(email, verifyCode)
+      await verifyEmailCode(email, verifyCode.trim())
       setCodeVerified(true)
     } catch (error) {
       const message = error.response?.data?.message
-      window.alert(message || '인증번호 확인에 실패했습니다.')
+      setCodeVerified(false)
+      setCodeVerifyMessage(message || '인증번호가 일치하지 않습니다.')
     } finally {
-      setVerifyLoading(false)
+      setCodeVerifying(false)
     }
+  }
+
+  const handleCheckNickname = async () => {
+    if (!isValidDisplayNickname(nickname)) {
+      setNicknameChecked(false)
+      setNicknameCheckMessage('닉네임은 특수문자를 제외한 2~20자로 입력해 주세요.')
+      return
+    }
+    if (nicknameChecking) return
+    setNicknameChecking(true)
+    setNicknameCheckMessage('')
+    try {
+      const res = await checkNickname(nickname.trim())
+      const available = res?.data?.data?.available
+      if (available) {
+        setNicknameChecked(true)
+        setNicknameCheckMessage('사용 가능한 닉네임입니다.')
+      } else {
+        setNicknameChecked(false)
+        setNicknameCheckMessage('이미 사용 중인 닉네임입니다.')
+      }
+    } catch (error) {
+      setNicknameChecked(false)
+      const message = error.response?.data?.message
+      setNicknameCheckMessage(message || '닉네임 확인에 실패했습니다. 잠시 후 다시 시도해 주세요.')
+    } finally {
+      setNicknameChecking(false)
+    }
+  }
+
+  const handleNicknameChange = (e) => {
+    setNickname(e.target.value)
+    setNicknameChecked(false)
+    setNicknameCheckMessage('')
   }
 
   const handleSubmit = async (e) => {
@@ -154,6 +198,10 @@ export default function SignUpPage() {
     }
     if (!isValidDisplayNickname(nickname)) {
       window.alert('닉네임은 특수문자를 제외한 2~20자로 입력해 주세요.')
+      return
+    }
+    if (!nicknameChecked) {
+      window.alert('닉네임 중복 확인을 진행해 주세요.')
       return
     }
     if (!isValidEmail(email)) {
@@ -202,7 +250,7 @@ export default function SignUpPage() {
     }
   }
 
-  const sendCodeDisabled = mailVerified || sendMailLoading
+  const sendCodeDisabled = mailVerified || mailSending
 
   return (
     <div className="edu-signup">
@@ -252,23 +300,42 @@ export default function SignUpPage() {
             <p className="edu-signup__hint">가입 시 등록되는 이름입니다. 2~20자, 숫자·한글·영문·공백</p>
           </label>
 
-          <label className="edu-signup__field edu-signup__field--narrow">
+          <div className="edu-signup__field edu-signup__field--narrow">
             <span className="edu-signup__label">닉네임</span>
-            <div className="edu-signup__input-wrap">
-              <input
-                className="edu-signup__input"
-                name="nickname"
-                autoComplete="nickname"
-                placeholder="닉네임"
-                maxLength={20}
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                aria-invalid={nickStatus === 'bad'}
-              />
-              <SignUpFieldStatusIcon status={nickStatus} />
+            <div className="edu-signup__nickname-row">
+              <div className="edu-signup__input-wrap edu-signup__input-wrap--grow">
+                <input
+                  className="edu-signup__input"
+                  name="nickname"
+                  autoComplete="nickname"
+                  placeholder="닉네임"
+                  maxLength={20}
+                  value={nickname}
+                  onChange={handleNicknameChange}
+                  aria-invalid={nickStatus === 'bad'}
+                />
+                <SignUpFieldStatusIcon status={nickStatus} />
+              </div>
+              <button
+                type="button"
+                className="btn btn--surface btn--sm edu-signup__nickname-check-btn"
+                disabled={!isValidDisplayNickname(nickname) || nicknameChecking || nicknameChecked}
+                onClick={handleCheckNickname}
+              >
+                {nicknameChecked ? '확인 완료' : nicknameChecking ? '확인 중…' : '중복 확인'}
+              </button>
             </div>
-            <p className="edu-signup__hint">표시용 닉네임입니다. 특수문자를 제외한 2~20자</p>
-          </label>
+            {nicknameCheckMessage ? (
+              <p
+                className={`edu-signup__hint ${nicknameChecked ? 'edu-signup__hint--ok' : 'edu-signup__hint--sent'}`}
+                role={nicknameChecked ? undefined : 'alert'}
+              >
+                {nicknameCheckMessage}
+              </p>
+            ) : (
+              <p className="edu-signup__hint">표시용 닉네임입니다. 특수문자를 제외한 2~20자</p>
+            )}
+          </div>
 
           <div className="edu-signup__field">
             <span className="edu-signup__label">아이디(메일주소)</span>
@@ -286,10 +353,16 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   className="btn btn--primary btn--sm edu-signup__send-code-btn"
-                  disabled={sendCodeDisabled}
+                  disabled={sendCodeDisabled || mailSending}
                   onClick={handleSendMail}
                 >
-                  {sendMailLoading ? '발송 중…' : '인증번호 받기'}
+                  {mailSending
+                    ? '발송 중…'
+                    : mailVerified
+                      ? '인증 완료'
+                      : mailSent
+                        ? '재발송'
+                        : '인증번호 받기'}
                 </button>
                 {mailSent ? (
                   <span className="edu-signup__sent-mark" aria-hidden="true">
@@ -321,15 +394,19 @@ export default function SignUpPage() {
                   <button
                     type="button"
                     className="btn btn--surface btn--sm edu-signup__verify-confirm-btn"
-                    disabled={codeVerified || !mailSent || verifyLoading}
+                    disabled={codeVerified || !mailSent || codeVerifying}
                     onClick={handleVerifyCode}
                   >
-                    {verifyLoading ? '확인 중…' : '확인'}
+                    {codeVerifying ? '확인 중…' : '확인'}
                   </button>
                 </div>
               </div>
             </div>
-            {mailSent ? (
+            {codeVerifyMessage ? (
+              <p className="edu-signup__hint edu-signup__hint--sent" role="alert">
+                {codeVerifyMessage}
+              </p>
+            ) : mailSent ? (
               <p className="edu-signup__hint edu-signup__hint--sent">확인 메일이 전송되었습니다.</p>
             ) : null}
           </div>

@@ -4,28 +4,40 @@
 import instance from './axios';
 import { APP_PUBLIC_URL } from '../config/env.js';
 
-/** 백엔드 Redis 키와 동일하게 trim + 소문자 */
+/** 백엔드 Redis 키(`ev:*:{email}`)와 동일하게 trim + 소문자 */
 export function normalizeSignupEmail(email) {
   return String(email ?? '').trim().toLowerCase()
 }
 
-/* POST /api/auth/email/send — { email } */
-export const sendEmailVerification = (email) =>
+/* POST /api/auth/email/send — 이메일 인증번호 발송 (PROF 가입 전)
+ * { email } */
+export const sendEmailCode = (email) =>
   instance.post('/api/auth/email/send', { email: normalizeSignupEmail(email) });
 
-/* POST /api/auth/email/verify — { email, code } (6자리) */
+/* POST /api/auth/email/verify — 이메일 인증번호 검증
+ * { email, code } */
 export const verifyEmailCode = (email, code) =>
   instance.post('/api/auth/email/verify', {
     email: normalizeSignupEmail(email),
     code: String(code ?? '').trim(),
   });
 
-/* POST /api/auth/signup — { username(이름), nickname, email, password, passwordConfirm } */
+/* POST /api/auth/profsignup — 교수(PROF) 로컬 회원가입
+ * { username(이름), nickname, email, password, passwordConfirm } */
 export const signup = (data) =>
-  instance.post('/api/auth/signup', {
+  instance.post('/api/auth/profsignup', {
     ...data,
     email: normalizeSignupEmail(data.email),
   });
+
+/* POST /api/auth/usersignup — 학생(USER) 카카오 소셜 가입 완료
+ * { pendingToken, username, email, nickname } */
+export const userSignup = (data) => instance.post('/api/auth/usersignup', data);
+
+/* GET /api/auth/check-nickname — 닉네임 중복 확인
+ * 응답 data.available: true(사용 가능) / false(중복) */
+export const checkNickname = (nickname) =>
+  instance.get('/api/auth/check-nickname', { params: { nickname } });
 
 /* POST /api/auth/login — { email, password } */
 export const login = (email, password) =>

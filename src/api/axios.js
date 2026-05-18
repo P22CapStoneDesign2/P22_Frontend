@@ -5,13 +5,18 @@ import { ROUTES } from '../shared/constants/routes.js';
 
 const instance = axios.create({ baseURL: API_BASE_URL || undefined });
 
-/** 401이어도 access 재발급을 시도하지 않는 URL (공개 인증 API·재발급 실패 등) */
+const REISSUE_URL = '/api/auth/reissue';
+
+/** 401이어도 access 재발급을 시도하지 않는 URL (공개 인증 API·재발급 자체 등) */
 const AUTH_REFRESH_EXCLUDED_PATHS = new Set([
   '/api/auth/login',
   '/api/auth/signup',
-  '/api/auth/reissue',
+  '/api/auth/profsignup',
+  '/api/auth/usersignup',
+  REISSUE_URL,
   '/api/auth/email/send',
   '/api/auth/email/verify',
+  '/api/auth/check-nickname',
   '/api/auth/password/reset-request',
   '/api/auth/password/reset',
 ])
@@ -27,12 +32,19 @@ function isRefreshSkippedRequest(config) {
   return AUTH_REFRESH_EXCLUDED_PATHS.has(requestPathWithoutQuery(config))
 }
 
+function clearTokensAndRedirect() {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  window.location.href = ROUTES.home;
+}
+
 // 요청 인터셉터 - accessToken 자동 첨부
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
 // 응답 인터셉터 - 401 시 토큰 재발급 후 재시도
 instance.interceptors.response.use(
   (res) => res,
@@ -55,7 +67,7 @@ instance.interceptors.response.use(
         }
         // 재발급 요청은 인터셉터에서 다시 401 처리하지 않도록 제외(재귀 방지)
         const res = await instance.post(
-          '/api/auth/reissue',
+          REISSUE_URL,
           { refreshToken },
           { skipAuthRefresh: true },
         );
@@ -70,9 +82,7 @@ instance.interceptors.response.use(
 
       } catch {
         // 재발급도 실패 → 로그아웃 처리
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = ROUTES.home;
+        clearTokensAndRedirect();
       }
     }
 
