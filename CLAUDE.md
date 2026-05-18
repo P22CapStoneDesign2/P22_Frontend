@@ -29,6 +29,7 @@ npm run lint       # ESLint 검사
 4. 401 처리·토큰 재발급은 `src/api/axios.js` 인터셉터에서만 담당 — 컴포넌트·페이지 레벨 중복 처리 금지
 5. UI 텍스트(레이블, 메시지, 오류 안내)는 항상 **한국어**
 6. API 베이스·프론트 공개 URL·OAuth 등 **환경에 따라 바뀌는 URL/호스트**는 `.env`의 `VITE_*`와 `src/config/env.js` export만 사용 — 컴포넌트·`src/api/*`에 `http(s)://…` 호스트 하드코딩 금지
+7. **작업 단계마다 `docs/` 의 관련 문서(exec-plan·design-doc·API·troubleshooting 등)를 최신화한 뒤, 다음 단계로 넘어가기 전 사용자 승인을 받는다** — 즉흥 작업으로 의사결정이 휘발되지 않도록 함
 
 ## 문서 지도
 

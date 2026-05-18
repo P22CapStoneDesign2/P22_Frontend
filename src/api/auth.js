@@ -4,8 +4,28 @@
 import instance from './axios';
 import { APP_PUBLIC_URL } from '../config/env.js';
 
-/* POST /api/auth/signup — { username(이름), nickname, email, password, passwordConfirm } */
-export const signup = (data) => instance.post('/api/auth/signup', data);
+/* POST /api/auth/email/send — 이메일 인증번호 발송 (PROF 가입 전)
+ * { email } */
+export const sendEmailCode = (email) =>
+  instance.post('/api/auth/email/send', { email });
+
+/* POST /api/auth/email/verify — 이메일 인증번호 검증
+ * { email, code } */
+export const verifyEmailCode = (email, code) =>
+  instance.post('/api/auth/email/verify', { email, code });
+
+/* POST /api/auth/profsignup — 교수(PROF) 로컬 회원가입
+ * { username(이름), nickname, email, password, passwordConfirm } */
+export const signup = (data) => instance.post('/api/auth/profsignup', data);
+
+/* POST /api/auth/usersignup — 학생(USER) 카카오 소셜 가입 완료
+ * { pendingToken, username, email, nickname } */
+export const userSignup = (data) => instance.post('/api/auth/usersignup', data);
+
+/* GET /api/auth/check-nickname — 닉네임 중복 확인
+ * 응답 data.available: true(사용 가능) / false(중복) */
+export const checkNickname = (nickname) =>
+  instance.get('/api/auth/check-nickname', { params: { nickname } });
 
 /* POST /api/auth/login — { email, password } */
 export const login = (email, password) =>
