@@ -26,6 +26,33 @@ export function ProfessorAreaLayout() {
   )
 }
 
+/** 관리자 영역 layout route — AppLayout + Outlet */
+export function AdminAreaLayout() {
+  const navigate = useNavigate()
+  const meta = layoutMetaFromMatches(useMatches())
+
+  return (
+    <AppLayout
+      className="edu-app-layout--admin-fullbleed"
+      contentClassName={meta.contentClassName ?? ''}
+      headerProps={{
+        userEmail: 'admin@school.edu',
+        onLogout: () => {
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          navigate(ROUTES.home, { replace: true })
+        },
+        logoHref: ROUTES.adminSubjectAccess,
+        logoLabel: 'EDU HUB',
+        logoCentered: true,
+        breadcrumbItems: meta.breadcrumbItems,
+      }}
+    >
+      <Outlet />
+    </AppLayout>
+  )
+}
+
 /** 학생 영역 layout route — AppLayout + Outlet */
 export function StudentAreaLayout() {
   const navigate = useNavigate()

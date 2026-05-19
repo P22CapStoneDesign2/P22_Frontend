@@ -2,7 +2,8 @@
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { ROUTES } from '../shared/constants/routes.js'
-import { ProfessorAreaLayout, StudentAreaLayout } from './RouteLayouts.jsx'
+import { AdminAreaLayout, ProfessorAreaLayout, StudentAreaLayout } from './RouteLayouts.jsx'
+import AdminSubjectAccessPage from '../domains/admin/subject-access/AdminSubjectAccessPage.jsx'
 import LoginPage from '../domains/auth/LoginPage.jsx'
 import SignUpPage from '../domains/auth/SignUpPage.jsx'
 import KakaoCallbackPage from '../domains/auth/KakaoCallbackPage.jsx'
@@ -49,6 +50,12 @@ const professorMeta = {
   },
 }
 
+const adminMeta = {
+  subjectAccess: {
+    contentClassName: 'edu-admin-access-app-layout-content',
+  },
+}
+
 //학생 메타 데이터
 const studentMeta = {
   dashboard: { contentClassName: 'edu-dashboard-app-layout-content' },
@@ -67,6 +74,17 @@ const appRouter = createBrowserRouter([
   { path: ROUTES.kakaoCallback, element: <KakaoCallbackPage /> },
   { path: ROUTES.kakaoSignup, element: <KakaoSignUpPage /> },
   { path: ROUTES.workspace, element: <LegacyAppShell /> },
+  {
+    path: '/admin',
+    element: <AdminAreaLayout />,
+    children: [
+      {
+        path: 'subject-access',
+        element: <AdminSubjectAccessPage />,
+        handle: { layoutMeta: adminMeta.subjectAccess },
+      },
+    ],
+  },
   {
     path: '/professor',
     element: <ProfessorAreaLayout />,

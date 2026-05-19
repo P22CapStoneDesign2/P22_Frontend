@@ -30,6 +30,9 @@ export const ROUTES = {
   studentQuizSolve: '/student/quiz/:materialId',
   /** `/student/quiz/:materialId` 의 공통 접두 (표시·조립용) */
   studentQuizRoot: '/student/quiz',
+
+  /** 관리자(ADMIN) — 과목 접근 권한 관리 */
+  adminSubjectAccess: '/admin/subject-access',
 }
 
 /**

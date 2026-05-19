@@ -135,3 +135,21 @@
   outline: 2px solid #6366f1;
   outline-offset: 2px;
 }
+
+/* 관리자 등: 로고 중앙, 계정·로그아웃 우측 (Figma 시안) */
+.edu-header--logo-centered .edu-header__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.edu-header--logo-centered .edu-header__primary {
+  grid-column: 2;
+  justify-self: center;
+  flex: none;
+}
+
+.edu-header--logo-centered .edu-header__right {
+  grid-column: 3;
+  justify-self: end;
+}

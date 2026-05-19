@@ -14,6 +14,7 @@ function isExternalHref(href) {
  * @param {string} [props.logoLabel]
  * @param {string} [props.className]
  * @param {BreadcrumbItem[]} [props.breadcrumbItems] 현재 경로 표시 (없거나 빈 배열이면 비표시)
+ * @param {boolean} [props.logoCentered] true면 로고를 상단바 가운데, 계정·로그아웃은 오른쪽
  */
 export default function Header({
   userEmail,
@@ -22,6 +23,7 @@ export default function Header({
   logoLabel = 'EDU HUB',
   className = '',
   breadcrumbItems,
+  logoCentered = false,
 }) {
   const logo = isExternalHref(logoHref) ? (
     <a className="edu-header__logo" href={logoHref}>
@@ -36,7 +38,9 @@ export default function Header({
   const showBreadcrumb = Array.isArray(breadcrumbItems) && breadcrumbItems.length > 0
 
   return (
-    <header className={`edu-header ${className}`.trim()}>
+    <header
+      className={`edu-header${logoCentered ? ' edu-header--logo-centered' : ''} ${className}`.trim()}
+    >
       <div className="edu-header__inner">
         <div className="edu-header__primary">
           {logo}

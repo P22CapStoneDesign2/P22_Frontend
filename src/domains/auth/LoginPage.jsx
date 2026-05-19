@@ -56,10 +56,10 @@ export default function LoginPage() {
         const meRole = meRes.data?.data?.role
         const destination = dashboardRouteForRole(meRole)
 
-        if (role === 'professor' && destination !== ROUTES.professorDashboard) {
+        if (role === 'professor' && destination === ROUTES.studentDashboard) {
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
-          window.alert('교수 계정이 아닙니다. 학생 로그인(카카오)을 이용해 주세요.')
+          window.alert('교수·관리자 계정이 아닙니다. 학생 로그인(카카오)을 이용해 주세요.')
           return
         }
 

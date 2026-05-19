@@ -7,7 +7,10 @@ import { ROUTES } from '../constants/routes.js'
  */
 export function dashboardRouteForRole(role) {
   const normalized = String(role ?? '').toUpperCase()
-  if (normalized === 'PROF' || normalized === 'ADMIN') {
+  if (normalized === 'ADMIN') {
+    return ROUTES.adminSubjectAccess
+  }
+  if (normalized === 'PROF') {
     return ROUTES.professorDashboard
   }
   if (normalized === 'USER') {
