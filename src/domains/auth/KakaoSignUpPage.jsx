@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getMe, updateMe } from '../../api/auth'
+import { dashboardRouteForRole } from '../../shared/auth/postAuthNavigation.js'
 import { ROUTES } from '../../shared/constants/routes.js'
 import { isValidDisplayNickname, isValidSignupUsername } from '../../shared/validation/signUpProfile.js'
 import { EduHubBookIcon } from '../../shared/icons/eduHubIcons.jsx'
@@ -98,7 +99,8 @@ export default function KakaoSignUpPage() {
         nickname: nickname.trim(),
       })
       window.alert('가입이 완료되었습니다.')
-      navigate(ROUTES.workspace, { replace: true })
+      const meRes = await getMe()
+      navigate(dashboardRouteForRole(meRes.data?.data?.role), { replace: true })
     } catch (error) {
       const message = error.response?.data?.message
       window.alert(message || '회원가입 중 오류가 발생했습니다.')

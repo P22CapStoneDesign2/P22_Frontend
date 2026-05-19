@@ -10,6 +10,7 @@
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getMe } from '../../api/auth'
+import { dashboardRouteForRole } from '../../shared/auth/postAuthNavigation.js'
 import { ROUTES } from '../../shared/constants/routes.js'
 
 export default function KakaoCallbackPage() {
@@ -52,7 +53,7 @@ export default function KakaoCallbackPage() {
         if (needsKakaoProfile) {
           navigate(ROUTES.kakaoSignup, { replace: true })
         } else {
-          navigate(ROUTES.workspace, { replace: true })
+          navigate(dashboardRouteForRole(me.role), { replace: true })
         }
       } catch {
         /* 회원 정보 조회 실패 시: 일단 추가 정보 입력 화면으로 보내 신규 가입 흐름을 유도 */

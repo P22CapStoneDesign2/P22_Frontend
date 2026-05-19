@@ -1,5 +1,6 @@
 /*로그인 화면*/
-import { login } from '../../api/auth'
+import { getMe, login } from '../../api/auth'
+import { dashboardRouteForRole } from '../../shared/auth/postAuthNavigation.js'
 import { KAKAO_OAUTH_AUTHORIZATION_URL } from '../../config/env.js'
 
 import { useState } from 'react'
@@ -50,7 +51,19 @@ export default function LoginPage() {
         const { accessToken, refreshToken } = res.data.data
         localStorage.setItem('accessToken', accessToken)
         localStorage.setItem('refreshToken', refreshToken)
-        navigate(ROUTES.workspace)
+
+        const meRes = await getMe()
+        const meRole = meRes.data?.data?.role
+        const destination = dashboardRouteForRole(meRole)
+
+        if (role === 'professor' && destination !== ROUTES.professorDashboard) {
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          window.alert('교수 계정이 아닙니다. 학생 로그인(카카오)을 이용해 주세요.')
+          return
+        }
+
+        navigate(destination, { replace: true })
       } catch (error) {
         const message = error.response?.data?.message
         window.alert(message || '로그인 중 오류가 발생했습니다.')
