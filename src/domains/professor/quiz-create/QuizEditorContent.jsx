@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import QuizQuestionFormList from './QuizQuestionFormList.jsx'
 import QuestionNavigator from './QuestionNavigator.jsx'
@@ -8,27 +7,35 @@ import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quiz
 
 /**
  * 퀴즈 생성·수정 공통 본문
- * - questions 단일 원천, 번호는 인덱스+1만 사용
- * - 모달 문구·저장 DTO는 상위에서 주입 (과도한 분기 없이 콜백으로 통일)
+ * - title/description/questions 단일 원천, 번호는 인덱스+1만 사용
+ * - 저장은 상위에서 주입한 `onConfirmSave` 콜백에 위임
  *
  * @param {object} props
- * @param {string} props.materialId
+ * @param {string} props.materialId — 표시·미래 anchorId 매핑용. 현재 API에는 보내지 않음.
  * @param {string | null} [props.quizId] 수정 시에만 전달
+ * @param {string} [props.initialTitle]
+ * @param {string} [props.initialDescription]
  * @param {Array<object> | null} [props.initialQuestions] 있으면 preload (복사본으로 state 초기화)
- * @param {string | null} [props.initialActiveQuestionId] 수정 진입 시 활성·스크롤 대상 문항 id
+ * @param {string | null} [props.initialActiveQuestionId]
  * @param {string} props.confirmMessage
- * @param {(materialId: string, questions: object[], quizId: string | null) => object} props.buildDto
+ * @param {(payload: { materialId: string, quizId: string | null, title: string, description: string, questions: object[] }) => Promise<void>} props.onConfirmSave
  */
 export default function QuizEditorContent({
   materialId,
   quizId = null,
+  initialTitle = '',
+  initialDescription = '',
   initialQuestions = null,
   initialActiveQuestionId = null,
   confirmMessage,
-  buildDto,
+  onConfirmSave,
 }) {
-  const navigate = useNavigate()
   const formRefs = useRef({})
+
+  const [title, setTitle] = useState(initialTitle)
+  const [description, setDescription] = useState(initialDescription)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   const [questions, setQuestions] = useState(() => {
     if (initialQuestions != null && initialQuestions.length > 0) {
@@ -161,14 +168,32 @@ export default function QuizEditorContent({
   }
 
   const handleSaveClick = () => {
+    if (saving) return
+    if (!title.trim()) {
+      setSaveError('퀴즈 제목을 입력해 주세요.')
+      return
+    }
+    setSaveError('')
     setSaveModalOpen(true)
   }
 
-  const handleConfirmSave = () => {
-    const dto = buildDto(materialId, questions, quizId)
-    console.log(dto)
+  const handleConfirmSave = async () => {
     setSaveModalOpen(false)
-    navigate('/professor/quizzes')
+    setSaving(true)
+    setSaveError('')
+    try {
+      await onConfirmSave({
+        materialId,
+        quizId,
+        title: title.trim(),
+        description: description.trim(),
+        questions,
+      })
+    } catch (e) {
+      setSaveError(e?.response?.data?.message || e?.message || '저장에 실패했습니다.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleCancelSave = () => {
@@ -179,6 +204,33 @@ export default function QuizEditorContent({
     <>
       <div className="edu-quiz-create-layout">
         <div className="edu-quiz-create-main">
+          <section className="edu-quiz-editor-meta" aria-label="퀴즈 세트 정보">
+            <label className="edu-quiz-editor-meta__field">
+              <span className="edu-quiz-editor-meta__label">제목</span>
+              <input
+                type="text"
+                className="edu-quiz-editor-meta__input"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="예: 3장 운영체제 기초 퀴즈"
+                disabled={saving}
+                maxLength={200}
+              />
+            </label>
+            <label className="edu-quiz-editor-meta__field">
+              <span className="edu-quiz-editor-meta__label">설명 (선택)</span>
+              <textarea
+                className="edu-quiz-editor-meta__textarea"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="퀴즈 설명을 입력하세요"
+                disabled={saving}
+                rows={2}
+                maxLength={500}
+              />
+            </label>
+          </section>
+
           <QuizQuestionFormList
             questions={questions}
             formRefs={formRefs}
@@ -190,7 +242,18 @@ export default function QuizEditorContent({
             onShortAnswerChange={handleShortAnswerChange}
             onExplanationChange={handleExplanationChange}
           />
-          <BottomActions onAddQuestion={handleAddQuestion} onSaveClick={handleSaveClick} />
+
+          {saveError ? (
+            <p className="edu-quiz-editor-error" role="alert">
+              {saveError}
+            </p>
+          ) : null}
+
+          <BottomActions
+            onAddQuestion={handleAddQuestion}
+            onSaveClick={handleSaveClick}
+            saving={saving}
+          />
         </div>
         <aside className="edu-quiz-create-aside">
           <QuestionNavigator

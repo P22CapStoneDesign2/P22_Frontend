@@ -54,15 +54,18 @@ src/shared/
 ## API 모듈 의존 관계
 
 ```
-컴포넌트/페이지 → src/api/auth.js → src/api/axios.js → 백엔드
+컴포넌트/페이지 → src/api/{auth,materials}.js  ─┐
+                  src/domains/quiz/api/quizApi.js → src/api/axios.js → 백엔드
 ```
+
+모든 경로는 `src/api/axios.js`의 `instance`를 거치며, 401·토큰 재발급은 인터셉터가 담당한다.
 
 | 페이지/컴포넌트 | 사용하는 API 함수 |
 |----------------|-----------------|
 | `LoginPage` | `login` |
-| `SignUpPage` | `signup` |
+| `SignUpPage` | `sendEmailCode`, `verifyEmailCode`, `signup`(`profsignup`), `checkNickname` |
 | `KakaoCallbackPage` | `getMe` |
-| `KakaoSignUpPage` | `updateMe` |
+| `KakaoSignUpPage` | `userSignup`, `checkNickname` |
 | `AppLayout` | — |
-| `LessonScript` | (미연동) |
-| `App` (QuizApp) | (미연동, 더미 데이터) |
+| `LessonScript` / Material 뷰어 | `getLectureMaterials`, `getMaterialDetail`, `getMaterialViewer`, `getMaterialPageImage`, `postMaterialProgress` |
+| 퀴즈 화면(교수/학생) | `createQuiz`, `getQuizzes`, `getQuizDetail`, `updateQuiz`, `deleteQuiz`, `addQuestion`, `updateQuestion`, `deleteQuestion`, `submitQuiz`, `getWrongAnswers` ([active plan](../exec-plans/active/2026-05-18_quiz-backend-wiring.md) 진행 중) |

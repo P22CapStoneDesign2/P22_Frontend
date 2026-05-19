@@ -88,6 +88,63 @@
   gap: 20px;
 }
 
+.edu-quiz-editor-meta {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edu-quiz-editor-meta__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edu-quiz-editor-meta__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.edu-quiz-editor-meta__input,
+.edu-quiz-editor-meta__textarea {
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: #0f172a;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #f8fafc;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.edu-quiz-editor-meta__textarea {
+  resize: vertical;
+  min-height: 48px;
+}
+
+.edu-quiz-editor-meta__input:disabled,
+.edu-quiz-editor-meta__textarea:disabled {
+  background: #e2e8f0;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+.edu-quiz-editor-error {
+  margin: 0;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
 @media (max-width: 768px) {
   .edu-quiz-create-layout {
     grid-template-columns: 1fr;

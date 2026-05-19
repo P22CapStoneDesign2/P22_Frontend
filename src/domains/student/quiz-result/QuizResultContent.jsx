@@ -1,24 +1,39 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import PdfViewerSection from '../../../components/media/PdfViewerSection/PdfViewerSection.jsx'
 import QuestionResultNavigator from './QuestionResultNavigator.jsx'
 import ResultContent from './ResultContent.jsx'
-import { getQuizResultByAttemptId } from './quizResultMock.js'
+import { mapSubmitResponseToResultBundle } from '../../quiz/mappers/quizResultMapper.js'
+import { ROUTES } from '../../../shared/constants/routes.js'
 
 /**
  * 퀴즈 결과/해설 본문.
- * 상태: resultQuestions / currentQuestionIndex / isExitModalOpen
+ *
+ * `submitQuiz` 응답(`submitResponse`)을 매퍼로 결과 화면 번들로 변환한다.
+ * `questionEnrichmentById`가 있으면 객관식 보기 매칭이 가능해진다 (선택).
  */
-export default function QuizResultContent({ attemptId }) {
+export default function QuizResultContent({
+  attemptId,
+  submitResponse,
+  questionEnrichmentById = null,
+  materialId = '',
+}) {
   const navigate = useNavigate()
 
-  const [resultBundle] = useState(() => getQuizResultByAttemptId(attemptId))
-  const [resultQuestions] = useState(() => resultBundle.questions)
+  const resultBundle = useMemo(
+    () =>
+      mapSubmitResponseToResultBundle(submitResponse, {
+        attemptId,
+        materialId,
+        questionEnrichmentById,
+      }),
+    [submitResponse, attemptId, materialId, questionEnrichmentById],
+  )
+
+  const resultQuestions = resultBundle.questions
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [isExitModalOpen, setIsExitModalOpen] = useState(false)
-
-  const materialId = resultBundle.materialId
 
   const total = resultQuestions.length
   const currentQuestion = total > 0 ? resultQuestions[currentQuestionIndex] : null
@@ -26,32 +41,25 @@ export default function QuizResultContent({ attemptId }) {
   const isPrevDisabled = currentQuestionIndex <= 0 || total === 0
   const isNextDisabled = currentQuestionIndex >= total - 1 || total === 0
 
-  const handlePrev = () => {
-    setCurrentQuestionIndex((i) => Math.max(0, i - 1))
-  }
+  const handlePrev = () => setCurrentQuestionIndex((i) => Math.max(0, i - 1))
+  const handleNext = () => setCurrentQuestionIndex((i) => Math.min(total - 1, i + 1))
 
-  const handleNext = () => {
-    setCurrentQuestionIndex((i) => Math.min(total - 1, i + 1))
-  }
-
-  const handleOpenExitModal = () => {
-    setIsExitModalOpen(true)
-  }
-
+  const handleOpenExitModal = () => setIsExitModalOpen(true)
   const handleConfirmExit = () => {
     setIsExitModalOpen(false)
-    navigate('/student')
+    navigate(ROUTES.studentDashboard)
   }
+  const handleCancelExit = () => setIsExitModalOpen(false)
 
-  const handleCancelExit = () => {
-    setIsExitModalOpen(false)
-  }
+  const pdfLabel = resultBundle.materialId
+    ? `교안 PDF placeholder (${resultBundle.materialId})`
+    : '교안 PDF placeholder'
 
   return (
     <>
       <div className="edu-quiz-result-layout">
         <section className="edu-quiz-result-layout__pdf">
-          <PdfViewerSection placeholderText={`교안 PDF placeholder (${materialId})`} />
+          <PdfViewerSection placeholderText={pdfLabel} />
         </section>
 
         <section className="edu-quiz-result-layout__result-card" aria-label="퀴즈 결과 카드">

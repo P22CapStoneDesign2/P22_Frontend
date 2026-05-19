@@ -7,6 +7,8 @@ export default function QuizNavigationButtons({
   onSubmit,
   isPrevDisabled,
   isNextDisabled,
+  isSubmitDisabled = false,
+  submitLabel,
 }) {
   return (
     <div className="edu-quiz-solve-nav-btns">
@@ -16,8 +18,13 @@ export default function QuizNavigationButtons({
       <Button type="button" variant="secondary" disabled={isNextDisabled} onClick={onNext}>
         다음
       </Button>
-      <Button type="button" variant="primary" onClick={onSubmit}>
-        제출 및 종료
+      <Button
+        type="button"
+        variant="primary"
+        disabled={isSubmitDisabled}
+        onClick={onSubmit}
+      >
+        {submitLabel ?? '제출 및 종료'}
       </Button>
     </div>
   )

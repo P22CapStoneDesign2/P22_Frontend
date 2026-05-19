@@ -5,10 +5,11 @@ import QuizTableRow from './QuizTableRow.jsx'
  * 선택된 교안의 퀴즈 목록 테이블
  *
  * @param {object} props
- * @param {Array<{ id: string, question: string, questionType: 'multiple' | 'short', updatedAt: string }>} props.quizzes
+ * @param {Array<{ id: string, question: string, questionType: 'multiple' | 'short' | 'mixed', updatedAt: string }>} props.quizzes
  * @param {(quizId: string) => void} props.onViewQuiz
+ * @param {(quiz: object) => void} props.onDeleteQuiz
  */
-export default function QuizTable({ quizzes, onViewQuiz }) {
+export default function QuizTable({ quizzes, onViewQuiz, onDeleteQuiz }) {
   const isEmpty = !quizzes || quizzes.length === 0
 
   return (
@@ -30,7 +31,7 @@ export default function QuizTable({ quizzes, onViewQuiz }) {
               수정한 날짜
             </th>
             <th scope="col" className="edu-quiz-table__th edu-quiz-table__th--action">
-              보기
+              작업
             </th>
           </tr>
         </thead>
@@ -48,6 +49,7 @@ export default function QuizTable({ quizzes, onViewQuiz }) {
                 index={index}
                 quiz={quiz}
                 onView={() => onViewQuiz(quiz.id)}
+                onDelete={() => onDeleteQuiz?.(quiz)}
               />
             ))
           )}

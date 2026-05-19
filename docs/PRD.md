@@ -59,9 +59,10 @@
 | 뷰 | 대상 Role | 구현 상태 |
 |----|----------|-----------|
 | 교안 작성 (`lesson`) | PROF | ✅ 구현 |
-| 퀴즈 생성 (`quiz-create`) | PROF | 🚧 미구현 |
+| 퀴즈 관리 (`quiz-management`) | PROF | 🟡 UI 완성·API 연동 진행 중 ([active plan](exec-plans/active/2026-05-18_quiz-backend-wiring.md)) |
+| 퀴즈 생성/수정/미리보기 (`quiz-create`/`quiz-edit`/`quiz-preview`) | PROF | 🟡 UI 완성·API 연동 진행 중 |
+| 퀴즈 풀이/결과/교안 선택 (`quiz-solve`/`quiz-result`/`quiz-material-select`) | USER | 🟡 UI 완성·API 연동 진행 중 |
 | 퀴즈 통계 (`quiz-stats`) | PROF | 🚧 미구현 |
-| 전체 조회 (`overview`) | USER/PROF | ✅ 더미 데이터 기반 구현 |
 
 ---
 

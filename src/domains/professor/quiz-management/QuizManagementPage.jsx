@@ -1,21 +1,22 @@
-import { useNavigate } from 'react-router-dom'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
 import QuizManagementContent from './QuizManagementContent.jsx'
+import { useSessionHeader } from '../../../shared/auth/useSessionHeader.js'
+import { ROUTES } from '../../../shared/constants/routes.js'
 import './QuizManagementPage.css'
 
 /**
- * 교수용 교안별 퀴즈 관리 페이지 (라우트: /professor/quizzes)
- * AppLayout + Header 유지, 본문은 QuizManagementContent에서 mock 상태로 구성
+ * 교수용 교안별 퀴즈 관리 페이지 (라우트: ROUTES.professorQuizzes)
+ * Header 사용자 이메일·로그아웃은 `useSessionHeader` 훅에서 처리.
  */
 export default function QuizManagementPage() {
-  const navigate = useNavigate()
+  const { userEmail, onLogout } = useSessionHeader()
 
   return (
     <AppLayout
       headerProps={{
-        userEmail: 'professor@school.edu',
-        onLogout: () => navigate('/professor'),
-        logoHref: '/professor',
+        userEmail,
+        onLogout,
+        logoHref: ROUTES.professorDashboard,
         logoLabel: 'EDU HUB',
         breadcrumbItems: [{ label: '교안별 퀴즈 관리' }],
       }}

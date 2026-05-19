@@ -45,6 +45,20 @@
   color: #0f172a;
 }
 
+.edu-quiz-solve-page__meta--error {
+  color: #b91c1c;
+}
+
+.edu-quiz-solve-error {
+  margin: 0;
+  padding: 10px 14px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 0.875rem;
+}
+
 .edu-quiz-solve-layout {
   display: grid;
   grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);

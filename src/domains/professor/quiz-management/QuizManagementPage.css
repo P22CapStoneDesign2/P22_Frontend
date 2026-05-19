@@ -102,3 +102,7 @@
   line-height: 1.5;
 }
 
+.edu-quiz-mgmt__hint--error {
+  color: #b91c1c;
+}
+

@@ -82,6 +82,13 @@
   font-size: 0.8125rem;
 }
 
+.edu-quiz-table__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .edu-quiz-table__empty {
   padding: 28px 16px;
   text-align: center;

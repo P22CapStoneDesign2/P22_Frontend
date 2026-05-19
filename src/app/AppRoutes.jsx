@@ -75,8 +75,8 @@ export default function AppRoutes() {
           반드시 `ROUTES.studentQuizSolve`보다 먼저 선언 (materials가 동적 파라미터로 잡히지 않도록)
         */}
         <Route path={ROUTES.studentQuizMaterials} element={<QuizMaterialSelectPage />} />
-        {/* 퀴즈 응시 결과/해설 (mock 결과 데이터) */}
-        <Route path="/student/quiz/result/:attemptId" element={<QuizResultPage />} />
+        {/* 퀴즈 응시 결과/해설 — submitQuiz 응답을 location state로 전달받음 */}
+        <Route path={ROUTES.studentQuizResult} element={<QuizResultPage />} />
         {/* 특정 교안 퀴즈 풀이 (mock 문항) */}
         <Route path={ROUTES.studentQuizSolve} element={<QuizSolvePage />} />
       </Routes>

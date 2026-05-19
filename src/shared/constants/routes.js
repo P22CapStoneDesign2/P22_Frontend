@@ -25,18 +25,28 @@ export const ROUTES = {
   studentMaterialViewer: '/student/materials/:materialId/viewer',
 
   studentQuizMaterials: '/student/quiz/materials',
-  /** `<Route path={ROUTES.studentQuizSolve} />` */
-  studentQuizSolve: '/student/quiz/:materialId',
-  /** `/student/quiz/:materialId` 의 공통 접두 (표시·조립용) */
+  /** `<Route path={ROUTES.studentQuizSolve} />` — `:quizId` 는 `useParams` */
+  studentQuizSolve: '/student/quiz/:quizId',
+  /** `<Route path={ROUTES.studentQuizResult} />` — `:attemptId` 는 `useParams` (서버의 submissionId) */
+  studentQuizResult: '/student/quiz/result/:attemptId',
+  /** `/student/quiz/...` 의 공통 접두 (표시·조립용) */
   studentQuizRoot: '/student/quiz',
 }
 
 /**
- * @param {string|number} materialId
+ * @param {string|number} quizId
  * @returns {string}
  */
-export function studentQuizSolvePath(materialId) {
-  return `${ROUTES.studentQuizRoot}/${encodeURIComponent(String(materialId))}`
+export function studentQuizSolvePath(quizId) {
+  return `${ROUTES.studentQuizRoot}/${encodeURIComponent(String(quizId))}`
+}
+
+/**
+ * @param {string|number} attemptId — 서버의 submissionId
+ * @returns {string}
+ */
+export function studentQuizResultPath(attemptId) {
+  return `${ROUTES.studentQuizRoot}/result/${encodeURIComponent(String(attemptId))}`
 }
 
 /**

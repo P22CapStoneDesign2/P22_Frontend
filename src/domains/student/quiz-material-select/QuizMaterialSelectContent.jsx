@@ -3,18 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import { studentQuizSolvePath } from '../../../shared/constants/routes.js'
+import { getQuizzes } from '../../quiz/api/quizApi.js'
+import { mapQuizListPageDataToTableRows } from '../../quiz/mappers/quizManagementMapper.js'
 import './QuizMaterialSelectPage.css'
 
-/** mock: 강의 (SelectDropdown 옵션: value, label) */
+/** mock: 강의 (SelectDropdown 옵션: value, label) — 강의/교안 API 추가 시 교체 */
 const MOCK_COURSES = [
   { value: 'course-ds', label: '자료구조' },
   { value: 'course-algo', label: '알고리즘' },
   { value: 'course-db', label: '데이터베이스' },
 ]
 
-/**
- * mock: 교안 (강의별 courseId, value는 /student/quiz/:materialId 라우트용 id)
- */
 const ALL_MATERIALS = [
   { value: 'mat-ds-w1', label: '자료구조 1주차', courseId: 'course-ds' },
   { value: 'mat-ds-w2', label: '자료구조 2주차', courseId: 'course-ds' },
@@ -30,8 +29,14 @@ function materialsForCourse(courseValue) {
   return ALL_MATERIALS.filter((m) => m.courseId === courseValue)
 }
 
+const QUIZ_PAGE_SIZE = 20
+
 /**
- * 퀴즈 풀기 — 강의·교안 선택 본문 (mock 전용, 클라이언트 state만 사용)
+ * 학생 — 풀이 진입 화면.
+ *
+ * 백엔드가 교안↔퀴즈 관계를 가지지 않으므로 강의·교안 선택은 mock 필터로 두고,
+ * 교안 선택 시 `getQuizzes`로 전체 퀴즈 목록을 받아와 학생이 직접 풀 퀴즈를 고른다.
+ * (교안 단위 필터 API가 생기면 `getQuizzes` 파라미터만 교체)
  */
 export default function QuizMaterialSelectContent() {
   const navigate = useNavigate()
@@ -44,24 +49,39 @@ export default function QuizMaterialSelectContent() {
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false)
   const [materialDropdownOpen, setMaterialDropdownOpen] = useState(false)
 
+  const [quizzes, setQuizzes] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
   const handleCourseSelect = (option) => {
     setSelectedCourse(option)
     setMaterials(materialsForCourse(option.value))
     setSelectedMaterial(null)
+    setQuizzes([])
+    setErrorMessage('')
   }
 
-  const handleMaterialSelect = (option) => {
+  const handleMaterialSelect = async (option) => {
     setSelectedMaterial(option)
+    setLoading(true)
+    setErrorMessage('')
+    try {
+      const res = await getQuizzes({ page: 0, size: QUIZ_PAGE_SIZE })
+      setQuizzes(mapQuizListPageDataToTableRows(res.data?.data))
+    } catch (e) {
+      setQuizzes([])
+      setErrorMessage(e?.response?.data?.message || e?.message || '퀴즈 목록을 불러오지 못했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleStartQuiz = (quizId) => {
+    if (!quizId) return
+    navigate(studentQuizSolvePath(quizId))
   }
 
   const materialSelectDisabled = !selectedCourse || materials.length === 0
-
-  const canStartQuiz = Boolean(selectedCourse && selectedMaterial)
-
-  const handleStartQuiz = () => {
-    if (!selectedMaterial) return
-    navigate(studentQuizSolvePath(selectedMaterial.value))
-  }
 
   return (
     <div className="edu-stu-quiz-mat">
@@ -106,16 +126,34 @@ export default function QuizMaterialSelectContent() {
           </div>
         </div>
 
-        <div className="edu-stu-quiz-mat__actions">
-          <Button
-            type="button"
-            variant="primary"
-            disabled={!canStartQuiz}
-            onClick={handleStartQuiz}
-          >
-            퀴즈 풀기
-          </Button>
-        </div>
+        {selectedMaterial ? (
+          loading ? (
+            <p className="edu-stu-quiz-mat__intro" role="status" aria-live="polite">
+              퀴즈 목록을 불러오는 중입니다…
+            </p>
+          ) : errorMessage ? (
+            <p className="edu-stu-quiz-mat__error" role="alert">
+              {errorMessage}
+            </p>
+          ) : quizzes.length === 0 ? (
+            <p className="edu-stu-quiz-mat__intro">현재 풀 수 있는 퀴즈가 없습니다.</p>
+          ) : (
+            <ul className="edu-stu-quiz-mat__quizzes">
+              {quizzes.map((quiz) => (
+                <li key={quiz.id} className="edu-stu-quiz-mat__quiz-row">
+                  <span className="edu-stu-quiz-mat__quiz-title">{quiz.question}</span>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => handleStartQuiz(quiz.id)}
+                  >
+                    풀기
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )
+        ) : null}
       </div>
     </div>
   )
