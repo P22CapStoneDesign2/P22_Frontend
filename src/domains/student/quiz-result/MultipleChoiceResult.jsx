@@ -1,11 +1,30 @@
 import './MultipleChoiceResult.css'
 
+function getCorrectOptionIds(question) {
+  if (Array.isArray(question.correctOptionIds) && question.correctOptionIds.length > 0) {
+    return question.correctOptionIds
+  }
+  if (question.correctOptionId) return [question.correctOptionId]
+  return []
+}
+
+function getUserSelectedOptionIds(question) {
+  if (Array.isArray(question.userSelectedOptionIds) && question.userSelectedOptionIds.length > 0) {
+    return question.userSelectedOptionIds
+  }
+  if (question.userSelectedOptionId) return [question.userSelectedOptionId]
+  return []
+}
+
 function getOptionStatus(question, optionId) {
-  const isCorrectOption = question.correctOptionId === optionId
-  const isUserSelected = question.userSelectedOptionId === optionId
+  const correctIds = getCorrectOptionIds(question)
+  const userSelectedIds = getUserSelectedOptionIds(question)
+  const isCorrectOption = correctIds.includes(optionId)
+  const isUserSelected = userSelectedIds.includes(optionId)
 
   if (isCorrectOption) return 'correct'
   if (isUserSelected && !question.isCorrect) return 'wrong'
+  if (isUserSelected && question.isCorrect) return 'correct'
   return 'normal'
 }
 

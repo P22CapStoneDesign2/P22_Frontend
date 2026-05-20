@@ -3,13 +3,20 @@ import QuizTableRow from './QuizTableRow.jsx'
 
 /**
  * 선택된 교안의 퀴즈 목록 테이블
- *
- * @param {object} props
- * @param {Array<{ id: string, question: string, questionType: 'multiple' | 'short', updatedAt: string }>} props.quizzes
- * @param {(quizId: string) => void} props.onViewQuiz
  */
-export default function QuizTable({ quizzes, onViewQuiz }) {
+export default function QuizTable({
+  quizzes,
+  selectedQuestionIds,
+  onToggleQuestion,
+  onToggleAll,
+  onViewQuiz,
+  selectionDisabled = false,
+}) {
   const isEmpty = !quizzes || quizzes.length === 0
+  const allIds = isEmpty ? [] : quizzes.map((q) => q.questionId)
+  const allSelected =
+    allIds.length > 0 && allIds.every((id) => selectedQuestionIds.has(id))
+  const someSelected = allIds.some((id) => selectedQuestionIds.has(id))
 
   return (
     <div className="edu-quiz-table-wrap">
@@ -17,6 +24,19 @@ export default function QuizTable({ quizzes, onViewQuiz }) {
         <caption className="edu-quiz-table__caption">퀴즈 목록</caption>
         <thead>
           <tr>
+            <th scope="col" className="edu-quiz-table__th edu-quiz-table__th--check">
+              <input
+                type="checkbox"
+                className="edu-quiz-table__checkbox"
+                checked={allSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = someSelected && !allSelected
+                }}
+                disabled={isEmpty || selectionDisabled}
+                onChange={(e) => onToggleAll(e.target.checked)}
+                aria-label="전체 선택"
+              />
+            </th>
             <th scope="col" className="edu-quiz-table__th edu-quiz-table__th--num">
               번호
             </th>
@@ -37,7 +57,7 @@ export default function QuizTable({ quizzes, onViewQuiz }) {
         <tbody>
           {isEmpty ? (
             <tr>
-              <td colSpan={5} className="edu-quiz-table__empty">
+              <td colSpan={6} className="edu-quiz-table__empty">
                 등록된 퀴즈가 없습니다. 교안을 선택하거나 퀴즈를 생성해 보세요.
               </td>
             </tr>
@@ -47,7 +67,10 @@ export default function QuizTable({ quizzes, onViewQuiz }) {
                 key={quiz.id}
                 index={index}
                 quiz={quiz}
-                onView={() => onViewQuiz(quiz.id)}
+                checked={selectedQuestionIds.has(quiz.questionId)}
+                onToggle={() => onToggleQuestion(quiz.questionId)}
+                selectionDisabled={selectionDisabled}
+                onView={() => onViewQuiz(quiz.quizSetId, quiz.questionId)}
               />
             ))
           )}

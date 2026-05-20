@@ -1,34 +1,43 @@
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import QuizEditContent from './QuizEditContent.jsx'
 import { getMockQuizEditBundle } from './mockQuizEditData.js'
+import { getMaterialIdForQuizSet } from '../../quiz/storage/professorQuizzesStorage.js'
+import { getMaterialDisplayLabel } from '../materials/professorMaterialsStorage.js'
+import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
 import '../quiz-create/QuizCreatePage.css'
 
 export default function QuizEditPage() {
   const { quizId } = useParams()
-  const bundle = getMockQuizEditBundle(quizId)
-  const materialId = bundle.materialId
-  const initialQuestions = bundle.questions
-  const initialActiveQuestionId = bundle.initialActiveQuestionId
+  const location = useLocation()
+  const { isViewerMode } = useIsViewerMode()
+
+  const focusQuestionId = location.state?.initialActiveQuestionId ?? null
+  const materialId =
+    location.state?.materialId ??
+    location.state?.selectedMaterialId ??
+    getMaterialIdForQuizSet(quizId) ??
+    ''
+
+  const bundle = getMockQuizEditBundle(quizId, focusQuestionId, materialId)
+  const resolvedMaterialId = bundle.materialId || materialId
+  const materialLabel = getMaterialDisplayLabel(resolvedMaterialId)
 
   return (
     <div className="edu-quiz-create-page">
       <header className="edu-quiz-create-page__header">
-        <h1 className="edu-quiz-create-page__title">퀴즈 수정</h1>
+        <h1 className="edu-quiz-create-page__title">{isViewerMode ? '퀴즈 보기' : '퀴즈 수정'}</h1>
         <p className="edu-quiz-create-page__meta">
-          <span className="edu-quiz-create-page__meta-label">퀴즈 ID</span>{' '}
-          <code className="edu-quiz-create-page__meta-code">{quizId ?? '—'}</code>
-          <span className="edu-quiz-create-page__meta-sep" aria-hidden>
-            {' · '}
-          </span>
-          <span className="edu-quiz-create-page__meta-label">교안 ID</span>{' '}
-          <code className="edu-quiz-create-page__meta-code">{materialId}</code>
+          <span className="edu-quiz-create-page__meta-label">교안</span>{' '}
+          <span className="edu-quiz-create-page__meta-v">{materialLabel}</span>
         </p>
       </header>
       <QuizEditContent
         quizId={quizId ?? ''}
-        materialId={materialId}
-        initialQuestions={initialQuestions}
-        initialActiveQuestionId={initialActiveQuestionId}
+        materialId={bundle.materialId || materialId}
+        initialQuestions={bundle.questions}
+        initialActiveQuestionId={bundle.initialActiveQuestionId}
+        initialPersistedQuestionIds={bundle.persistedQuestionIds}
+        primaryQuizSetId={bundle.primaryQuizSetId}
       />
     </div>
   )

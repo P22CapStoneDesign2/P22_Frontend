@@ -4,6 +4,32 @@
   gap: 10px;
 }
 
+.edu-quiz-solve-mc__hints {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edu-quiz-solve-mc__instruction {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.edu-quiz-solve-mc__progress {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #475569;
+}
+
+.edu-quiz-solve-mc__limit-msg {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #b45309;
+  font-weight: 600;
+}
+
 .edu-quiz-solve-mc__label {
   margin: 0;
   font-size: 0.8125rem;

@@ -1,4 +1,5 @@
 import { httpClient } from '../../../shared/api/httpClient.js'
+import { rejectQuizMutationIfStudent } from '../../../shared/auth/quizMutationGuard.js'
 
 /**
  * @param {Record<string, string | number | boolean | undefined | null>} params
@@ -16,6 +17,8 @@ function toSearchParams(params) {
  * @param {object} payload — 명세: title, description?
  */
 export function createQuiz(payload) {
+  const denied = rejectQuizMutationIfStudent()
+  if (denied) return denied
   return httpClient('/api/quiz', { method: 'POST', json: payload })
 }
 
@@ -37,6 +40,8 @@ export function getQuizDetail(quizId) {
  * @param {object} payload — 명세: title, description?
  */
 export function updateQuiz(quizId, payload) {
+  const denied = rejectQuizMutationIfStudent()
+  if (denied) return denied
   return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}`, {
     method: 'PUT',
     json: payload,
@@ -44,6 +49,8 @@ export function updateQuiz(quizId, payload) {
 }
 
 export function deleteQuiz(quizId) {
+  const denied = rejectQuizMutationIfStudent()
+  if (denied) return denied
   return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}`, { method: 'DELETE' })
 }
 
@@ -52,6 +59,8 @@ export function deleteQuiz(quizId) {
  * @param {object} payload — 문제 추가 본문 (명세 §20)
  */
 export function addQuestion(quizId, payload) {
+  const denied = rejectQuizMutationIfStudent()
+  if (denied) return denied
   return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}/questions`, {
     method: 'POST',
     json: payload,
@@ -59,12 +68,16 @@ export function addQuestion(quizId, payload) {
 }
 
 export function updateQuestion(quizId, questionId, payload) {
+  const denied = rejectQuizMutationIfStudent()
+  if (denied) return denied
   const q = encodeURIComponent(String(quizId))
   const qq = encodeURIComponent(String(questionId))
   return httpClient(`/api/quiz/${q}/questions/${qq}`, { method: 'PUT', json: payload })
 }
 
 export function deleteQuestion(quizId, questionId) {
+  const denied = rejectQuizMutationIfStudent()
+  if (denied) return denied
   const q = encodeURIComponent(String(quizId))
   const qq = encodeURIComponent(String(questionId))
   return httpClient(`/api/quiz/${q}/questions/${qq}`, { method: 'DELETE' })

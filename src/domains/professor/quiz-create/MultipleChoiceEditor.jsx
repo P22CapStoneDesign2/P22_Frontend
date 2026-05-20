@@ -19,6 +19,7 @@ export default function MultipleChoiceEditor({
   onOptionTextChange,
   onCorrectChange,
   onAddOption,
+  readOnly = false,
 }) {
   const correctSet = new Set(Array.isArray(correctOptionIds) ? correctOptionIds : [])
 
@@ -26,9 +27,11 @@ export default function MultipleChoiceEditor({
     <div className="edu-mc-editor">
       <div className="edu-mc-editor__header">
         <span className="edu-mc-editor__title">보기</span>
-        <Button type="button" variant="secondary" onClick={() => onAddOption(questionId)}>
-          보기 추가
-        </Button>
+        {!readOnly ? (
+          <Button type="button" variant="secondary" onClick={() => onAddOption(questionId)}>
+            보기 추가
+          </Button>
+        ) : null}
       </div>
       <ul className="edu-mc-editor__list">
         {options.map((opt, index) => {
@@ -40,7 +43,11 @@ export default function MultipleChoiceEditor({
                   type="checkbox"
                   className="edu-mc-editor__checkbox"
                   checked={isChecked}
-                  onChange={() => onCorrectChange(questionId, opt.id)}
+                  disabled={readOnly}
+                  onChange={() => {
+                    if (readOnly) return
+                    onCorrectChange(questionId, opt.id)
+                  }}
                   aria-label={`${index + 1}번 보기를 정답으로 ${isChecked ? '해제' : '선택'}`}
                 />
                 <span className="edu-mc-editor__badge">{index + 1}</span>
@@ -49,7 +56,12 @@ export default function MultipleChoiceEditor({
                 type="text"
                 className="edu-mc-editor__input"
                 value={opt.text}
-                onChange={(e) => onOptionTextChange(questionId, opt.id, e.target.value)}
+                readOnly={readOnly}
+                disabled={readOnly}
+                onChange={(e) => {
+                  if (readOnly) return
+                  onOptionTextChange(questionId, opt.id, e.target.value)
+                }}
                 placeholder={`보기 ${index + 1}`}
                 aria-label={`보기 ${index + 1} 내용`}
               />

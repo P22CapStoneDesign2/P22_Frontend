@@ -102,3 +102,10 @@
   line-height: 1.5;
 }
 
+.edu-quiz-mgmt__delete-warn {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #b91c1c;
+  line-height: 1.5;
+}
+

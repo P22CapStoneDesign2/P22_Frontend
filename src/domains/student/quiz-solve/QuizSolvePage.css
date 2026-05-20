@@ -36,6 +36,11 @@
   font-weight: 600;
 }
 
+.edu-quiz-solve-page__meta-value {
+  font-weight: 500;
+  color: #0f172a;
+}
+
 .edu-quiz-solve-page__meta-code {
   padding: 2px 8px;
   border-radius: 6px;
@@ -62,6 +67,26 @@
 
 .edu-quiz-solve-layout__main {
   min-width: 0;
+}
+
+.edu-quiz-solve-layout__progress {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.edu-quiz-solve-layout--empty {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.edu-quiz-solve-layout__empty-msg {
+  margin: 0 0 16px;
+  text-align: center;
+  color: #475569;
+  font-size: 0.9375rem;
 }
 
 .edu-quiz-solve-layout__card {

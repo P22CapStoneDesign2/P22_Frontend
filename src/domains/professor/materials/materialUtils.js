@@ -11,6 +11,26 @@ export function nowDateString() {
   return new Date().toISOString().slice(0, 10)
 }
 
+/**
+ * 교안 업로드/등록일 표시 (예: 2026-04-30 → 2026년 4월 30일)
+ * @param {string | undefined} dateStr
+ * @returns {string}
+ */
+export function formatMaterialUploadDate(dateStr) {
+  if (!dateStr || typeof dateStr !== 'string') return '—'
+  const trimmed = dateStr.trim()
+  const iso = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/)
+  if (iso) {
+    const year = Number(iso[1])
+    const month = Number(iso[2])
+    const day = Number(iso[3])
+    if (year > 0 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${year}년 ${month}월 ${day}일`
+    }
+  }
+  return trimmed
+}
+
 export function isPdfFile(file) {
   if (!file) return false
   const nameOk = file.name?.toLowerCase().endsWith('.pdf')

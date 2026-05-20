@@ -36,6 +36,11 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+.edu-quiz-table__th--check {
+  width: 44px;
+  text-align: center;
+}
+
 .edu-quiz-table__th--num {
   width: 56px;
   text-align: center;
@@ -55,6 +60,26 @@
   vertical-align: middle;
   color: #334155;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.edu-quiz-table__cell--check {
+  text-align: center;
+}
+
+.edu-quiz-table__checkbox {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+.edu-quiz-table__checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.edu-quiz-table__row--selected .edu-quiz-table__cell {
+  background: #eff6ff;
 }
 
 .edu-quiz-table__cell--num {

@@ -1,19 +1,31 @@
 import Button from '../../../components/ui/Button/Button.jsx'
 
 /**
- * 퀴즈 테이블 단일 행 (번호 / 질문 / 문제유형 / 수정일 / 보기)
- *
- * @param {object} props
- * @param {number} props.index - 0-based; 화면에는 index + 1로 표시
- * @param {{ id: string, question: string, questionType: 'multiple' | 'short', updatedAt: string }} props.quiz
- * @param {() => void} props.onView - 보기 버튼 클릭 시 편집 라우트로 이동하는 쪽에서 연결
+ * 퀴즈 테이블 단일 행 (선택 / 번호 / 질문 / 문제유형 / 수정일 / 보기)
  */
-export default function QuizTableRow({ index, quiz, onView }) {
+export default function QuizTableRow({
+  index,
+  quiz,
+  checked,
+  onToggle,
+  selectionDisabled = false,
+  onView,
+}) {
   const typeLabel = quiz.questionType === 'multiple' ? '객관식' : '단답형'
   const dateLabel = formatUpdatedAt(quiz.updatedAt)
 
   return (
-    <tr className="edu-quiz-table__row">
+    <tr className={`edu-quiz-table__row${checked ? ' edu-quiz-table__row--selected' : ''}`}>
+      <td className="edu-quiz-table__cell edu-quiz-table__cell--check">
+        <input
+          type="checkbox"
+          className="edu-quiz-table__checkbox"
+          checked={checked}
+          disabled={selectionDisabled}
+          onChange={onToggle}
+          aria-label={`문제 ${index + 1} 선택`}
+        />
+      </td>
       <td className="edu-quiz-table__cell edu-quiz-table__cell--num">{index + 1}</td>
       <td className="edu-quiz-table__cell edu-quiz-table__cell--question">{quiz.question}</td>
       <td className="edu-quiz-table__cell">{typeLabel}</td>
@@ -27,7 +39,6 @@ export default function QuizTableRow({ index, quiz, onView }) {
   )
 }
 
-/** mock 단계: ISO 또는 표시용 문자열을 그대로/간단히 포맷 */
 function formatUpdatedAt(value) {
   if (!value) return '—'
   const d = new Date(value)

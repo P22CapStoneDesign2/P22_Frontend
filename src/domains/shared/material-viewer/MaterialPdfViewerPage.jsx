@@ -10,7 +10,16 @@ import {
   parseMaterialResponse,
   postMaterialProgress,
 } from '../../../api/materials.js'
-import { ROUTES } from '../../../shared/constants/routes.js'
+import {
+  ROUTES,
+  STUDENT_MATERIALS_COURSE_QUERY_KEY,
+  studentMaterialsPath,
+} from '../../../shared/constants/routes.js'
+import {
+  findCourseIdForMaterial,
+  getMaterialDisplayLabel,
+  loadProfessorMaterialsDto,
+} from '../../professor/materials/professorMaterialsStorage.js'
 import { resolvePdfFileForViewer } from './materialPdfAuth.js'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
 import './MaterialPdfViewerPage.css'
@@ -33,7 +42,7 @@ export default function MaterialPdfViewerPage() {
 
   const mid = materialId ?? ''
 
-  const exitTo = isProfessorRoute ? ROUTES.professorMaterials : ROUTES.studentMaterials
+  const courseIdFromQuery = searchParams.get(STUDENT_MATERIALS_COURSE_QUERY_KEY) ?? ''
   const logoHref = isProfessorRoute ? ROUTES.professorDashboard : ROUTES.studentDashboard
 
   const [userEmail] = useState('user@school.edu')
@@ -122,7 +131,9 @@ export default function MaterialPdfViewerPage() {
     setNumPages(0)
     setApiPageCount(null)
     setAspectRatioCss('16 / 9')
-    setTitle('')
+    const storageTitle = getMaterialDisplayLabel(mid)
+    if (storageTitle && storageTitle !== '—') setTitle(storageTitle)
+    else setTitle('')
 
     ;(async () => {
       try {
@@ -252,8 +263,17 @@ export default function MaterialPdfViewerPage() {
     metaLoading || Boolean(metaError) || Boolean(pdfLoadError) || !pdfFile
 
   const handleExit = useCallback(() => {
-    navigate(exitTo)
-  }, [navigate, exitTo])
+    if (isProfessorRoute) {
+      navigate(ROUTES.professorMaterials)
+      return
+    }
+    const fromQuery = courseIdFromQuery.trim()
+    const courseId =
+      fromQuery ||
+      findCourseIdForMaterial(loadProfessorMaterialsDto(), mid) ||
+      ''
+    navigate(studentMaterialsPath(courseId || undefined))
+  }, [navigate, isProfessorRoute, courseIdFromQuery, mid])
 
   const handleLogout = useCallback(() => {
     navigate(logoHref)

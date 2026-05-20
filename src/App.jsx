@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import './QuizApp.css'
 
 /**
@@ -245,11 +245,10 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('')
   const toastTimerRef = useRef(null)
 
-  /** 문제 이동 시: 제출된 답이 있으면 selectedOption에 반영, 없으면 null */
-  useEffect(() => {
-    const saved = answers[currentQuestionIndex]
+  const syncSelectionForIndex = (index) => {
+    const saved = answers[index]
     setSelectedOption(saved !== null && saved !== undefined ? saved : null)
-  }, [currentQuestionIndex, answers])
+  }
 
   const showToast = (msg) => {
     setToastMessage(msg)
@@ -291,15 +290,20 @@ export default function App() {
   }
 
   const goToQuestion = (index) => {
+    syncSelectionForIndex(index)
     setCurrentQuestionIndex(index)
   }
 
   const handlePrev = () => {
-    setCurrentQuestionIndex((i) => Math.max(0, i - 1))
+    const next = Math.max(0, currentQuestionIndex - 1)
+    syncSelectionForIndex(next)
+    setCurrentQuestionIndex(next)
   }
 
   const handleNext = () => {
-    setCurrentQuestionIndex((i) => Math.min(quizData.length - 1, i + 1))
+    const next = Math.min(quizData.length - 1, currentQuestionIndex + 1)
+    syncSelectionForIndex(next)
+    setCurrentQuestionIndex(next)
   }
 
   const currentQ = quizData[currentQuestionIndex]

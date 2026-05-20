@@ -36,6 +36,29 @@
   font-weight: 600;
 }
 
+.edu-quiz-result-page__meta-value {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.edu-quiz-result-layout--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 20px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.edu-quiz-result-layout__empty-msg {
+  margin: 0;
+  text-align: center;
+  color: #475569;
+  font-size: 0.9375rem;
+}
+
 .edu-quiz-result-page__meta-code {
   padding: 2px 8px;
   border-radius: 6px;

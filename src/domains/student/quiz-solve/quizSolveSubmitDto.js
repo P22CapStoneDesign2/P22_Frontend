@@ -1,4 +1,18 @@
 /**
+ * @param {object | undefined} answer
+ * @returns {string[]}
+ */
+function readMcSelectedIds(answer) {
+  if (Array.isArray(answer?.selectedOptionIds)) {
+    return [...answer.selectedOptionIds]
+  }
+  if (typeof answer?.selectedOptionId === 'string' && answer.selectedOptionId) {
+    return [answer.selectedOptionId]
+  }
+  return []
+}
+
+/**
  * 제출 DTO 생성 (콘솔 출력·추후 API용)
  * @param {string} materialId
  * @param {Array<object>} questions
@@ -13,7 +27,7 @@ export function buildQuizSubmitDto(materialId, questions, answersByQuestionId) {
         return {
           questionId: q.id,
           type: 'multipleChoice',
-          selectedOptionId: a?.selectedOptionId ?? null,
+          selectedOptionIds: readMcSelectedIds(a),
           shortAnswer: null,
         }
       }
@@ -21,7 +35,7 @@ export function buildQuizSubmitDto(materialId, questions, answersByQuestionId) {
       return {
         questionId: q.id,
         type: 'shortAnswer',
-        selectedOptionId: null,
+        selectedOptionIds: [],
         shortAnswer: text.length > 0 ? text : null,
       }
     }),

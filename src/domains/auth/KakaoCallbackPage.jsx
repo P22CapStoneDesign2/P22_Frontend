@@ -11,6 +11,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { getMe } from '../../api/auth'
 import { dashboardRouteForRole } from '../../shared/auth/postAuthNavigation.js'
+import { setStoredUserRole } from '../../shared/auth/roleUtils.js'
 import { ROUTES } from '../../shared/constants/routes.js'
 
 export default function KakaoCallbackPage() {
@@ -53,6 +54,7 @@ export default function KakaoCallbackPage() {
         if (needsKakaoProfile) {
           navigate(ROUTES.kakaoSignup, { replace: true })
         } else {
+          setStoredUserRole(me.role)
           navigate(dashboardRouteForRole(me.role), { replace: true })
         }
       } catch {

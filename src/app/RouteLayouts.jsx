@@ -3,6 +3,7 @@
 import { Outlet, useMatches, useNavigate } from 'react-router-dom'
 import AppLayout from '../components/layout/AppLayout/AppLayout.jsx'
 import { ROUTES } from '../shared/constants/routes.js'
+import { clearStoredUserRole } from '../shared/auth/roleUtils.js'
 import { layoutMetaFromMatches } from './layoutMetaFromMatches.js'
 
 /** 교수 영역 layout route — AppLayout + Outlet */
@@ -39,6 +40,7 @@ export function AdminAreaLayout() {
       headerProps={{
         userEmail: 'admin@school.edu',
         onLogout: () => {
+          clearStoredUserRole()
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
           navigate(ROUTES.home, { replace: true })

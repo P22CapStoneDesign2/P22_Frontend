@@ -35,6 +35,9 @@ export const ROUTES = {
   adminSubjectAccess: '/admin/subject-access',
 }
 
+/** 학생 교안 목록 — 강의 선택 유지용 query key */
+export const STUDENT_MATERIALS_COURSE_QUERY_KEY = 'courseId'
+
 /**
  * @param {string|number} materialId
  * @returns {string}
@@ -44,11 +47,36 @@ export function studentQuizSolvePath(materialId) {
 }
 
 /**
- * @param {string|number} materialId
+ * @param {string} attemptId
  * @returns {string}
  */
-export function studentMaterialViewerPath(materialId) {
-  return `${ROUTES.studentMaterials}/${encodeURIComponent(String(materialId))}/viewer`
+export function studentQuizResultPath(attemptId) {
+  return `${ROUTES.studentQuizRoot}/result/${encodeURIComponent(String(attemptId))}`
+}
+
+/**
+ * @param {string} [courseId] 선택 강의 유지용 query
+ * @returns {string}
+ */
+export function studentMaterialsPath(courseId) {
+  const base = ROUTES.studentMaterials
+  const id = typeof courseId === 'string' ? courseId.trim() : ''
+  if (!id) return base
+  const params = new URLSearchParams({ [STUDENT_MATERIALS_COURSE_QUERY_KEY]: id })
+  return `${base}?${params.toString()}`
+}
+
+/**
+ * @param {string|number} materialId
+ * @param {string} [courseId] 뷰어 종료 시 목록 복귀용
+ * @returns {string}
+ */
+export function studentMaterialViewerPath(materialId, courseId) {
+  const base = `${ROUTES.studentMaterials}/${encodeURIComponent(String(materialId))}/viewer`
+  const cid = typeof courseId === 'string' ? courseId.trim() : ''
+  if (!cid) return base
+  const params = new URLSearchParams({ [STUDENT_MATERIALS_COURSE_QUERY_KEY]: cid })
+  return `${base}?${params.toString()}`
 }
 
 /**
@@ -57,4 +85,20 @@ export function studentMaterialViewerPath(materialId) {
  */
 export function professorMaterialViewerPath(materialId) {
   return `${ROUTES.professorMaterials}/${encodeURIComponent(String(materialId))}/viewer`
+}
+
+/**
+ * @param {string|number} materialId
+ * @returns {string}
+ */
+export function professorQuizCreatePath(materialId) {
+  return `${ROUTES.professorMaterials}/${encodeURIComponent(String(materialId))}/quizzes/create`
+}
+
+/**
+ * @param {string|number} quizId
+ * @returns {string}
+ */
+export function professorQuizEditPath(quizId) {
+  return `${ROUTES.professorQuizzes}/${encodeURIComponent(String(quizId))}/edit`
 }

@@ -1,3 +1,5 @@
+import { flattenStoredQuizzesToTableRows } from '../storage/professorQuizzesStorage.js'
+
 /**
  * 교수 퀴즈 관리 — GET /api/quiz 페이지 응답을 테이블 행 형태로 변환
  *
@@ -41,4 +43,12 @@ export function mapQuizListPageDataToTableRows(pageData) {
   const content = pageData?.content
   if (!Array.isArray(content)) return []
   return content.map((item, i) => mapQuizPageItemToTableRow(item, i))
+}
+
+/**
+ * localStorage mock 저장 레코드 배열 → 문항 단위 테이블 행 (flatten)
+ * @param {import('../storage/professorQuizzesStorage.js').StoredQuizRecord[]} records
+ */
+export function mapStoredQuizRecordsToTableRows(records) {
+  return flattenStoredQuizzesToTableRows(records)
 }
