@@ -12,9 +12,9 @@ dist
 dist-ssr
 *.local
 
-# Environment (Vite)
-.env
-.env.*.local
+# Environment (Vite) — secrets; keep only the template tracked
+.env*
+!.env.example
 
 # Editor directories and files
 .vscode/*
