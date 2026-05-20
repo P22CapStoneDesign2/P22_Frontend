@@ -13,26 +13,39 @@ export default function QuizQuestionFormList({
   onAddOption,
   onShortAnswerChange,
   onExplanationChange,
+  isEditable = true,
+  activeQuestionId = null,
+  displayNumberOffset = 0,
 }) {
+  const visibleQuestions =
+    !isEditable && activeQuestionId != null
+      ? questions.filter((q) => q.id === activeQuestionId)
+      : questions
+
   return (
     <div className="edu-quiz-form-list">
-      {questions.map((question, questionIndex) => (
-        <QuizQuestionForm
-          key={question.id}
-          ref={(el) => {
-            formRefs.current[question.id] = el
-          }}
-          question={question}
-          questionIndex={questionIndex}
-          onContentChange={onContentChange}
-          onTypeChange={onTypeChange}
-          onOptionTextChange={onOptionTextChange}
-          onCorrectOptionChange={onCorrectOptionChange}
-          onAddOption={onAddOption}
-          onShortAnswerChange={onShortAnswerChange}
-          onExplanationChange={onExplanationChange}
-        />
-      ))}
+      {visibleQuestions.map((question) => {
+        const questionIndex = questions.findIndex((q) => q.id === question.id)
+        return (
+          <QuizQuestionForm
+            key={question.id}
+            ref={(el) => {
+              formRefs.current[question.id] = el
+            }}
+            question={question}
+            questionIndex={questionIndex}
+            onContentChange={onContentChange}
+            onTypeChange={onTypeChange}
+            onOptionTextChange={onOptionTextChange}
+            onCorrectOptionChange={onCorrectOptionChange}
+            onAddOption={onAddOption}
+            onShortAnswerChange={onShortAnswerChange}
+            onExplanationChange={onExplanationChange}
+            isEditable={isEditable}
+            displayNumberOffset={displayNumberOffset}
+          />
+        )
+      })}
     </div>
   )
 }

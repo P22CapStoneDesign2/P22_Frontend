@@ -1,24 +1,32 @@
 import QuizEditorContent from '../quiz-create/QuizEditorContent.jsx'
 import { buildQuizEditDto } from '../quiz-create/quizCreateUtils.js'
+import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
 
 /**
- * 수정 전용: preload된 문제·교안 ID·초기 포커스 문항을 QuizEditorContent에 넘김
+ * 수정 전용: 교안 전체 문항 preload + 초기 포커스 문항
  */
 export default function QuizEditContent({
   quizId,
   materialId,
   initialQuestions,
   initialActiveQuestionId,
+  initialPersistedQuestionIds,
+  primaryQuizSetId,
 }) {
+  const { isViewerMode } = useIsViewerMode()
+
   return (
     <QuizEditorContent
-      key={quizId}
+      key={`${materialId}-material-edit`}
       materialId={materialId}
-      quizId={quizId}
+      quizId={primaryQuizSetId ?? quizId}
       initialQuestions={initialQuestions}
       initialActiveQuestionId={initialActiveQuestionId}
-      confirmMessage="수정하시겠습니까?"
-      buildDto={(mid, qs, qid) => buildQuizEditDto(qid, mid, qs)}
+      initialPersistedQuestionIds={initialPersistedQuestionIds}
+      isMaterialEditMode
+      isViewerMode={isViewerMode}
+      confirmMessage={isViewerMode ? '' : '수정하시겠습니까?'}
+      buildDto={(mid, qs, qid) => buildQuizEditDto(qid ?? quizId, mid, qs)}
     />
   )
 }

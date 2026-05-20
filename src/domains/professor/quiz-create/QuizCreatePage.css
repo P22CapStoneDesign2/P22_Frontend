@@ -39,12 +39,24 @@
   font-weight: 600;
 }
 
+.edu-quiz-create-main__progress {
+  margin: 0 0 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #475569;
+}
+
 .edu-quiz-create-page__meta-code {
   padding: 2px 8px;
   border-radius: 6px;
   background: #ffffff;
   border: 1px solid #cbd5e1;
   font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.edu-quiz-create-page__meta-v {
+  font-weight: 600;
   color: #0f172a;
 }
 

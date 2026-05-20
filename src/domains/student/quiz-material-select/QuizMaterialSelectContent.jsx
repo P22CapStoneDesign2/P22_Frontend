@@ -1,42 +1,25 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
+import { countExistingQuestionsForMaterial } from '../../quiz/storage/professorQuizzesStorage.js'
+import {
+  courseOptionsFromDto,
+  loadProfessorMaterialsDto,
+  materialOptionsForCourseFromDto,
+} from '../../professor/materials/professorMaterialsStorage.js'
 import { studentQuizSolvePath } from '../../../shared/constants/routes.js'
 import './QuizMaterialSelectPage.css'
 
-/** mock: 강의 (SelectDropdown 옵션: value, label) */
-const MOCK_COURSES = [
-  { value: 'course-ds', label: '자료구조' },
-  { value: 'course-algo', label: '알고리즘' },
-  { value: 'course-db', label: '데이터베이스' },
-]
-
 /**
- * mock: 교안 (강의별 courseId, value는 /student/quiz/:materialId 라우트용 id)
- */
-const ALL_MATERIALS = [
-  { value: 'mat-ds-w1', label: '자료구조 1주차', courseId: 'course-ds' },
-  { value: 'mat-ds-w2', label: '자료구조 2주차', courseId: 'course-ds' },
-  { value: 'mat-ds-mid', label: '자료구조 중간고사 범위', courseId: 'course-ds' },
-  { value: 'mat-algo-intro', label: '알고리즘 개론', courseId: 'course-algo' },
-  { value: 'mat-algo-greedy', label: '탐욕 알고리즘', courseId: 'course-algo' },
-  { value: 'mat-algo-dp', label: '동적 계획법', courseId: 'course-algo' },
-  { value: 'mat-db-w1', label: 'DB 1주차 — 관계 모델', courseId: 'course-db' },
-  { value: 'mat-db-sql', label: 'SQL 기초', courseId: 'course-db' },
-]
-
-function materialsForCourse(courseValue) {
-  return ALL_MATERIALS.filter((m) => m.courseId === courseValue)
-}
-
-/**
- * 퀴즈 풀기 — 강의·교안 선택 본문 (mock 전용, 클라이언트 state만 사용)
+ * 퀴즈 풀기 — 강의·교안 선택 (교수 교안·퀴즈 저장소와 동일 소스)
  */
 export default function QuizMaterialSelectContent() {
   const navigate = useNavigate()
 
-  const [courses] = useState(MOCK_COURSES)
+  const materialsDto = useMemo(() => loadProfessorMaterialsDto(), [])
+  const courses = useMemo(() => courseOptionsFromDto(materialsDto), [materialsDto])
+
   const [materials, setMaterials] = useState([])
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [selectedMaterial, setSelectedMaterial] = useState(null)
@@ -44,9 +27,14 @@ export default function QuizMaterialSelectContent() {
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false)
   const [materialDropdownOpen, setMaterialDropdownOpen] = useState(false)
 
+  const questionCount = useMemo(() => {
+    if (!selectedMaterial?.value) return 0
+    return countExistingQuestionsForMaterial(selectedMaterial.value)
+  }, [selectedMaterial])
+
   const handleCourseSelect = (option) => {
     setSelectedCourse(option)
-    setMaterials(materialsForCourse(option.value))
+    setMaterials(materialOptionsForCourseFromDto(materialsDto, option.value))
     setSelectedMaterial(null)
   }
 
@@ -54,12 +42,13 @@ export default function QuizMaterialSelectContent() {
     setSelectedMaterial(option)
   }
 
-  const materialSelectDisabled = !selectedCourse || materials.length === 0
-
-  const canStartQuiz = Boolean(selectedCourse && selectedMaterial)
+  const materialSelectDisabled = !selectedCourse
+  const hasMaterialsForCourse = Boolean(selectedCourse && materials.length > 0)
+  const showNoQuizHint = Boolean(selectedMaterial && questionCount === 0)
+  const canStartQuiz = Boolean(selectedCourse && selectedMaterial && questionCount > 0)
 
   const handleStartQuiz = () => {
-    if (!selectedMaterial) return
+    if (!canStartQuiz || !selectedMaterial) return
     navigate(studentQuizSolvePath(selectedMaterial.value))
   }
 
@@ -101,9 +90,21 @@ export default function QuizMaterialSelectContent() {
               onOpenChange={setMaterialDropdownOpen}
               onSelect={handleMaterialSelect}
               disabled={materialSelectDisabled}
-              emptyMessage="이 강의에 등록된 교안이 없습니다."
+              emptyMessage="등록된 교안이 없습니다."
             />
           </div>
+
+          {selectedCourse && !hasMaterialsForCourse ? (
+            <p className="edu-stu-quiz-mat__hint" role="status">
+              등록된 교안이 없습니다.
+            </p>
+          ) : null}
+
+          {showNoQuizHint ? (
+            <p className="edu-stu-quiz-mat__hint" role="status">
+              등록된 퀴즈가 없습니다.
+            </p>
+          ) : null}
         </div>
 
         <div className="edu-stu-quiz-mat__actions">

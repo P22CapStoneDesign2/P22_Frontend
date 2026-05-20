@@ -3,13 +3,18 @@ import './QuestionNavigator.css'
 /**
  * 오른쪽 sticky 문제 번호 네비 — 클릭 시 상위에서 scrollIntoView 처리
  */
-export default function QuestionNavigator({ questions, activeQuestionId, onQuestionNavigate }) {
+export default function QuestionNavigator({
+  questions,
+  activeQuestionId,
+  onQuestionNavigate,
+  displayNumberOffset = 0,
+}) {
   return (
     <nav className="edu-q-nav" aria-label="문제 번호 이동">
       <p className="edu-q-nav__title">문제</p>
       <div className="edu-q-nav__buttons">
         {questions.map((q, index) => {
-          const num = index + 1
+          const num = displayNumberOffset + index + 1
           const isActive = q.id === activeQuestionId
           return (
             <button

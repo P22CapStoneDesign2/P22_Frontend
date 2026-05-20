@@ -79,6 +79,13 @@
   width: 100%;
 }
 
+.edu-stu-quiz-mat__hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #b45309;
+  text-align: center;
+}
+
 .edu-stu-quiz-mat__actions {
   display: flex;
   justify-content: center;

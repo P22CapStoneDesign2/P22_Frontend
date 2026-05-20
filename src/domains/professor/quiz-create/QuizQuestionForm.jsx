@@ -19,10 +19,13 @@ const QuizQuestionForm = forwardRef(function QuizQuestionForm(
     onAddOption,
     onShortAnswerChange,
     onExplanationChange,
+    isEditable = true,
+    displayNumberOffset = 0,
   },
   ref,
 ) {
-  const displayNumber = questionIndex + 1
+  const readOnly = !isEditable
+  const displayNumber = displayNumberOffset + questionIndex + 1
 
   return (
     <section
@@ -43,7 +46,12 @@ const QuizQuestionForm = forwardRef(function QuizQuestionForm(
           id={`edu-q-content-${question.id}`}
           className="edu-quiz-form-card__textarea"
           value={question.content}
-          onChange={(e) => onContentChange(question.id, e.target.value)}
+          readOnly={readOnly}
+          disabled={readOnly}
+          onChange={(e) => {
+            if (readOnly) return
+            onContentChange(question.id, e.target.value)
+          }}
           placeholder="문제를 입력하세요"
           rows={4}
         />
@@ -51,7 +59,11 @@ const QuizQuestionForm = forwardRef(function QuizQuestionForm(
 
       <QuestionTypeSelector
         value={question.type}
-        onChange={(type) => onTypeChange(question.id, type)}
+        disabled={readOnly}
+        onChange={(type) => {
+          if (readOnly) return
+          onTypeChange(question.id, type)
+        }}
       />
 
       {question.type === 'multipleChoice' ? (
@@ -62,11 +74,13 @@ const QuizQuestionForm = forwardRef(function QuizQuestionForm(
           onOptionTextChange={onOptionTextChange}
           onCorrectChange={onCorrectOptionChange}
           onAddOption={onAddOption}
+          readOnly={readOnly}
         />
       ) : (
         <ShortAnswerEditor
           id={`sa-${question.id}`}
           value={question.shortAnswer}
+          readOnly={readOnly}
           onChange={(v) => onShortAnswerChange(question.id, v)}
         />
       )}
@@ -74,6 +88,7 @@ const QuizQuestionForm = forwardRef(function QuizQuestionForm(
       <ExplanationEditor
         id={`ex-${question.id}`}
         value={question.explanation}
+        readOnly={readOnly}
         onChange={(v) => onExplanationChange(question.id, v)}
       />
     </section>

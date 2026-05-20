@@ -1,26 +1,37 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
+import { ROUTES } from '../../../shared/constants/routes.js'
 import MaterialFileTable from './MaterialFileTable.jsx'
 import {
-  buildMaterialsSaveDto,
   genCourseId,
   genMaterialFileId,
   isPdfFile,
   nowDateString,
 } from './materialUtils.js'
+import {
+  loadProfessorMaterialsDto,
+  professorMaterialsDtoToState,
+  saveProfessorMaterialsFromState,
+} from './professorMaterialsStorage.js'
 import './ProfessorMaterialPage.css'
 
 const DELETE_CONFIRM_MESSAGE =
   '교안 파일을 삭제하면 관련된 퀴즈들도 모두 삭제됩니다. 정말 삭제하시겠습니까?'
 
+const SAVE_CONFIRM_MESSAGE = '저장하시겠습니까?'
+
 export default function ProfessorMaterialContent() {
+  const navigate = useNavigate()
   const [courses, setCourses] = useState([])
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [materialFilesByCourseId, setMaterialFilesByCourseId] = useState({})
   const [deleteTargetFileId, setDeleteTargetFileId] = useState(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   const [isCreateCourseModalOpen, setIsCreateCourseModalOpen] = useState(false)
   const [newCourseName, setNewCourseName] = useState('')
@@ -30,6 +41,15 @@ export default function ProfessorMaterialContent() {
   const addFileInputRef = useRef(null)
   const replaceFileInputRef = useRef(null)
   const replaceTargetFileIdRef = useRef(null)
+
+  useEffect(() => {
+    const dto = loadProfessorMaterialsDto()
+    if (!dto) return
+    const { courses: loadedCourses, materialFilesByCourseId: loadedFiles } =
+      professorMaterialsDtoToState(dto)
+    setCourses(loadedCourses)
+    setMaterialFilesByCourseId(loadedFiles)
+  }, [])
 
   const courseOptions = courses.map((c) => ({ value: c.id, label: c.name }))
   const courseSelectValue = selectedCourse
@@ -145,9 +165,29 @@ export default function ProfessorMaterialContent() {
     setDeleteTargetFileId(null)
   }
 
-  const handleSave = () => {
-    const dto = buildMaterialsSaveDto(courses, materialFilesByCourseId)
-    console.log(dto)
+  const handleSaveClick = () => {
+    if (isSaving) return
+    setIsSaveModalOpen(true)
+  }
+
+  const handleCancelSave = () => {
+    if (isSaving) return
+    setIsSaveModalOpen(false)
+  }
+
+  const handleConfirmSave = async () => {
+    if (isSaving) return
+    setIsSaving(true)
+    try {
+      const dto = saveProfessorMaterialsFromState(courses, materialFilesByCourseId)
+      console.log(dto)
+      await Promise.resolve()
+      window.alert('저장되었습니다.')
+      setIsSaveModalOpen(false)
+      navigate(ROUTES.professorDashboard)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const fileActionsDisabled = !selectedCourse
@@ -217,7 +257,13 @@ export default function ProfessorMaterialContent() {
         </section>
 
         <div className="edu-mat__footer-save">
-          <Button type="button" variant="primary" className="edu-mat-save-btn" onClick={handleSave}>
+          <Button
+            type="button"
+            variant="primary"
+            className="edu-mat-save-btn"
+            onClick={handleSaveClick}
+            disabled={isSaving}
+          >
             저장
           </Button>
         </div>
@@ -256,6 +302,18 @@ export default function ProfessorMaterialContent() {
         confirmVariant="danger"
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
+      />
+
+      <ConfirmModal
+        isOpen={isSaveModalOpen}
+        message={SAVE_CONFIRM_MESSAGE}
+        confirmText="확인"
+        cancelText="취소"
+        onConfirm={handleConfirmSave}
+        onCancel={handleCancelSave}
+        isConfirmLoading={isSaving}
+        closeOnOverlayClick={!isSaving}
+        closeOnEscape={!isSaving}
       />
     </div>
   )

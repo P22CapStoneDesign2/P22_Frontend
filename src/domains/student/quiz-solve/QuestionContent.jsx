@@ -8,12 +8,16 @@ import './QuestionContent.css'
 export default function QuestionContent({
   question,
   answer,
-  onSelectMcOption,
+  mcLimitMessage = '',
+  onToggleMcOption,
   onShortAnswerChange,
 }) {
   if (!question) return null
 
   const typeLabel = question.type === 'multipleChoice' ? '객관식' : '단답형'
+  const selectedOptionIds = Array.isArray(answer?.selectedOptionIds)
+    ? answer.selectedOptionIds
+    : []
 
   return (
     <div className="edu-quiz-solve-qbody">
@@ -26,8 +30,10 @@ export default function QuestionContent({
       {question.type === 'multipleChoice' ? (
         <MultipleChoiceAnswer
           options={question.options ?? []}
-          selectedOptionId={answer?.selectedOptionId}
-          onSelectOption={onSelectMcOption}
+          requiredAnswerCount={question.requiredAnswerCount ?? 1}
+          selectedOptionIds={selectedOptionIds}
+          limitMessage={mcLimitMessage}
+          onToggleOption={onToggleMcOption}
         />
       ) : (
         <ShortAnswerInput

@@ -1,6 +1,7 @@
 /*로그인 화면*/
 import { getMe, login } from '../../api/auth'
 import { dashboardRouteForRole } from '../../shared/auth/postAuthNavigation.js'
+import { clearStoredUserRole, setStoredUserRole } from '../../shared/auth/roleUtils.js'
 import { KAKAO_OAUTH_AUTHORIZATION_URL } from '../../config/env.js'
 
 import { useState } from 'react'
@@ -57,12 +58,14 @@ export default function LoginPage() {
         const destination = dashboardRouteForRole(meRole)
 
         if (role === 'professor' && destination === ROUTES.studentDashboard) {
+          clearStoredUserRole()
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
           window.alert('교수·관리자 계정이 아닙니다. 학생 로그인(카카오)을 이용해 주세요.')
           return
         }
 
+        setStoredUserRole(meRole)
         navigate(destination, { replace: true })
       } catch (error) {
         const message = error.response?.data?.message

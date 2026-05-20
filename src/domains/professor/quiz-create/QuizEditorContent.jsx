@@ -1,14 +1,23 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import QuizQuestionFormList from './QuizQuestionFormList.jsx'
 import QuestionNavigator from './QuestionNavigator.jsx'
-import BottomActions from './BottomActions.jsx'
+import QuizEditorFloatingActions from './QuizEditorFloatingActions.jsx'
+import { ROUTES } from '../../../shared/constants/routes.js'
+import {
+  countExistingQuestionsForMaterial,
+  saveMaterialQuestionsConsolidated,
+  saveNewQuizForMaterial,
+} from '../../quiz/storage/professorQuizzesStorage.js'
 import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quizCreateUtils.js'
+import { useQuizFormActiveQuestionSpy } from './useQuizFormActiveQuestionSpy.js'
+
+const CANCEL_CONFIRM_MESSAGE = '작업을 취소하시겠습니까?'
 
 /**
  * 퀴즈 생성·수정 공통 본문
- * - questions 단일 원천, 번호는 인덱스+1만 사용
+ * - questions 단일 원천, 화면 번호는 displayNumberOffset + index + 1 (생성 시 기존 문항 수 반영)
  * - 모달 문구·저장 DTO는 상위에서 주입 (과도한 분기 없이 콜백으로 통일)
  *
  * @param {object} props
@@ -18,17 +27,34 @@ import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quiz
  * @param {string | null} [props.initialActiveQuestionId] 수정 진입 시 활성·스크롤 대상 문항 id
  * @param {string} props.confirmMessage
  * @param {(materialId: string, questions: object[], quizId: string | null) => object} props.buildDto
+ * @param {boolean} [props.isViewerMode] 학생 보기 전용 — 수정·저장·추가 비활성
+ * @param {boolean} [props.isMaterialEditMode] 교안 전체 문항 수정
+ * @param {string[]} [props.initialPersistedQuestionIds] 수정 진입 시 저장소에 있던 문항 id
  */
 export default function QuizEditorContent({
   materialId,
   quizId = null,
   initialQuestions = null,
   initialActiveQuestionId = null,
+  initialPersistedQuestionIds = null,
+  isMaterialEditMode = false,
   confirmMessage,
   buildDto,
+  isViewerMode = false,
 }) {
+  const isEditable = !isViewerMode
+  const isCreateMode = !isMaterialEditMode
   const navigate = useNavigate()
   const formRefs = useRef({})
+  const initialPersistedRef = useRef(
+    Array.isArray(initialPersistedQuestionIds) ? [...initialPersistedQuestionIds] : [],
+  )
+
+  const displayNumberOffset = useMemo(() => {
+    if (isMaterialEditMode) return 0
+    if (!isCreateMode) return 0
+    return countExistingQuestionsForMaterial(materialId)
+  }, [isMaterialEditMode, isCreateMode, materialId])
 
   const [questions, setQuestions] = useState(() => {
     if (initialQuestions != null && initialQuestions.length > 0) {
@@ -50,6 +76,18 @@ export default function QuizEditorContent({
   })
 
   const [saveModalOpen, setSaveModalOpen] = useState(false)
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
+
+  const handleActiveQuestionFromScroll = useCallback((questionId) => {
+    setActiveQuestionId(questionId)
+  }, [])
+
+  const { markProgrammaticScroll } = useQuizFormActiveQuestionSpy({
+    questions,
+    formRefs,
+    onActiveQuestionChange: handleActiveQuestionFromScroll,
+    enabled: isEditable && !isViewerMode,
+  })
 
   const scrollToQuestion = (questionId, behavior = 'smooth') => {
     const el = formRefs.current[questionId]
@@ -58,17 +96,30 @@ export default function QuizEditorContent({
 
   useLayoutEffect(() => {
     if (initialActiveQuestionId == null || initialActiveQuestionId === '') return
+    markProgrammaticScroll()
     scrollToQuestion(initialActiveQuestionId, 'instant')
-  }, [initialActiveQuestionId])
+  }, [initialActiveQuestionId, markProgrammaticScroll])
+
+  useLayoutEffect(() => {
+    if (!isViewerMode) return
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [activeQuestionId, isViewerMode])
 
   const handleQuestionNavigate = (questionId) => {
+    markProgrammaticScroll()
     setActiveQuestionId(questionId)
+    if (isViewerMode) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
     scrollToQuestion(questionId)
   }
 
   const handleAddQuestion = () => {
+    if (!isEditable) return
     const newQ = createNewQuestion()
     setQuestions((prev) => [...prev, newQ])
+    markProgrammaticScroll()
     setActiveQuestionId(newQ.id)
     queueMicrotask(() => {
       requestAnimationFrame(() => {
@@ -80,10 +131,12 @@ export default function QuizEditorContent({
   }
 
   const handleContentChange = (questionId, content) => {
+    if (!isEditable) return
     setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, content } : q)))
   }
 
   const handleTypeChange = (questionId, type) => {
+    if (!isEditable) return
     setQuestions((prev) =>
       prev.map((q) => {
         if (q.id !== questionId) return q
@@ -110,6 +163,7 @@ export default function QuizEditorContent({
   }
 
   const handleOptionTextChange = (questionId, optionId, text) => {
+    if (!isEditable) return
     setQuestions((prev) =>
       prev.map((q) => {
         if (q.id !== questionId) return q
@@ -126,6 +180,7 @@ export default function QuizEditorContent({
    * options 변경/삭제 시 잔존 ID를 정리하지는 않음 — 보기 ID 자체는 안정적이므로 충분.
    */
   const handleCorrectOptionChange = (questionId, optionId) => {
+    if (!isEditable) return
     setQuestions((prev) =>
       prev.map((q) => {
         if (q.id !== questionId) return q
@@ -139,6 +194,7 @@ export default function QuizEditorContent({
   }
 
   const handleAddOption = (questionId) => {
+    if (!isEditable) return
     setQuestions((prev) =>
       prev.map((q) =>
         q.id !== questionId
@@ -149,39 +205,81 @@ export default function QuizEditorContent({
   }
 
   const handleShortAnswerChange = (questionId, value) => {
+    if (!isEditable) return
     setQuestions((prev) =>
       prev.map((q) => (q.id === questionId ? { ...q, shortAnswer: value } : q)),
     )
   }
 
   const handleExplanationChange = (questionId, value) => {
+    if (!isEditable) return
     setQuestions((prev) =>
       prev.map((q) => (q.id === questionId ? { ...q, explanation: value } : q)),
     )
   }
 
   const handleSaveClick = () => {
+    if (!isEditable) return
     setSaveModalOpen(true)
   }
 
   const handleConfirmSave = () => {
+    if (!isEditable) return
     const dto = buildDto(materialId, questions, quizId)
-    console.log(dto)
+    if (isMaterialEditMode) {
+      const persistResult = saveMaterialQuestionsConsolidated(
+        materialId,
+        questions,
+        initialPersistedRef.current,
+      )
+      console.log({ dto, persistResult })
+    } else {
+      const newQuizSetId = saveNewQuizForMaterial(materialId, questions)
+      console.log({ dto, newQuizSetId })
+    }
     setSaveModalOpen(false)
-    navigate('/professor/quizzes')
+    navigate(ROUTES.professorQuizzes, {
+      state: { selectedMaterialId: materialId, materialId },
+    })
   }
 
   const handleCancelSave = () => {
     setSaveModalOpen(false)
   }
 
+  const handleCancelClick = () => {
+    setIsCancelModalOpen(true)
+  }
+
+  const handleDismissCancelModal = () => {
+    setIsCancelModalOpen(false)
+  }
+
+  const handleConfirmCancel = () => {
+    setIsCancelModalOpen(false)
+    navigate(ROUTES.professorQuizzes, {
+      state: { selectedMaterialId: materialId, materialId },
+    })
+  }
+
   return (
     <>
       <div className="edu-quiz-create-layout">
         <div className="edu-quiz-create-main">
+          {isViewerMode && questions.length > 0 ? (
+            <p className="edu-quiz-create-main__progress" aria-live="polite">
+              문제{' '}
+              {displayNumberOffset +
+                (questions.findIndex((q) => q.id === activeQuestionId) + 1 || 1)}{' '}
+              / {displayNumberOffset + questions.length}
+            </p>
+          ) : null}
           <QuizQuestionFormList
             questions={questions}
             formRefs={formRefs}
+            activeQuestionId={activeQuestionId}
+            displayNumberOffset={displayNumberOffset}
+            isEditable={isEditable}
             onContentChange={handleContentChange}
             onTypeChange={handleTypeChange}
             onOptionTextChange={handleOptionTextChange}
@@ -190,14 +288,22 @@ export default function QuizEditorContent({
             onShortAnswerChange={handleShortAnswerChange}
             onExplanationChange={handleExplanationChange}
           />
-          <BottomActions onAddQuestion={handleAddQuestion} onSaveClick={handleSaveClick} />
         </div>
         <aside className="edu-quiz-create-aside">
-          <QuestionNavigator
-            questions={questions}
-            activeQuestionId={activeQuestionId}
-            onQuestionNavigate={handleQuestionNavigate}
-          />
+          <div className="edu-quiz-create-aside-inner">
+            <QuestionNavigator
+              questions={questions}
+              activeQuestionId={activeQuestionId}
+              displayNumberOffset={displayNumberOffset}
+              onQuestionNavigate={handleQuestionNavigate}
+            />
+            <QuizEditorFloatingActions
+              isEditable={isEditable}
+              onAddQuestion={handleAddQuestion}
+              onSaveClick={handleSaveClick}
+              onCancelClick={handleCancelClick}
+            />
+          </div>
         </aside>
       </div>
 
@@ -206,6 +312,15 @@ export default function QuizEditorContent({
         message={confirmMessage}
         onConfirm={handleConfirmSave}
         onCancel={handleCancelSave}
+      />
+
+      <ConfirmModal
+        isOpen={isCancelModalOpen}
+        message={CANCEL_CONFIRM_MESSAGE}
+        confirmText="확인"
+        cancelText="취소"
+        onConfirm={handleConfirmCancel}
+        onCancel={handleDismissCancelModal}
       />
     </>
   )

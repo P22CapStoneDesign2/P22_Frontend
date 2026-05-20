@@ -16,6 +16,10 @@ dist-ssr
 .env*
 !.env.example
 
+# Spring Boot local profile (secrets — do not commit)
+src/main/resources/application-local.yml
+src/main/resources/application-local.yaml
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
