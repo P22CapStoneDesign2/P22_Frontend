@@ -265,6 +265,7 @@ export default function MaterialPdfViewerPage() {
       onLogout: handleLogout,
       logoHref,
       logoLabel: 'EDU HUB',
+      logoImageOnly: true,
     }),
     [userEmail, handleLogout, logoHref],
   )

@@ -26,6 +26,7 @@ export default function EduHubCommonShell() {
         onLogout: () => {},
         logoHref: '/',
         logoLabel: 'EDU HUB',
+        logoImageOnly: true,
       }}
       contentClassName="edu-common-shell__layout-content"
     >

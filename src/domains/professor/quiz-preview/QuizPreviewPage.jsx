@@ -18,6 +18,7 @@ export default function QuizPreviewPage() {
         onLogout: () => navigate('/professor'),
         logoHref: '/professor',
         logoLabel: 'EDU HUB',
+        logoImageOnly: true,
         breadcrumbItems: [
           { label: '교안별 퀴즈 관리', to: ROUTES.professorQuizzes },
           { label: '퀴즈 미리보기' },

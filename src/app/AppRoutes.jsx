@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { ROUTES } from '../shared/constants/routes.js'
 import { AdminAreaLayout, ProfessorAreaLayout, StudentAreaLayout } from './RouteLayouts.jsx'
 import AdminSubjectAccessPage from '../domains/admin/subject-access/AdminSubjectAccessPage.jsx'
+import LandingPage from '../domains/landing/LandingPage.jsx'
 import LoginPage from '../domains/auth/LoginPage.jsx'
 import SignUpPage from '../domains/auth/SignUpPage.jsx'
 import KakaoCallbackPage from '../domains/auth/KakaoCallbackPage.jsx'
@@ -67,7 +68,7 @@ const studentMeta = {
 
 // 앱 라우터
 const appRouter = createBrowserRouter([
-  { path: ROUTES.home, element: <LoginPage /> },
+  { path: ROUTES.home, element: <LandingPage /> },
   { path: ROUTES.login, element: <LoginPage /> },
   { path: ROUTES.signup, element: <SignUpPage /> },
   { path: ROUTES.passwordReset, element: <PasswordResetPage /> },

@@ -18,6 +18,7 @@ export function ProfessorAreaLayout() {
         onLogout: () => navigate(ROUTES.professorDashboard),
         logoHref: ROUTES.professorDashboard,
         logoLabel: 'EDU HUB',
+        logoImageOnly: true,
         breadcrumbItems: meta.breadcrumbItems,
       }}
     >
@@ -44,7 +45,7 @@ export function AdminAreaLayout() {
         },
         logoHref: ROUTES.adminSubjectAccess,
         logoLabel: 'EDU HUB',
-        logoCentered: true,
+        logoImageOnly: true,
         breadcrumbItems: meta.breadcrumbItems,
       }}
     >
@@ -66,6 +67,7 @@ export function StudentAreaLayout() {
         onLogout: () => navigate(ROUTES.studentDashboard),
         logoHref: ROUTES.studentDashboard,
         logoLabel: 'EDU HUB',
+        logoImageOnly: true,
         breadcrumbItems: meta.breadcrumbItems,
       }}
     >

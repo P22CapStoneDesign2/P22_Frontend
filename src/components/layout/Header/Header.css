@@ -3,7 +3,7 @@
   top: 0;
   z-index: 50;
   min-height: 56px;
-  padding: 10px 20px;
+  padding: 10px clamp(8px, 1.5vw, 12px);
   box-sizing: border-box;
   /*
    * Figma 톤: 흰색 배경 + 옅은 하늘색 하단 보더로 본문 sky 그라데이션과 자연스럽게 이어짐.
@@ -152,4 +152,98 @@
 .edu-header--logo-centered .edu-header__right {
   grid-column: 3;
   justify-self: end;
+}
+
+/* 랜딩 등 비로그인 화면 */
+.edu-header--public {
+  background: #e0e0e0;
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+}
+
+/* 비로그인: 로고 왼쪽 · 로그인 오른쪽 */
+.edu-header--public .edu-header__inner {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+}
+
+.edu-header--public .edu-header__primary {
+  flex: 0 1 auto;
+}
+
+.edu-header--public.edu-header--no-logo .edu-header__inner {
+  justify-content: flex-end;
+}
+
+.edu-header--public.edu-header--no-logo .edu-header__primary:empty {
+  display: none;
+}
+
+.edu-header__logo--image {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.edu-header__logo--image:hover {
+  text-decoration: none;
+  opacity: 0.92;
+}
+
+.edu-header__logo--image .edu-login__brand-icon {
+  display: block;
+  width: auto;
+  height: clamp(32px, 5vw, 44px);
+  max-width: min(220px, 42vw);
+  object-fit: contain;
+  margin: 0;
+  transform: none;
+}
+
+.edu-header__logo--brand-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+
+.edu-header__logo--brand-icon:hover {
+  text-decoration: none;
+}
+
+.edu-header__brand-text {
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.edu-header__logo--brand-icon .edu-login__brand-icon {
+  width: auto;
+  height: clamp(28px, 5vw, 36px);
+  margin: 0;
+  transform: none;
+}
+
+.edu-header__login {
+  padding: 0.45rem 1.25rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.15s ease;
+}
+
+.edu-header__login:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  text-decoration: none;
+}
+
+.edu-header__login:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }

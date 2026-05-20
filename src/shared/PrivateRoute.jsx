@@ -8,7 +8,7 @@ export default function PrivateRoute({ children }) {
   const token = localStorage.getItem('accessToken')
 
   if (!token) {
-    return <Navigate to={ROUTES.home} replace />
+    return <Navigate to={ROUTES.login} replace />
   }
 
   return children

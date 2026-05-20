@@ -17,6 +17,7 @@ export default function StudentCourseApplyPlaceholderPage() {
         onLogout: () => {},
         logoHref: '/student',
         logoLabel: 'EDU HUB',
+        logoImageOnly: true,
       }}
       contentClassName="edu-student-course-apply-placeholder-app-layout-content"
     >
