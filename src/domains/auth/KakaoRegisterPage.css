@@ -1,6 +1,6 @@
 @import '../../shared/styles/index.css';
 
-.kakao-signup {
+.kakao-register {
   position: fixed;
   inset: 0;
   z-index: 100;
@@ -18,7 +18,7 @@
   color: #1e293b;
 }
 
-.kakao-signup__logo {
+.kakao-register__logo {
   position: absolute;
   top: clamp(0.45rem, 1.4vw, 0.75rem);
   display: inline-flex;
@@ -27,11 +27,11 @@
   pointer-events: none;
 }
 
-.kakao-signup__logo--left {
+.kakao-register__logo--left {
   left: clamp(0.6rem, 2vw, 1.25rem);
 }
 
-.kakao-signup__logo .edu-login__brand-icon {
+.kakao-register__logo .edu-login__brand-icon {
   display: block;
   height: clamp(46px, 11vw, 78px);
   width: auto;
@@ -39,7 +39,7 @@
   object-fit: contain;
 }
 
-.kakao-signup__layout {
+.kakao-register__layout {
   width: min(720px, 100%);
   display: flex;
   flex-direction: column;
@@ -49,7 +49,7 @@
   padding-bottom: clamp(1.5rem, 4vh, 2.5rem);
 }
 
-.kakao-signup__welcome {
+.kakao-register__welcome {
   margin: 0;
   font-size: clamp(1.65rem, 5vw, 2.35rem);
   font-weight: 800;
@@ -58,8 +58,7 @@
   text-align: center;
 }
 
-.kakao-signup__card {
-  /* 카드 전체는 가운데에, 내부는 공통 가로폭(--field-width)으로 묶어 좌측 기준선이 일치하도록 한다. */
+.kakao-register__card {
   --kakao-label-width: 4.5rem;
   --kakao-row-gap: 0.85rem;
   --kakao-field-width: min(360px, 100%);
@@ -75,14 +74,14 @@
   gap: clamp(0.95rem, 2.5vw, 1.4rem);
 }
 
-.kakao-signup__field {
+.kakao-register__field {
   width: var(--kakao-field-width);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
 }
 
-.kakao-signup__row {
+.kakao-register__row {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
@@ -90,7 +89,7 @@
   width: 100%;
 }
 
-.kakao-signup__label {
+.kakao-register__label {
   flex: 0 0 auto;
   width: var(--kakao-label-width);
   font-size: 0.92rem;
@@ -99,13 +98,13 @@
   text-align: left;
 }
 
-.kakao-signup__segment {
+.kakao-register__segment {
   display: flex;
   gap: 0.5rem;
 }
 
-.kakao-signup__segment-btn,
-.kakao-signup__segment-current {
+.kakao-register__segment-btn,
+.kakao-register__segment-current {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -118,21 +117,20 @@
   user-select: none;
 }
 
-/* 카카오 회원가입은 학생 고정: 학생은 선택 상태, 교수는 비활성 상태 */
-.kakao-signup__segment-current {
+.kakao-register__segment-current {
   border: 1px solid #2563eb;
   background: rgba(37, 99, 235, 0.1);
   color: #1d4ed8;
 }
 
-.kakao-signup__segment-btn--disabled {
+.kakao-register__segment-btn--disabled {
   opacity: 0.55;
   border: 1px solid rgba(148, 163, 184, 0.4);
   background: rgba(255, 255, 255, 0.35);
   color: #64748b;
 }
 
-.kakao-signup__input-wrap {
+.kakao-register__input-wrap {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -140,7 +138,7 @@
   min-width: 0;
 }
 
-.kakao-signup__input {
+.kakao-register__input {
   width: 100%;
   box-sizing: border-box;
   padding: 0.55rem 2.1rem 0.55rem 0.75rem;
@@ -153,12 +151,12 @@
   outline: none;
 }
 
-.kakao-signup__input:focus {
+.kakao-register__input:focus {
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
 }
 
-.kakao-signup__field-status {
+.kakao-register__field-status {
   width: 1.1rem;
   height: 1.1rem;
   border-radius: 999px;
@@ -174,38 +172,60 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
 }
 
-.kakao-signup__input-wrap .kakao-signup__field-status {
+.kakao-register__input-wrap .kakao-register__field-status {
   position: absolute;
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.kakao-signup__field-status--ok {
+.kakao-register__field-status--ok {
   background: #16a34a;
 }
 
-.kakao-signup__field-status--bad {
+.kakao-register__field-status--bad {
   background: #dc2626;
 }
 
-.kakao-signup__hint {
+.kakao-register__hint {
   margin: 0;
-  /* 라벨 너비 + 라벨↔입력 gap 만큼 들여서 입력 칸 좌측에 정렬 */
   padding-left: calc(var(--kakao-label-width) + var(--kakao-row-gap));
   font-size: 0.78rem;
   color: #64748b;
   line-height: 1.35;
 }
 
-.kakao-signup__field--agree {
-  /* 동의 줄과 가입 버튼은 폼 가운데 정렬 */
+.kakao-register__nickname-action {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.kakao-register__nickname-action:hover:not(:disabled) {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.kakao-register__nickname-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.kakao-register__field--agree {
   padding-left: 0;
   align-items: center;
   margin-top: -0.5rem;
 }
 
-.kakao-signup__checkbox-label {
+.kakao-register__checkbox-label {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -214,12 +234,12 @@
   color: #334155;
 }
 
-.kakao-signup__checkbox-label input[type='checkbox'] {
+.kakao-register__checkbox-label input[type='checkbox'] {
   flex-shrink: 0;
   margin: 0;
 }
 
-.kakao-signup__policy-link {
+.kakao-register__policy-link {
   display: inline;
   padding: 0;
   border: none;
@@ -232,29 +252,29 @@
   cursor: pointer;
 }
 
-.kakao-signup__policy-link:hover {
+.kakao-register__policy-link:hover {
   color: #1d4ed8;
 }
 
-.kakao-signup__submit-row {
+.kakao-register__submit-row {
   width: var(--kakao-field-width);
   display: flex;
   justify-content: center;
   margin-top: clamp(0.75rem, 2vw, 1.25rem);
 }
 
-.kakao-signup__submit {
+.kakao-register__submit {
   width: min(180px, 100%);
   box-sizing: border-box;
 }
 
-.kakao-signup__submit:disabled {
+.kakao-register__submit:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
 @media (max-width: 480px) {
-  .kakao-signup__card {
+  .kakao-register__card {
     --kakao-label-width: 3.5rem;
     --kakao-row-gap: 0.6rem;
   }

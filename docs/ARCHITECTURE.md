@@ -19,7 +19,7 @@ src/
 ├── LoginPage.jsx              # / — 로그인 페이지
 ├── SignUpPage.jsx             # /signup — 일반 회원가입
 ├── KakaoCallbackPage.jsx      # /oauth2/callback — 카카오 OAuth2 토큰 수신·저장
-├── KakaoSignUpPage.jsx        # /oauth2/signup — 카카오 최초 로그인 닉네임 입력
+├── KakaoRegisterPage.jsx      # /oauth2/register — 카카오 신규 유저 가입 완료 (pendingToken → usersignup)
 │
 ├── api/
 │   ├── axios.js               # Axios 인스턴스, 요청/응답 인터셉터
@@ -45,7 +45,7 @@ src/
 | `/` | `LoginPage` | ❌ | 로그인 |
 | `/signup` | `SignUpPage` | ❌ | 일반 회원가입 |
 | `/oauth2/callback` | `KakaoCallbackPage` | ❌ | 카카오 콜백 — URL 쿼리에서 토큰 추출·저장 후 리다이렉트 |
-| `/oauth2/signup` | `KakaoSignUpPage` | ❌ | 카카오 최초 로그인 — 닉네임 입력 |
+| `/oauth2/register` | `KakaoRegisterPage` | ❌ | 카카오 신규 유저 — pendingToken·kakaoName 쿼리 수신 후 이메일·닉네임 입력 → `POST /api/auth/usersignup` |
 | `/workspace` | `AppLayout` | ✅ | 메인 워크스페이스 (교안·퀴즈 기능) |
 
 > ⚠️ `/workspace`는 현재 라우트 가드(`PrivateRoute`) 미적용. `src/api/PrivateRoute.jsx` 파일이 존재하나 라우팅에 미연결 상태.

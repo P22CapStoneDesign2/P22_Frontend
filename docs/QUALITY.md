@@ -14,7 +14,7 @@
 | `LoginPage` | 🔴 없음 | 🟢 완성 | 🟢 PRD 기술 | 🟡 |
 | `SignUpPage` | 🔴 없음 | 🟢 완성 | 🟢 PRD 기술 | 🟡 |
 | `KakaoCallbackPage` | 🔴 없음 | 🟢 완성 | 🟢 설계 결정 문서화 | 🟡 |
-| `KakaoSignUpPage` | 🔴 없음 | 🟢 완성 | 🟢 PRD 기술 | 🟡 |
+| `KakaoRegisterPage` | 🔴 없음 | 🟢 완성 | 🟢 PRD 기술 | 🟡 |
 | `AppLayout` (워크스페이스) | 🔴 없음 | 🟡 부분 구현 | 🟢 ARCHITECTURE 기술 | 🟡 |
 | `LessonScript` (교안 뷰어) | 🔴 없음 | 🟡 부분 구현 | 🟡 미문서화 | 🔴 |
 | `App` (퀴즈 풀기) | 🔴 없음 | 🟡 더미 데이터 | 🟡 미문서화 | 🔴 |

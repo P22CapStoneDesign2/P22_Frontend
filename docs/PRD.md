@@ -78,11 +78,13 @@
 ```
 ① 사용자 → /oauth2/authorization/kakao (백엔드 리다이렉트)
 ② 카카오 → 백엔드 콜백
-③ 백엔드 → /oauth2/callback?accessToken=...&refreshToken=... (프론트 리다이렉트)
-④ KakaoCallbackPage → 토큰 저장 → getMe() 호출
-   - username 있음 → /workspace
-   - username 없음(신규) → /oauth2/signup
-⑤ KakaoSignUpPage → 닉네임 설정 → /workspace
+③ 백엔드가 DB의 카카오 계정 존재 여부로 분기:
+   - 기존 유저 → /oauth2/callback?accessToken=...&refreshToken=...
+     → KakaoCallbackPage: 토큰 저장 + getMe() → role에 따라 /professor 또는 /student
+   - 신규 유저 → /oauth2/register?pendingToken=...&kakaoName=...
+     → KakaoRegisterPage: 이메일·닉네임 추가 입력
+     → POST /api/auth/usersignup { pendingToken, username, email, nickname }
+     → 응답 토큰 저장 → /student
 ```
 
 ### 토큰 갱신 (자동)

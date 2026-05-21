@@ -1,11 +1,10 @@
 /* 카카오(OAuth2) 콜백 처리
- * 명세: 백엔드가 /oauth2/callback?accessToken=...&refreshToken=... 로 리다이렉트
+ * 명세: docs/API-SPEC.md §3 — 백엔드가 카카오 인증 후 분기한다.
+ *  - 기존 유저: /oauth2/callback?accessToken=...&refreshToken=...  ← 이 페이지가 처리
+ *  - 신규 유저: /oauth2/register?pendingToken=...&kakaoName=...     ← KakaoRegisterPage가 처리
  *
- * 명세에 isNewUser 같은 신규 가입 플래그가 없으므로,
- *  1) 토큰 저장 후 GET /api/users/me 로 회원 정보를 조회
- *  2) provider가 KAKAO이고 username(이름) 또는 nickname(닉네임)이 비어 있으면
- *     → 최초 1회 이름·닉네임 등록 화면(/oauth2/signup)
- *     그 외 → 워크스페이스
+ * 즉, 이 페이지에 도착했다면 백엔드 기준 '기존 유저'이며 토큰이 반드시 함께 와야 한다.
+ * 토큰이 없으면 비정상 케이스로 간주해 로그인 화면으로 되돌린다.
  */
 import { useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -30,13 +29,13 @@ export default function KakaoCallbackPage() {
 
     if (errorMessage) {
       window.alert(decodeURIComponent(errorMessage))
-      navigate(ROUTES.home, { replace: true })
+      navigate(ROUTES.login, { replace: true })
       return
     }
 
     if (!accessToken || !refreshToken) {
       window.alert('카카오 로그인 정보를 받아오지 못했습니다.')
-      navigate(ROUTES.home, { replace: true })
+      navigate(ROUTES.login, { replace: true })
       return
     }
 
@@ -47,19 +46,11 @@ export default function KakaoCallbackPage() {
       try {
         const res = await getMe()
         const me = res.data?.data ?? {}
-        const username = (me.username ?? '').trim()
-        const nickname = (me.nickname ?? '').trim()
-        const isKakao = String(me.provider ?? '').toUpperCase() === 'KAKAO'
-        const needsKakaoProfile = isKakao && (!username || !nickname)
-        if (needsKakaoProfile) {
-          navigate(ROUTES.kakaoSignup, { replace: true })
-        } else {
-          setStoredUserRole(me.role)
-          navigate(dashboardRouteForRole(me.role), { replace: true })
-        }
+        setStoredUserRole(me.role)
+        navigate(dashboardRouteForRole(me.role), { replace: true })
       } catch {
-        /* 회원 정보 조회 실패 시: 일단 추가 정보 입력 화면으로 보내 신규 가입 흐름을 유도 */
-        navigate(ROUTES.kakaoSignup, { replace: true })
+        window.alert('회원 정보를 불러오지 못했습니다. 다시 로그인해 주세요.')
+        navigate(ROUTES.login, { replace: true })
       }
     })()
   }, [navigate, searchParams])

@@ -17,7 +17,7 @@ BrowserRouter (main.jsx)
 │
 ├── Route "/oauth2/callback" → KakaoCallbackPage
 │
-├── Route "/oauth2/signup" → KakaoSignUpPage
+├── Route "/oauth2/register" → KakaoRegisterPage
 │
 └── Route "/workspace" → AppLayout
     │
@@ -40,7 +40,7 @@ BrowserRouter (main.jsx)
 ```
 src/shared/
 ├── constants/
-│   └── routes.js           ROUTES { home, workspace, signup, kakaoCallback, kakaoSignup }
+│   └── routes.js           ROUTES { home, workspace, signup, kakaoCallback, kakaoRegister }
 ├── styles/
 │   ├── buttons.css
 │   ├── eduTokens.css
@@ -62,7 +62,7 @@ src/shared/
 | `LoginPage` | `login` |
 | `SignUpPage` | `signup` |
 | `KakaoCallbackPage` | `getMe` |
-| `KakaoSignUpPage` | `updateMe` |
+| `KakaoRegisterPage` | `userSignup`, `checkNickname` |
 | `AppLayout` | — |
 | `LessonScript` | (미연동) |
 | `App` (QuizApp) | (미연동, 더미 데이터) |

@@ -8,7 +8,7 @@ import LandingPage from '../domains/landing/LandingPage.jsx'
 import LoginPage from '../domains/auth/LoginPage.jsx'
 import SignUpPage from '../domains/auth/SignUpPage.jsx'
 import KakaoCallbackPage from '../domains/auth/KakaoCallbackPage.jsx'
-import KakaoSignUpPage from '../domains/auth/KakaoSignUpPage.jsx'
+import KakaoRegisterPage from '../domains/auth/KakaoRegisterPage.jsx'
 import PasswordResetPage from '../domains/auth/PasswordResetPage.jsx'
 import LegacyAppShell from '../shared/LegacyAppShell.jsx'
 import EduHubCommonShell from './EduHubCommonShell.jsx'
@@ -73,7 +73,7 @@ const appRouter = createBrowserRouter([
   { path: ROUTES.signup, element: <SignUpPage /> },
   { path: ROUTES.passwordReset, element: <PasswordResetPage /> },
   { path: ROUTES.kakaoCallback, element: <KakaoCallbackPage /> },
-  { path: ROUTES.kakaoSignup, element: <KakaoSignUpPage /> },
+  { path: ROUTES.kakaoRegister, element: <KakaoRegisterPage /> },
   { path: ROUTES.workspace, element: <LegacyAppShell /> },
   {
     path: '/admin',

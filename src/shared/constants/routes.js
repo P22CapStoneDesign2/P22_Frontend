@@ -12,8 +12,8 @@ export const ROUTES = {
   passwordReset: '/reset-password',
   /* 백엔드가 OAuth 성공 후 redirect 시키는 경로 (명세: /oauth2/callback?accessToken=...&refreshToken=...) */
   kakaoCallback: '/oauth2/callback',
-  /* 카카오 최초 로그인 시 이름·닉네임 입력 화면 */
-  kakaoSignup: '/oauth2/signup',
+  /* 카카오 신규 유저 가입 완료 화면 — 백엔드가 pendingToken·kakaoName 쿼리로 리다이렉트 */
+  kakaoRegister: '/oauth2/register',
 
   professorQuizzes: '/professor/quizzes',
   professorMaterials: '/professor/materials',
