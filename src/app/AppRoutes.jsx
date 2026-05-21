@@ -14,6 +14,7 @@ import LegacyAppShell from '../shared/LegacyAppShell.jsx'
 import EduHubCommonShell from './EduHubCommonShell.jsx'
 import ProfessorDashboardPage from '../domains/professor/ProfessorDashboardPage.jsx'
 import StudentDashboardPage from '../domains/student/StudentDashboardPage.jsx'
+import StudentCourseApplyPage from '../domains/student/course-apply/StudentCourseApplyPage.jsx'
 import QuizManagementPage from '../domains/professor/quiz-management/QuizManagementPage.jsx'
 import QuizCreatePage from '../domains/professor/quiz-create/QuizCreatePage.jsx'
 import QuizEditPage from '../domains/professor/quiz-edit/QuizEditPage.jsx'
@@ -60,6 +61,7 @@ const adminMeta = {
 //학생 메타 데이터
 const studentMeta = {
   dashboard: { contentClassName: 'edu-dashboard-app-layout-content' },
+  courseApply: { contentClassName: 'edu-student-course-apply-app-layout-content' },
   materials: { contentClassName: 'edu-stu-mat-list-app-layout-content' },
   quizMaterials: { contentClassName: 'edu-stu-quiz-mat-app-layout-content' },
   quizResult: { contentClassName: 'edu-quiz-result-app-layout-content' },
@@ -129,6 +131,11 @@ const appRouter = createBrowserRouter([
         index: true,
         element: <StudentDashboardPage />,
         handle: { layoutMeta: studentMeta.dashboard },
+      },
+      {
+        path: 'course-apply',
+        element: <StudentCourseApplyPage />,
+        handle: { layoutMeta: studentMeta.courseApply },
       },
       {
         path: 'materials',

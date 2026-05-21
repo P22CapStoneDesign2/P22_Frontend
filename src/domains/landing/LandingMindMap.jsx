@@ -2,6 +2,11 @@ import { Link } from 'react-router-dom'
 import eduhubLogo from '../../assets/eduhub_logo.png'
 import { ROUTES } from '../../shared/constants/routes.js'
 import {
+  LANDING_WAVE_BACK_PATH,
+  LANDING_WAVE_FRONT_PATH,
+  LANDING_WAVE_MID_PATH,
+} from './landingWavePaths.js'
+import {
   MindMapProfessorIcon,
   MindMapQuizIcon,
   MindMapStudentIcon,
@@ -171,10 +176,13 @@ export default function LandingMindMap() {
         <div className="landing-mindmap__start-scene">
           <div className="landing-mindmap__start-waves" aria-hidden="true">
             <svg className="landing-mindmap__start-waves-svg landing-mindmap__start-waves-svg--back" viewBox="0 0 1440 240" preserveAspectRatio="none">
-              <path d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,138.7C672,128,768,128,864,144C960,160,1056,192,1152,197.3C1248,203,1344,181,1392,170.7L1440,160L1440,240L0,240Z" />
+              <path d={LANDING_WAVE_BACK_PATH} />
+            </svg>
+            <svg className="landing-mindmap__start-waves-svg landing-mindmap__start-waves-svg--mid" viewBox="0 0 1440 240" preserveAspectRatio="none">
+              <path d={LANDING_WAVE_MID_PATH} />
             </svg>
             <svg className="landing-mindmap__start-waves-svg landing-mindmap__start-waves-svg--front" viewBox="0 0 1440 240" preserveAspectRatio="none">
-              <path d="M0,128L60,122.7C120,117,240,107,360,117.3C480,128,600,160,720,165.3C840,171,960,149,1080,138.7C1200,128,1320,128,1380,128L1440,128L1440,240L0,240Z" />
+              <path d={LANDING_WAVE_FRONT_PATH} />
             </svg>
           </div>
           <div className="landing-mindmap__start-boat-wrap">
@@ -198,7 +206,10 @@ export default function LandingMindMap() {
                   />
                 </svg>
                 <span className="landing-mindmap__start-label">
-                  EDU-HUB와 함께하는 여정을 시작하세요
+                  <span className="landing-mindmap__start-label-line">EDU-HUB와 함께하는 여정을</span>
+                  <span className="landing-mindmap__start-label-line landing-mindmap__start-label-line--cta">
+                    시작하세요
+                  </span>
                 </span>
               </span>
             </Link>

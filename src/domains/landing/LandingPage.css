@@ -13,6 +13,8 @@
 /* 뷰포트 고정 — 본문만 landing__content 안에서 스크롤 */
 /* 배경 톤: 로그인 화면(--edu-login-bg)과 동일 계열 */
 .landing.edu-app-layout {
+  --landing-scale: 0.75;
+  --ls: var(--landing-scale);
   --landing-sky: var(--edu-login-bg);
   --landing-light: color-mix(in srgb, var(--landing-sky) 72%, #ffffff);
   --landing-soft: color-mix(in srgb, var(--landing-sky) 88%, #c5daf0);
@@ -26,8 +28,16 @@
 }
 
 .landing__content {
-  --landing-section-gap: clamp(200px, 34vh, 400px);
-  --landing-footer-gap: clamp(100px, 18vh, 180px);
+  --landing-section-gap: clamp(
+    calc(200px * var(--ls)),
+    calc(34vh * var(--ls)),
+    calc(400px * var(--ls))
+  );
+  --landing-footer-gap: clamp(
+    calc(100px * var(--ls)),
+    calc(18vh * var(--ls)),
+    calc(180px * var(--ls))
+  );
 
   position: relative;
   display: flex;
@@ -143,21 +153,36 @@
 }
 
 .landing-waves__svg--back path {
-  fill: color-mix(in srgb, var(--landing-sky) 45%, transparent);
+  fill: #5a82b0;
+  opacity: 0.55;
+}
+
+.landing-waves__svg--mid path {
+  fill: #7aa3cc;
+  opacity: 0.5;
 }
 
 .landing-waves__svg--front path {
-  fill: color-mix(in srgb, var(--landing-sky) 55%, #ffffff);
+  fill: #d4e8f8;
+  opacity: 0.65;
 }
 
 .landing-waves__svg--back {
   bottom: 0;
+  z-index: 1;
   animation: landing-wave-slide 22s linear infinite;
+}
+
+.landing-waves__svg--mid {
+  bottom: 0;
+  z-index: 2;
+  animation: landing-wave-slide 19s linear infinite reverse;
 }
 
 .landing-waves__svg--front {
   bottom: 0;
-  animation: landing-wave-slide 16s linear infinite reverse;
+  z-index: 3;
+  animation: landing-wave-slide 16s linear infinite;
 }
 
 @keyframes landing-wave-slide {
@@ -170,31 +195,34 @@
 }
 
 .landing-scroll {
-  --landing-scroll-pad-x: clamp(20px, 4vw, 40px);
+  --landing-scroll-pad-x: clamp(
+    calc(20px * var(--ls)),
+    calc(4vw * var(--ls)),
+    calc(40px * var(--ls))
+  );
+  /* 스크롤바·우측 플로팅바로 본문이 왼쪽으로 밀려 보이는 현상 보정 */
+  --landing-content-shift-x: clamp(
+    calc(12px * var(--ls)),
+    calc(1.75vw * var(--ls)),
+    calc(28px * var(--ls))
+  );
   position: relative;
   z-index: 1;
   flex: 1;
   min-height: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   -webkit-overflow-scrolling: touch;
   background: transparent;
-  padding: clamp(32px, 5vh, 56px) var(--landing-scroll-pad-x) 0;
+  padding: clamp(calc(32px * var(--ls)), calc(5vh * var(--ls)), calc(56px * var(--ls)))
+    var(--landing-scroll-pad-x) 0;
 }
 
-/* 상단바: 가로 전체(#e0e0e0), 안쪽만 본문 720px 정렬 */
-.landing .edu-header--public {
-  width: 100%;
-  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06);
-}
-
-.landing .edu-header--public .edu-header__inner {
-  width: 100%;
-  max-width: none;
-  margin-inline: auto;
-  padding-inline: 0;
-  box-sizing: border-box;
-  justify-content: space-between;
+.landing-intro,
+.landing-bridge,
+.landing-mindmap__canvas {
+  transform: translateX(var(--landing-content-shift-x));
 }
 
 .landing-main {
@@ -202,7 +230,7 @@
   flex-direction: column;
   gap: var(--landing-section-gap);
   width: 100%;
-  max-width: min(960px, 100%);
+  max-width: min(calc(960px * var(--ls)), 100%);
   margin: 0 auto;
   overflow: visible;
 }
@@ -212,7 +240,7 @@
 #landing-bridge,
 #landing-mindmap,
 #landing-start {
-  scroll-margin-top: clamp(48px, 10vh, 96px);
+  scroll-margin-top: clamp(calc(48px * var(--ls)), calc(10vh * var(--ls)), calc(96px * var(--ls)));
 }
 
 .landing-intro {
@@ -221,7 +249,8 @@
   align-items: center;
   gap: 0;
   text-align: center;
-  padding: clamp(64px, 12vh, 128px) clamp(28px, 6vw, 56px) 0;
+  padding: clamp(calc(64px * var(--ls)), calc(12vh * var(--ls)), calc(128px * var(--ls)))
+    clamp(calc(28px * var(--ls)), calc(6vw * var(--ls)), calc(56px * var(--ls))) 0;
 }
 
 .landing-intro__logo-wrap {
@@ -235,9 +264,9 @@
 /* 가로형 로고(eduhub_logo.png) — 너비 기준, 슬로건은 바로 아래 */
 .landing-intro .edu-login__brand-icon {
   display: block;
-  width: min(96vw, 920px);
+  width: min(96vw, calc(920px * var(--ls)));
   height: auto;
-  max-height: clamp(160px, 32vw, 280px);
+  max-height: clamp(calc(160px * var(--ls)), calc(32vw * var(--ls)), calc(280px * var(--ls)));
   margin: 0 auto;
   object-fit: contain;
   object-position: center;
@@ -245,12 +274,12 @@
 }
 
 .landing-intro__tagline {
-  margin: clamp(16px, 2.5vh, 28px) 0 0;
-  padding: 0 clamp(20px, 4vw, 40px);
+  margin: clamp(calc(16px * var(--ls)), calc(2.5vh * var(--ls)), calc(28px * var(--ls))) 0 0;
+  padding: 0 clamp(calc(20px * var(--ls)), calc(4vw * var(--ls)), calc(40px * var(--ls)));
   position: relative;
   z-index: 1;
   max-width: 28em;
-  font-size: clamp(1rem, 2.8vw, 1.25rem);
+  font-size: clamp(calc(1rem * var(--ls)), calc(2.8vw * var(--ls)), calc(1.25rem * var(--ls)));
   font-weight: 600;
   line-height: 1.35;
   color: #334155;
@@ -263,13 +292,13 @@
   align-items: center;
   width: 100%;
   box-sizing: border-box;
-  padding: 0 clamp(28px, 6vw, 56px);
+  padding: 0 clamp(calc(28px * var(--ls)), calc(6vw * var(--ls)), calc(56px * var(--ls)));
   text-align: center;
 }
 
 .landing-bridge__title {
-  margin: 0 0 clamp(16px, 3vh, 28px);
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  margin: 0 0 clamp(calc(16px * var(--ls)), calc(3vh * var(--ls)), calc(28px * var(--ls)));
+  font-size: clamp(calc(1.75rem * var(--ls)), calc(5vw * var(--ls)), calc(2.5rem * var(--ls)));
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -279,7 +308,7 @@
 .landing-bridge__lead {
   margin: 0;
   max-width: 28em;
-  font-size: clamp(1.05rem, 2.8vw, 1.25rem);
+  font-size: clamp(calc(1.05rem * var(--ls)), calc(2.8vw * var(--ls)), calc(1.25rem * var(--ls)));
   font-weight: 600;
   line-height: 1.55;
   color: #334155;
@@ -287,37 +316,41 @@
 
 .landing-bridge__visual {
   width: 100%;
-  max-width: min(920px, 100%);
-  margin-top: clamp(36px, 7vh, 72px);
+  max-width: min(calc(920px * var(--ls)), 100%);
+  margin-top: clamp(calc(36px * var(--ls)), calc(7vh * var(--ls)), calc(72px * var(--ls)));
 }
 
 .landing-bridge__gif {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: clamp(14px, 2.5vw, 22px);
+  border-radius: clamp(calc(14px * var(--ls)), calc(2.5vw * var(--ls)), calc(22px * var(--ls)));
   box-shadow: 0 16px 48px rgb(37 99 235 / 0.14);
 }
 
 /* —— 마인드맵 —— */
 .landing-mindmap {
-  --landing-mindmap-start-gap: clamp(180px, 30vh, 340px);
+  --landing-mindmap-start-gap: clamp(
+    calc(180px * var(--ls)),
+    calc(30vh * var(--ls)),
+    calc(340px * var(--ls))
+  );
 
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--landing-mindmap-start-gap);
   margin-top: 0;
-  padding: 0 clamp(28px, 6vw, 56px) 0;
+  padding: 0 clamp(calc(28px * var(--ls)), calc(6vw * var(--ls)), calc(56px * var(--ls))) 0;
   overflow: visible;
 }
 
 .landing-mindmap__canvas {
   position: relative;
   width: 100%;
-  min-height: min(72vh, 640px);
+  min-height: min(calc(72vh * var(--ls)), calc(640px * var(--ls)));
   aspect-ratio: 1.15 / 1;
-  max-height: 720px;
+  max-height: calc(720px * var(--ls));
   overflow: visible;
 }
 
@@ -346,7 +379,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: min(46%, 240px);
+  width: min(46%, calc(240px * var(--ls)));
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -500,12 +533,12 @@
   justify-content: flex-start;
   gap: 0;
   box-sizing: border-box;
-  width: clamp(80px, 15vw, 100px);
-  height: clamp(80px, 15vw, 100px);
+  width: clamp(calc(80px * var(--ls)), calc(15vw * var(--ls)), calc(100px * var(--ls)));
+  height: clamp(calc(80px * var(--ls)), calc(15vw * var(--ls)), calc(100px * var(--ls)));
   padding-block: 0;
-  padding-inline: calc((100% - clamp(44px, 9vw, 56px)) / 2);
+  padding-inline: calc((100% - clamp(calc(44px * var(--ls)), calc(9vw * var(--ls)), calc(56px * var(--ls)))) / 2);
   border: 2px solid color-mix(in srgb, var(--edu-login-bg) 55%, #ffffff);
-  border-radius: 24px;
+  border-radius: calc(24px * var(--ls));
   background: #fff;
   color: #2563eb;
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.14);
@@ -523,9 +556,9 @@
 .landing-mindmap__bubble:hover,
 .landing-mindmap__bubble:focus-visible {
   gap: 0.85rem;
-  width: min(400px, 94vw);
-  height: clamp(9.5rem, 26vw, 12.75rem);
-  padding: 1rem 1.2rem 1rem 0.95rem;
+  width: min(calc(400px * var(--ls)), 94vw);
+  height: clamp(calc(9.5rem * var(--ls)), calc(26vw * var(--ls)), calc(12.75rem * var(--ls)));
+  padding: calc(1rem * var(--ls)) calc(1.2rem * var(--ls)) calc(1rem * var(--ls)) calc(0.95rem * var(--ls));
   overflow: hidden;
   border-radius: 20px;
   box-shadow: 0 14px 36px rgba(15, 23, 42, 0.18);
@@ -544,7 +577,7 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  width: clamp(48px, 10vw, 60px);
+  width: clamp(calc(48px * var(--ls)), calc(10vw * var(--ls)), calc(60px * var(--ls)));
   color: #2563eb;
   pointer-events: none;
 }
@@ -552,14 +585,14 @@
 .landing-mindmap__bubble-icon .edu-login__role-icon,
 .landing-mindmap__bubble-icon .landing-mindmap__node-icon-svg {
   display: block;
-  width: clamp(44px, 9vw, 56px);
-  height: clamp(44px, 9vw, 56px);
+  width: clamp(calc(44px * var(--ls)), calc(9vw * var(--ls)), calc(56px * var(--ls)));
+  height: clamp(calc(44px * var(--ls)), calc(9vw * var(--ls)), calc(56px * var(--ls)));
   color: #2563eb;
 }
 
 .landing-mindmap__bubble-icon .edu-login__brand-icon {
   width: auto;
-  height: clamp(44px, 9vw, 56px);
+  height: clamp(calc(44px * var(--ls)), calc(9vw * var(--ls)), calc(56px * var(--ls)));
   margin: 0;
   transform: none;
 }
@@ -596,14 +629,14 @@
 }
 
 .landing-mindmap__bubble-title {
-  font-size: 1.05rem;
+  font-size: calc(1.05rem * var(--ls));
   font-weight: 700;
   line-height: 1.35;
   color: #0f172a;
 }
 
 .landing-mindmap__bubble-body {
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--ls));
   line-height: 1.58;
   color: #475569;
 }
@@ -611,12 +644,11 @@
 /* 마인드맵 하단: 배가 파도 위에 떠 있는 CTA */
 .landing-mindmap__start {
   position: relative;
-  width: 100vw;
-  max-width: 100vw;
+  width: auto;
+  max-width: none;
   margin-top: 0;
-  margin-right: calc(50% - 50vw);
-  margin-left: calc(50% - 50vw);
-  padding: clamp(24px, 4vh, 40px) 0 0;
+  margin-inline: calc(-1 * var(--landing-scroll-pad-x));
+  padding: clamp(calc(24px * var(--ls)), calc(4vh * var(--ls)), calc(40px * var(--ls))) 0 0;
   overflow: visible;
   box-sizing: border-box;
 }
@@ -624,45 +656,64 @@
 .landing-mindmap__start-scene {
   position: relative;
   width: 100%;
-  min-height: clamp(280px, 44vh, 400px);
+  min-height: clamp(calc(280px * var(--ls)), calc(44vh * var(--ls)), calc(400px * var(--ls)));
   overflow: visible;
 }
 
 /* 랜딩 배경(.landing-waves)과 동일한 파도 — 뷰포트 가로 전체, 섹션 맨 아래까지 */
 .landing-mindmap__start-waves {
   position: absolute;
+  right: 0;
   bottom: 0;
-  left: 50%;
+  left: 0;
   z-index: 1;
-  width: 100vw;
-  height: clamp(180px, 32vh, 280px);
-  overflow: hidden;
+  width: auto;
+  height: clamp(calc(200px * var(--ls)), calc(36vh * var(--ls)), calc(300px * var(--ls)));
+  overflow: visible;
   pointer-events: none;
-  transform: translateX(-50%);
 }
 
 .landing-mindmap__start-waves-svg {
   position: absolute;
-  inset: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   display: block;
   width: 100%;
   height: 100%;
 }
 
+.landing-mindmap__start-waves-svg--back {
+  z-index: 1;
+}
+
+.landing-mindmap__start-waves-svg--mid {
+  z-index: 2;
+}
+
+.landing-mindmap__start-waves-svg--front {
+  z-index: 3;
+}
+
 .landing-mindmap__start-waves-svg--back path {
-  fill: #6a94be;
-  opacity: 0.92;
+  fill: #4d7399;
+  opacity: 1;
+}
+
+.landing-mindmap__start-waves-svg--mid path {
+  fill: #6f9bc4;
+  opacity: 0.95;
 }
 
 .landing-mindmap__start-waves-svg--front path {
-  fill: #9ec0e8;
+  fill: #e8f4fc;
   opacity: 1;
 }
 
 .landing-mindmap__start-boat-wrap {
   position: absolute;
   right: 0;
-  bottom: clamp(12px, 2.5vh, 32px);
+  bottom: clamp(calc(12px * var(--ls)), calc(2.5vh * var(--ls)), calc(32px * var(--ls)));
   left: 0;
   z-index: 3;
   display: flex;
@@ -679,14 +730,14 @@
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  width: min(480px, 94vw);
-  margin: 0 0 clamp(0.35rem, 1.2vh, 0.75rem);
+  width: min(calc(480px * var(--ls)), 94vw);
+  margin: 0 0 clamp(calc(0.35rem * var(--ls)), calc(1.2vh * var(--ls)), calc(0.75rem * var(--ls)));
   pointer-events: none;
 }
 
 .landing-mindmap__start-click-text {
   margin: 0;
-  font-size: clamp(1.35rem, 3.6vw, 1.85rem);
+  font-size: clamp(calc(1.35rem * var(--ls)), calc(3.6vw * var(--ls)), calc(1.85rem * var(--ls)));
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.04em;
@@ -725,7 +776,7 @@
 .landing-mindmap__start-boat-visual {
   position: relative;
   display: block;
-  width: min(480px, 94vw);
+  width: min(calc(480px * var(--ls)), 94vw);
   transition: filter 0.2s ease;
 }
 
@@ -749,18 +800,29 @@
 
 .landing-mindmap__start-label {
   position: absolute;
-  top: 62%;
+  top: 66%;
   left: 50%;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   width: min(72%, 17rem);
   margin: 0;
-  font-size: clamp(0.9rem, 2.4vw, 1.15rem);
+  font-size: clamp(calc(0.78rem * var(--ls)), calc(2.05vw * var(--ls)), calc(0.98rem * var(--ls)));
   font-weight: 700;
-  line-height: 1.35;
+  line-height: 1.25;
   color: #1e40af;
   text-align: center;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.landing-mindmap__start-label-line {
+  display: block;
+}
+
+.landing-mindmap__start-label-line--cta {
+  margin-top: 0.55em;
 }
 
 @keyframes landing-start-boat-bob {
@@ -778,10 +840,11 @@
   position: relative;
   z-index: 2;
   box-sizing: border-box;
-  width: calc(100% + 2 * var(--landing-scroll-pad-x));
+  width: auto;
   max-width: none;
   margin: var(--landing-footer-gap) calc(-1 * var(--landing-scroll-pad-x)) 0;
-  padding: clamp(16px, 2.5vh, 24px) clamp(16px, 4vw, 32px);
+  padding: clamp(calc(16px * var(--ls)), calc(2.5vh * var(--ls)), calc(24px * var(--ls)))
+    clamp(calc(16px * var(--ls)), calc(4vw * var(--ls)), calc(32px * var(--ls)));
   text-align: center;
   border-radius: 0;
   background: rgb(255 255 255 / 0.88);
@@ -792,27 +855,22 @@
 
 .landing-footer__text {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--ls));
   color: #475569;
-}
-
-@media (min-width: 521px) {
-  .landing-scroll {
-    padding-right: calc(var(--landing-scroll-pad-x) + 8.5rem);
-  }
 }
 
 @media (max-width: 640px) {
   .landing-mindmap__canvas {
-    min-height: 520px;
+    min-height: calc(520px * var(--ls));
     aspect-ratio: auto;
   }
 
   .landing-mindmap__bubble:hover,
   .landing-mindmap__bubble:focus-visible {
-    width: min(340px, 96vw);
-    height: clamp(9rem, 28vw, 11.5rem);
-    padding: 0.95rem 1.05rem 0.95rem 0.85rem;
+    width: min(calc(340px * var(--ls)), 96vw);
+    height: clamp(calc(9rem * var(--ls)), calc(28vw * var(--ls)), calc(11.5rem * var(--ls)));
+    padding: calc(0.95rem * var(--ls)) calc(1.05rem * var(--ls)) calc(0.95rem * var(--ls))
+      calc(0.85rem * var(--ls));
     gap: 0.65rem;
   }
 }
@@ -843,5 +901,11 @@
 
   .landing-mindmap__start-boat-wrap {
     animation: none;
+  }
+
+  .landing-intro,
+  .landing-bridge,
+  .landing-mindmap__canvas {
+    transform: none;
   }
 }

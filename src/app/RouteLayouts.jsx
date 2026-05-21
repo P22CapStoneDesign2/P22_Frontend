@@ -1,6 +1,6 @@
 // 공통 껍데기 레이아웃 — 교수/학생 영역 Header + Outlet
 
-import { Outlet, useMatches, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom'
 import AppLayout from '../components/layout/AppLayout/AppLayout.jsx'
 import { ROUTES } from '../shared/constants/routes.js'
 import { clearStoredUserRole } from '../shared/auth/roleUtils.js'
@@ -59,10 +59,13 @@ export function AdminAreaLayout() {
 /** 학생 영역 layout route — AppLayout + Outlet */
 export function StudentAreaLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const meta = layoutMetaFromMatches(useMatches())
+  const isCourseApplyPage = location.pathname === ROUTES.studentCourseApply
 
   return (
     <AppLayout
+      className={isCourseApplyPage ? 'edu-app-layout--fullbleed' : ''}
       contentClassName={meta.contentClassName ?? ''}
       headerProps={{
         userEmail: 'student@school.edu',

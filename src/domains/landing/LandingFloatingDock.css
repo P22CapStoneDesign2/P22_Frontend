@@ -1,12 +1,13 @@
 .landing-dock {
   --dock-panel: rgb(255 255 255 / 0.98);
   --dock-sky: var(--edu-login-bg);
+  --ls: var(--landing-scale, 1);
 
   position: fixed;
-  right: clamp(10px, 2vw, 22px);
-  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  right: clamp(calc(24px * var(--ls)), calc(3.5vw * var(--ls)), calc(40px * var(--ls)));
+  bottom: max(calc(112px * var(--ls)), calc(12vh * var(--ls)), env(safe-area-inset-bottom, 0px));
   z-index: 12;
-  width: min(11.5rem, 36vw);
+  width: min(calc(11.5rem * var(--ls)), calc(36vw * var(--ls)));
   pointer-events: none;
 }
 
@@ -21,8 +22,8 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  min-height: clamp(12rem, 30vh, 15.5rem);
-  border-radius: 0 1.35rem 1.35rem 0;
+  min-height: clamp(calc(12rem * var(--ls)), calc(30vh * var(--ls)), calc(15.5rem * var(--ls)));
+  border-radius: 0 calc(1.35rem * var(--ls)) calc(1.35rem * var(--ls)) 0;
   overflow: hidden;
   border: none;
   background: linear-gradient(
@@ -142,16 +143,16 @@
 }
 
 .landing-dock__selection {
-  --sel-pad-y: 3px;
+  --sel-pad-y: calc(3px * var(--ls));
 
   position: absolute;
   left: 36%;
   right: 0;
   z-index: 1;
   top: calc(var(--sel-top, 0px) - var(--sel-pad-y));
-  height: calc(var(--sel-height, 2.75rem) + var(--sel-pad-y) * 2);
-  min-height: 2rem;
-  border-radius: 0.75rem;
+  height: calc(var(--sel-height, calc(2.75rem * var(--ls))) + var(--sel-pad-y) * 2);
+  min-height: calc(2rem * var(--ls));
+  border-radius: calc(0.75rem * var(--ls));
   pointer-events: none;
   background: linear-gradient(
     270deg,
@@ -172,9 +173,10 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
-  gap: 0.35rem;
+  gap: calc(0.35rem * var(--ls));
   min-width: 0;
-  padding: 1.15rem 0.7rem 1.25rem 2.15rem;
+  padding: calc(1.15rem * var(--ls)) calc(0.7rem * var(--ls)) calc(1.25rem * var(--ls))
+    calc(2.15rem * var(--ls));
 }
 
 .landing-dock__item {
@@ -183,12 +185,13 @@
   display: block;
   width: 100%;
   margin: 0;
-  padding: 0.62rem 0.2rem 0.62rem 0.5rem;
+  padding: calc(0.62rem * var(--ls)) calc(0.2rem * var(--ls)) calc(0.62rem * var(--ls))
+    calc(0.5rem * var(--ls));
   border: none;
-  border-radius: 0.65rem;
+  border-radius: calc(0.65rem * var(--ls));
   background: transparent;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--ls));
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.02em;
@@ -208,11 +211,11 @@
 }
 
 .landing-dock__item--brand {
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--ls));
 }
 
 .landing-dock__item--cta {
-  margin-top: 0.15rem;
+  margin-top: calc(0.15rem * var(--ls));
 }
 
 .landing-dock__item--active {
@@ -287,11 +290,11 @@
 
 @media (max-width: 520px) {
   .landing-dock {
-    width: min(10.5rem, 38vw);
+    width: min(calc(10.5rem * var(--ls)), calc(38vw * var(--ls)));
   }
 
   .landing-dock__raft {
-    min-height: clamp(11rem, 34vh, 14rem);
+    min-height: clamp(calc(11rem * var(--ls)), calc(34vh * var(--ls)), calc(14rem * var(--ls)));
   }
 
   .landing-dock__waves {
@@ -299,12 +302,14 @@
   }
 
   .landing-dock__panel {
-    padding: 1rem 0.55rem 1.1rem 1.85rem;
+    padding: calc(1rem * var(--ls)) calc(0.55rem * var(--ls)) calc(1.1rem * var(--ls))
+      calc(1.85rem * var(--ls));
   }
 
   .landing-dock__item {
-    font-size: 0.8rem;
-    padding: 0.55rem 0.15rem 0.55rem 0.35rem;
+    font-size: calc(0.8rem * var(--ls));
+    padding: calc(0.55rem * var(--ls)) calc(0.15rem * var(--ls)) calc(0.55rem * var(--ls))
+      calc(0.35rem * var(--ls));
   }
 }
 

@@ -8,6 +8,16 @@
   box-sizing: border-box;
 }
 
+/* #root(1126px) 밖으로 — 헤더·본문 배경이 뷰포트 전체에 닿게 함 */
+.edu-app-layout--fullbleed {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
 .edu-app-layout__content {
   flex: 1;
   min-width: 0;

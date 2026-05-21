@@ -115,7 +115,8 @@
   max-width: min(40vw, 280px);
 }
 
-.edu-header__logout {
+.edu-header__logout,
+.edu-header__login {
   font: inherit;
   font-size: 0.875rem;
   font-weight: 600;
@@ -124,14 +125,27 @@
   border: 1px solid #d1d5db;
   background: #f9fafb;
   color: #111827;
+  box-sizing: border-box;
+}
+
+.edu-header__logout {
   cursor: pointer;
 }
 
-.edu-header__logout:hover {
-  background: #f3f4f6;
+.edu-header__login {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.edu-header__logout:focus-visible {
+.edu-header__logout:hover,
+.edu-header__login:hover {
+  background: #f3f4f6;
+  text-decoration: none;
+}
+
+.edu-header__logout:focus-visible,
+.edu-header__login:focus-visible {
   outline: 2px solid #6366f1;
   outline-offset: 2px;
 }
@@ -156,8 +170,8 @@
 
 /* 랜딩 등 비로그인 화면 */
 .edu-header--public {
-  background: #e0e0e0;
-  border-bottom-color: rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+  border-bottom-color: #dbeafe;
   padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
 }
 
@@ -226,24 +240,3 @@
   transform: none;
 }
 
-.edu-header__login {
-  padding: 0.45rem 1.25rem;
-  border-radius: 999px;
-  background: #fff;
-  color: #111;
-  font-size: 0.95rem;
-  font-weight: 600;
-  text-decoration: none;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.15s ease;
-}
-
-.edu-header__login:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  text-decoration: none;
-}
-
-.edu-header__login:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-}

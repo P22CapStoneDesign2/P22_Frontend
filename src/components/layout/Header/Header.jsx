@@ -92,6 +92,7 @@ export default function Header({
   logoCentered = false,
 }) {
   const isPublic = variant === 'public'
+  const showLoginLink = isPublic || Boolean(loginHref && !onLogout && !userEmail)
   const logo = hideLogo ? null : (
     <HeaderLogo
       logoHref={logoHref}
@@ -131,7 +132,7 @@ export default function Header({
           ) : null}
         </div>
         <div className="edu-header__right">
-          {isPublic ? (
+          {showLoginLink ? (
             <Link className="edu-header__login" to={loginHref}>
               {loginLabel}
             </Link>

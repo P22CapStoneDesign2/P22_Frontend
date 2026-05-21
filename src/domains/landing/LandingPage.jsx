@@ -4,10 +4,14 @@ import { ROUTES } from '../../shared/constants/routes.js'
 import { EduHubBookIcon } from '../../shared/icons/eduHubIcons.jsx'
 import LandingFloatingDock from './LandingFloatingDock.jsx'
 import LandingMindMap from './LandingMindMap.jsx'
+import {
+  LANDING_WAVE_BACK_PATH,
+  LANDING_WAVE_FRONT_PATH,
+  LANDING_WAVE_MID_PATH,
+} from './landingWavePaths.js'
 import './LandingPage.css'
 
 const LANDING_HEADER = {
-  variant: 'public',
   logoImageOnly: true,
   logoHref: ROUTES.home,
   loginHref: ROUTES.login,
@@ -29,14 +33,21 @@ export default function LandingPage() {
           viewBox="0 0 1440 240"
           preserveAspectRatio="none"
         >
-          <path d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,138.7C672,128,768,128,864,144C960,160,1056,192,1152,197.3C1248,203,1344,181,1392,170.7L1440,160L1440,240L0,240Z" />
+          <path d={LANDING_WAVE_BACK_PATH} />
+        </svg>
+        <svg
+          className="landing-waves__svg landing-waves__svg--mid"
+          viewBox="0 0 1440 240"
+          preserveAspectRatio="none"
+        >
+          <path d={LANDING_WAVE_MID_PATH} />
         </svg>
         <svg
           className="landing-waves__svg landing-waves__svg--front"
           viewBox="0 0 1440 240"
           preserveAspectRatio="none"
         >
-          <path d="M0,128L60,122.7C120,117,240,107,360,117.3C480,128,600,160,720,165.3C840,171,960,149,1080,138.7C1200,128,1320,128,1380,128L1440,128L1440,240L0,240Z" />
+          <path d={LANDING_WAVE_FRONT_PATH} />
         </svg>
       </div>
 

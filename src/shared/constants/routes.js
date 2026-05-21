@@ -21,6 +21,8 @@ export const ROUTES = {
   professorMaterialViewer: '/professor/materials/:materialId/viewer',
 
   studentDashboard: '/student',
+  /** 학생 — 과목(수강) 신청 */
+  studentCourseApply: '/student/course-apply',
   studentMaterials: '/student/materials',
   /** `<Route path={ROUTES.studentMaterialViewer} />` */
   studentMaterialViewer: '/student/materials/:materialId/viewer',
