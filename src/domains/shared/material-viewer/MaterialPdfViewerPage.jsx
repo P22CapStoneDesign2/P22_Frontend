@@ -10,6 +10,7 @@ import {
   parseMaterialResponse,
   postMaterialProgress,
 } from '../../../api/materials.js'
+import { useAuthHeaderSession } from '../../../shared/auth/useAuthHeaderSession.js'
 import {
   ROUTES,
   STUDENT_MATERIALS_COURSE_QUERY_KEY,
@@ -45,7 +46,7 @@ export default function MaterialPdfViewerPage() {
   const courseIdFromQuery = searchParams.get(STUDENT_MATERIALS_COURSE_QUERY_KEY) ?? ''
   const logoHref = isProfessorRoute ? ROUTES.professorDashboard : ROUTES.studentDashboard
 
-  const [userEmail] = useState('user@school.edu')
+  const { userEmail, onLogout: onHeaderLogout } = useAuthHeaderSession()
 
   const [title, setTitle] = useState('')
   const [metaLoading, setMetaLoading] = useState(true)
@@ -276,8 +277,8 @@ export default function MaterialPdfViewerPage() {
   }, [navigate, isProfessorRoute, courseIdFromQuery, mid])
 
   const handleLogout = useCallback(() => {
-    navigate(logoHref)
-  }, [navigate, logoHref])
+    onHeaderLogout()
+  }, [onHeaderLogout])
 
   const headerProps = useMemo(
     () => ({

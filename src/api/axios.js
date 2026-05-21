@@ -19,6 +19,7 @@ const AUTH_REFRESH_EXCLUDED_PATHS = new Set([
   '/api/auth/check-nickname',
   '/api/auth/password/reset-request',
   '/api/auth/password/reset',
+  '/api/auth/logout',
 ])
 
 function requestPathWithoutQuery(config) {

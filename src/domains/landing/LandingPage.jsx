@@ -1,9 +1,9 @@
 import introduceGif from '../../assets/introduce_1.gif'
 import AppLayout from '../../components/layout/AppLayout/AppLayout.jsx'
-import { ROUTES } from '../../shared/constants/routes.js'
 import { EduHubBookIcon } from '../../shared/icons/eduHubIcons.jsx'
 import LandingFloatingDock from './LandingFloatingDock.jsx'
 import LandingMindMap from './LandingMindMap.jsx'
+import { useLandingHeaderProps } from './useLandingHeaderProps.js'
 import {
   LANDING_WAVE_BACK_PATH,
   LANDING_WAVE_FRONT_PATH,
@@ -11,18 +11,14 @@ import {
 } from './landingWavePaths.js'
 import './LandingPage.css'
 
-const LANDING_HEADER = {
-  logoImageOnly: true,
-  logoHref: ROUTES.home,
-  loginHref: ROUTES.login,
-}
-
 export default function LandingPage() {
+  const headerProps = useLandingHeaderProps()
+
   return (
     <AppLayout
       className="landing"
       contentClassName="landing__content"
-      headerProps={LANDING_HEADER}
+      headerProps={headerProps}
     >
       <div className="landing-waves" aria-hidden="true">
         <div className="landing-waves__blob landing-waves__blob--1" />

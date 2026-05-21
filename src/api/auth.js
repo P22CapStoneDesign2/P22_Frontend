@@ -67,7 +67,7 @@ export const reissue = (refreshToken) =>
 
 /* POST /api/auth/logout (인증 필요) — { refreshToken } */
 export const logout = (refreshToken) =>
-  instance.post('/api/auth/logout', { refreshToken });
+  instance.post('/api/auth/logout', { refreshToken }, { skipAuthRefresh: true });
 
 /* GET /api/users/me (인증 필요) — 회원 정보 조회
  * 카카오 등에서 username(이름)·nickname(닉네임) 설정 여부 판별에 사용한다.

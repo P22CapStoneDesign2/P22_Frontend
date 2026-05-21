@@ -1,5 +1,6 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
+import { useAuthHeaderSession } from '../../../shared/auth/useAuthHeaderSession.js'
 import { ROUTES } from '../../../shared/constants/routes.js'
 import QuizPreviewContent from './QuizPreviewContent.jsx'
 import './QuizPreviewPage.css'
@@ -9,13 +10,13 @@ import './QuizPreviewPage.css'
  */
 export default function QuizPreviewPage() {
   const { quizId } = useParams()
-  const navigate = useNavigate()
+  const { userEmail, onLogout } = useAuthHeaderSession()
 
   return (
     <AppLayout
       headerProps={{
-        userEmail: 'professor@school.edu',
-        onLogout: () => navigate('/professor'),
+        userEmail,
+        onLogout,
         logoHref: '/professor',
         logoLabel: 'EDU HUB',
         logoImageOnly: true,
