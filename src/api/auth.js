@@ -65,7 +65,7 @@ export const confirmPasswordReset = (data) =>
 export const reissue = (refreshToken) =>
   instance.post('/api/auth/reissue', { refreshToken });
 
-/* POST /api/auth/logout (인증 필요) — { refreshToken } */
+/* POST /api/auth/logout — { refreshToken } (Access Token 불필요) */
 export const logout = (refreshToken) =>
   instance.post('/api/auth/logout', { refreshToken }, { skipAuthRefresh: true });
 

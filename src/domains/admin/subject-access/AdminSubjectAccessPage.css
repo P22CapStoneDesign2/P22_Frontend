@@ -139,6 +139,7 @@
 .edu-admin-access__actions--c3 {
   grid-column: 3;
   grid-row: 4;
+  gap: 8px;
 }
 
 @media (max-width: 1100px) {
@@ -249,6 +250,10 @@
   background: #fff;
 }
 
+.edu-admin-access__table-body--enrollment {
+  scrollbar-gutter: stable;
+}
+
 .edu-admin-access__table {
   width: 100%;
   table-layout: fixed;
@@ -256,8 +261,21 @@
   font-size: clamp(0.8125rem, 1.2vw, 0.9375rem);
 }
 
-.edu-admin-access__table col.edu-admin-access__col-check {
+/* 수강·신청 패널 — 헤더/본문 동일 5열(체크 44px + 데이터 4열) */
+.edu-admin-access__table--enrollment col.edu-admin-access__col-check {
   width: 44px;
+}
+
+.edu-admin-access__table--enrollment col.edu-admin-access__col-name {
+  width: 24%;
+}
+
+.edu-admin-access__table--enrollment col.edu-admin-access__col-nick {
+  width: 22%;
+}
+
+.edu-admin-access__table--enrollment col.edu-admin-access__col-date {
+  width: 27%;
 }
 
 .edu-admin-access__caption {
@@ -297,6 +315,10 @@
   justify-content: center;
 }
 
+.edu-admin-access__empty-msg--error {
+  color: #b91c1c;
+}
+
 .edu-admin-access__empty-msg {
   margin: 0;
   padding: 24px 16px;
@@ -306,10 +328,20 @@
   line-height: 1.5;
 }
 
-.edu-admin-access__th-check,
-.edu-admin-access__cell-check {
+.edu-admin-access__table--enrollment .edu-admin-access__th-check,
+.edu-admin-access__table--enrollment .edu-admin-access__cell-check {
   width: 44px;
+  max-width: 44px;
+  padding-left: 8px;
+  padding-right: 8px;
   text-align: center;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.edu-admin-access__table--enrollment .edu-admin-access__cell-check input[type='checkbox'] {
+  margin: 0;
+  vertical-align: middle;
 }
 
 .edu-admin-access__sr-only {

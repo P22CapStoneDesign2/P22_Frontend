@@ -10,12 +10,14 @@
 
 - [x] `ROUTES.studentCourseApply` · 라우트 연결
 - [ ] 학생 대시보드 진입 경로 (요청 없음 — 대시보드 메뉴 변경하지 않음)
-- [x] mock 과목 목록·검색·행 선택(보라 톤)·신청 버튼 (API 전 `alert`)
+- [x] mock 과목 목록·검색·행 선택(보라 톤)·신청 버튼
+- [x] `GET /api/lessons` · `GET /api/lessons/my` · `POST`/`DELETE` enrollments (`src/api/lessons.js`, §10·§27~§29)
+- [x] 신청 상태 열·승인 대기 시 신청 취소
 - [x] `npm run build` 성공
 - [ ] 브라우저에서 목업과 레이아웃·동작 확인
 
 ## 의사결정 로그
 
-- API 없음 → `MOCK_COURSES` 상수, 신청은 `window.alert` 플레이스홀더.
+- 목록·신청 API: `src/api/lessons.js` — 명세 §10·§26 (사용자 제공 API 명세서 기준).
 - 플레이스홀더 페이지(`StudentCourseApplyPlaceholderPage`) 제거, `course-apply/StudentCourseApplyPage`로 대체.
 - 배경은 다른 학생 화면과 동일 그라데이션; `/student/course-apply` 에서만 `edu-app-layout--fullbleed` 로 헤더·본문 뷰포트 전체.
