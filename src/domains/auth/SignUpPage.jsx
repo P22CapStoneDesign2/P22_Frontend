@@ -15,7 +15,12 @@ import {
   EduHubEyeClosedIcon,
   EduHubEyeOpenIcon,
 } from '../../shared/icons/eduHubIcons.jsx'
-import { isValidDisplayNickname, isValidSignupUsername } from '../../shared/validation/signUpProfile.js'
+import {
+  DISPLAY_NICKNAME_HINT,
+  DISPLAY_NICKNAME_MAX,
+  isValidDisplayNickname,
+  isValidSignupUsername,
+} from '../../shared/validation/signUpProfile.js'
 import './SignUpPage.css'
 
 
@@ -159,7 +164,7 @@ export default function SignUpPage() {
   const handleCheckNickname = async () => {
     if (!isValidDisplayNickname(nickname)) {
       setNicknameChecked(false)
-      setNicknameCheckMessage('닉네임은 특수문자를 제외한 2~20자로 입력해 주세요.')
+      setNicknameCheckMessage(DISPLAY_NICKNAME_HINT)
       return
     }
     if (nicknameChecking) return
@@ -197,7 +202,7 @@ export default function SignUpPage() {
       return
     }
     if (!isValidDisplayNickname(nickname)) {
-      window.alert('닉네임은 특수문자를 제외한 2~20자로 입력해 주세요.')
+      window.alert(DISPLAY_NICKNAME_HINT)
       return
     }
     if (!nicknameChecked) {
@@ -309,7 +314,7 @@ export default function SignUpPage() {
                   name="nickname"
                   autoComplete="nickname"
                   placeholder="닉네임"
-                  maxLength={20}
+                  maxLength={DISPLAY_NICKNAME_MAX}
                   value={nickname}
                   onChange={handleNicknameChange}
                   aria-invalid={nickStatus === 'bad'}
@@ -333,7 +338,7 @@ export default function SignUpPage() {
                 {nicknameCheckMessage}
               </p>
             ) : (
-              <p className="edu-signup__hint">표시용 닉네임입니다. 특수문자를 제외한 2~20자</p>
+              <p className="edu-signup__hint">{DISPLAY_NICKNAME_HINT}</p>
             )}
           </div>
 

@@ -12,7 +12,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { checkNickname, userSignup } from '../../api/auth'
 import { ROUTES } from '../../shared/constants/routes.js'
 import { setStoredUserRole } from '../../shared/auth/roleUtils.js'
-import { isValidDisplayNickname, isValidSignupUsername } from '../../shared/validation/signUpProfile.js'
+import {
+  DISPLAY_NICKNAME_HINT,
+  DISPLAY_NICKNAME_MAX,
+  isValidDisplayNickname,
+  isValidSignupUsername,
+} from '../../shared/validation/signUpProfile.js'
 import { EduHubBookIcon } from '../../shared/icons/eduHubIcons.jsx'
 import './KakaoRegisterPage.css'
 
@@ -105,7 +110,7 @@ export default function KakaoRegisterPage() {
   const handleCheckNickname = async () => {
     if (!isValidDisplayNickname(nickname)) {
       setNicknameChecked(false)
-      setNicknameCheckMessage('닉네임은 특수문자를 제외한 2~20자로 입력해 주세요.')
+      setNicknameCheckMessage(DISPLAY_NICKNAME_HINT)
       return
     }
     if (nicknameChecking) return
@@ -141,7 +146,7 @@ export default function KakaoRegisterPage() {
       return
     }
     if (!isValidDisplayNickname(nickname)) {
-      window.alert('닉네임은 특수문자를 제외한 2~20자로 입력해 주세요.')
+      window.alert(DISPLAY_NICKNAME_HINT)
       return
     }
     if (!nicknameChecked) {
@@ -266,7 +271,7 @@ export default function KakaoRegisterPage() {
                   name="nickname"
                   autoComplete="nickname"
                   placeholder="닉네임"
-                  maxLength={20}
+                  maxLength={DISPLAY_NICKNAME_MAX}
                   value={nickname}
                   onChange={handleNicknameChange}
                   aria-invalid={nickStatus === 'bad'}
@@ -277,13 +282,15 @@ export default function KakaoRegisterPage() {
                 type="button"
                 className="kakao-register__nickname-action"
                 onClick={handleCheckNickname}
-                disabled={nicknameChecking || !nickname}
+                disabled={
+                  nicknameChecking || !isValidDisplayNickname(nickname) || nicknameChecked
+                }
               >
                 {nicknameChecked ? '확인 완료' : nicknameChecking ? '확인 중…' : '중복 확인'}
               </button>
             </div>
             <p className="kakao-register__hint">
-              {nicknameCheckMessage || '앱에서 보이는 호칭입니다. 특수문자를 제외한 2~20자'}
+              {nicknameCheckMessage || DISPLAY_NICKNAME_HINT}
             </p>
           </div>
 

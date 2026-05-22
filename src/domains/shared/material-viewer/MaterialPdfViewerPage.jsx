@@ -6,7 +6,6 @@ import 'react-pdf/dist/Page/TextLayer.css'
 import {
   getMaterialDetail,
   getMaterialViewer,
-  parseAspectRatioString,
   parseMaterialResponse,
   postMaterialProgress,
 } from '../../../api/materials.js'
@@ -53,8 +52,6 @@ export default function MaterialPdfViewerPage() {
   const [metaError, setMetaError] = useState(null)
   const [allowDownload, setAllowDownload] = useState(true)
   const [apiPageCount, setApiPageCount] = useState(null)
-  const [aspectRatioCss, setAspectRatioCss] = useState('16 / 9')
-
   const [pdfFile, setPdfFile] = useState(null)
   const [pdfLoadError, setPdfLoadError] = useState(null)
   const revokeRef = useRef(null)
@@ -131,7 +128,6 @@ export default function MaterialPdfViewerPage() {
     setPdfLoadError(null)
     setNumPages(0)
     setApiPageCount(null)
-    setAspectRatioCss('16 / 9')
     const storageTitle = getMaterialDisplayLabel(mid)
     if (storageTitle && storageTitle !== '—') setTitle(storageTitle)
     else setTitle('')
@@ -158,11 +154,6 @@ export default function MaterialPdfViewerPage() {
 
         const pageHint = Number(viewer?.pageCount) || Number(detail?.pageCount)
         if (Number.isFinite(pageHint) && pageHint > 0) setApiPageCount(pageHint)
-
-        const ar =
-          parseAspectRatioString(viewer?.aspectRatio) ||
-          parseAspectRatioString(detail?.aspectRatio)
-        if (ar) setAspectRatioCss(ar)
 
         const pdfUrl = viewer?.pdfUrl
         if (!pdfUrl) {
@@ -287,6 +278,7 @@ export default function MaterialPdfViewerPage() {
       logoHref,
       logoLabel: 'EDU HUB',
       logoImageOnly: true,
+      logoCentered: true,
     }),
     [userEmail, handleLogout, logoHref],
   )
@@ -306,59 +298,58 @@ export default function MaterialPdfViewerPage() {
       contentClassName="edu-mat-pdf-viewer-layout-content"
     >
       <div className="edu-mat-pdf-viewer">
-        <div className="edu-mat-pdf-viewer__subbar">
-          <h1 className="edu-mat-pdf-viewer__doc-title">{subbarTitle}</h1>
-          <div className="edu-mat-pdf-viewer__subbar-spacer" aria-hidden />
-          <button type="button" className="edu-mat-pdf-viewer__exit-btn" onClick={handleExit}>
-            뷰어 종료
-          </button>
-        </div>
-
-        <main className="edu-mat-pdf-viewer__main">
-          <div className="edu-mat-pdf-viewer__jump-above-grey">
-            <div className="edu-mat-pdf-viewer__jump-row">
-              <label className="edu-mat-pdf-viewer__page-jump-label" htmlFor="edu-mat-pdf-page-jump">
-                페이지 이동
-              </label>
-              <input
-                id="edu-mat-pdf-page-jump"
-                className="edu-mat-pdf-viewer__page-jump-input"
-                type="search"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="페이지"
-                aria-label="이동할 페이지 번호"
-                disabled={jumpDisabled}
-                value={jumpInput}
-                onChange={(e) => {
-                  setJumpInput(e.target.value)
-                  setJumpError(null)
-                }}
-                onKeyDown={handleJumpKeyDown}
-                aria-invalid={Boolean(jumpError)}
-                aria-describedby="edu-mat-pdf-page-jump-hint edu-mat-pdf-page-jump-err"
-              />
-              <button
-                type="button"
-                className="edu-mat-pdf-viewer__small-btn"
-                disabled={jumpDisabled}
-                onClick={applyJump}
-              >
-                이동
-              </button>
-              <span id="edu-mat-pdf-page-jump-hint" className="edu-mat-pdf-viewer__sr-only">
-                Enter 키 또는 이동 버튼으로 해당 페이지로 이동합니다.
-              </span>
-              {jumpError ? (
-                <span id="edu-mat-pdf-page-jump-err" className="edu-mat-pdf-viewer__jump-error" role="status">
-                  {jumpError}
+        <div className="edu-mat-pdf-viewer__body">
+          <aside className="edu-mat-pdf-viewer__sidebar" aria-label="교안 뷰어 메뉴">
+            <h1 className="edu-mat-pdf-viewer__doc-title">{subbarTitle}</h1>
+            <div className="edu-mat-pdf-viewer__sidebar-tools">
+              <div className="edu-mat-pdf-viewer__jump-row">
+                <label className="edu-mat-pdf-viewer__page-jump-label" htmlFor="edu-mat-pdf-page-jump">
+                  페이지 이동
+                </label>
+                <input
+                  id="edu-mat-pdf-page-jump"
+                  className="edu-mat-pdf-viewer__page-jump-input"
+                  type="search"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  placeholder="페이지"
+                  aria-label="이동할 페이지 번호"
+                  disabled={jumpDisabled}
+                  value={jumpInput}
+                  onChange={(e) => {
+                    setJumpInput(e.target.value)
+                    setJumpError(null)
+                  }}
+                  onKeyDown={handleJumpKeyDown}
+                  aria-invalid={Boolean(jumpError)}
+                  aria-describedby="edu-mat-pdf-page-jump-hint edu-mat-pdf-page-jump-err"
+                />
+                <button
+                  type="button"
+                  className="edu-mat-pdf-viewer__small-btn"
+                  disabled={jumpDisabled}
+                  onClick={applyJump}
+                >
+                  이동
+                </button>
+                <span id="edu-mat-pdf-page-jump-hint" className="edu-mat-pdf-viewer__sr-only">
+                  Enter 키 또는 이동 버튼으로 해당 페이지로 이동합니다.
                 </span>
-              ) : (
-                <span id="edu-mat-pdf-page-jump-err" className="edu-mat-pdf-viewer__sr-only" />
-              )}
+                {jumpError ? (
+                  <span id="edu-mat-pdf-page-jump-err" className="edu-mat-pdf-viewer__jump-error" role="status">
+                    {jumpError}
+                  </span>
+                ) : (
+                  <span id="edu-mat-pdf-page-jump-err" className="edu-mat-pdf-viewer__sr-only" />
+                )}
+              </div>
             </div>
-          </div>
+            <button type="button" className="edu-mat-pdf-viewer__exit-btn" onClick={handleExit}>
+              돌아가기
+            </button>
+          </aside>
 
+          <main className="edu-mat-pdf-viewer__main">
           <div className="edu-mat-pdf-viewer__grey-frame">
             <div className="edu-mat-pdf-viewer__grey-frame-content">
               {metaLoading ? (
@@ -373,7 +364,7 @@ export default function MaterialPdfViewerPage() {
               </div>
             ) : (
               <div className="edu-mat-pdf-viewer__stage">
-                <div className="edu-mat-pdf-viewer__aspect" style={{ aspectRatio: aspectRatioCss }}>
+                <div className="edu-mat-pdf-viewer__aspect">
                   <div ref={scrollRef} className="edu-mat-pdf-viewer__scroll">
                     {pdfLoadError ? (
                       <div className="edu-mat-pdf-viewer__frame-fill edu-mat-pdf-viewer__frame-fill--tight">
@@ -410,23 +401,23 @@ export default function MaterialPdfViewerPage() {
               </div>
               )}
             </div>
+            <div
+              className="edu-mat-pdf-viewer__bottom-nav"
+              role="status"
+              aria-live="polite"
+              aria-label="현재 페이지"
+            >
+              <span className="edu-mat-pdf-viewer__page-indicator">
+                {bottomPageDisplay.cur} / {bottomPageDisplay.total}
+              </span>
+            </div>
           </div>
 
-          <div
-            className="edu-mat-pdf-viewer__bottom-nav"
-            role="status"
-            aria-live="polite"
-            aria-label="현재 페이지"
-          >
-            <span className="edu-mat-pdf-viewer__page-indicator">
-              {bottomPageDisplay.cur} / {bottomPageDisplay.total}
-            </span>
-          </div>
-
-          {!metaLoading && !metaError && !allowDownload ? (
-            <p className="edu-mat-pdf-viewer__hint">이 교안은 다운로드가 제한되어 있습니다.</p>
-          ) : null}
-        </main>
+            {!metaLoading && !metaError && !allowDownload ? (
+              <p className="edu-mat-pdf-viewer__hint">이 교안은 다운로드가 제한되어 있습니다.</p>
+            ) : null}
+          </main>
+        </div>
       </div>
     </AppLayout>
   )

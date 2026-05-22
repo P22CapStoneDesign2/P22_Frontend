@@ -42,6 +42,25 @@
   justify-content: center;
 }
 
+.edu-login__logo-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: opacity 0.15s ease;
+}
+
+.edu-login__logo-link:hover {
+  opacity: 0.88;
+}
+
+.edu-login__logo-link:focus-visible {
+  outline: 2px solid var(--edu-focus-ring, #4a7ab5);
+  outline-offset: 4px;
+}
+
 .edu-login__header .edu-login__brand-icon {
   display: block;
   width: auto;
