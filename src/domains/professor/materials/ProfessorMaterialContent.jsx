@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
-import { ROUTES } from '../../../shared/constants/routes.js'
+import {
+  PROFESSOR_MATERIALS_COURSE_QUERY_KEY,
+  ROUTES,
+} from '../../../shared/constants/routes.js'
 import MaterialFileTable from './MaterialFileTable.jsx'
 import {
   genCourseId,
@@ -25,6 +28,7 @@ const SAVE_CONFIRM_MESSAGE = '저장하시겠습니까?'
 
 export default function ProfessorMaterialContent() {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [courses, setCourses] = useState([])
   const [selectedCourse, setSelectedCourse] = useState(null)
   const [materialFilesByCourseId, setMaterialFilesByCourseId] = useState({})
@@ -42,6 +46,8 @@ export default function ProfessorMaterialContent() {
   const replaceFileInputRef = useRef(null)
   const replaceTargetFileIdRef = useRef(null)
 
+  const courseIdFromUrl = searchParams.get(PROFESSOR_MATERIALS_COURSE_QUERY_KEY) ?? ''
+
   useEffect(() => {
     const dto = loadProfessorMaterialsDto()
     if (!dto) return
@@ -50,6 +56,16 @@ export default function ProfessorMaterialContent() {
     setCourses(loadedCourses)
     setMaterialFilesByCourseId(loadedFiles)
   }, [])
+
+  useEffect(() => {
+    if (!courseIdFromUrl) {
+      setSelectedCourse(null)
+      return
+    }
+    if (courses.length === 0) return
+    const found = courses.find((c) => c.id === courseIdFromUrl)
+    setSelectedCourse(found ?? null)
+  }, [courseIdFromUrl, courses])
 
   const courseOptions = courses.map((c) => ({ value: c.id, label: c.name }))
   const courseSelectValue = selectedCourse
@@ -65,6 +81,9 @@ export default function ProfessorMaterialContent() {
   const handleCourseSelect = (option) => {
     const found = courses.find((c) => c.id === option.value)
     setSelectedCourse(found ?? null)
+    const next = new URLSearchParams(searchParams)
+    next.set(PROFESSOR_MATERIALS_COURSE_QUERY_KEY, option.value)
+    setSearchParams(next, { replace: true })
   }
 
   const handleConfirmCreateCourse = () => {
@@ -74,6 +93,9 @@ export default function ProfessorMaterialContent() {
     const next = { id, name }
     setCourses((prev) => [...prev, next])
     setSelectedCourse(next)
+    const urlParams = new URLSearchParams(searchParams)
+    urlParams.set(PROFESSOR_MATERIALS_COURSE_QUERY_KEY, id)
+    setSearchParams(urlParams, { replace: true })
     setMaterialFilesByCourseId((prev) => ({
       ...prev,
       [id]: [],
@@ -251,6 +273,7 @@ export default function ProfessorMaterialContent() {
           </div>
           <MaterialFileTable
             files={currentFiles}
+            courseId={selectedCourse?.id ?? ''}
             onReplaceFile={handleReplaceFile}
             onDeleteFile={handleDeleteFile}
           />

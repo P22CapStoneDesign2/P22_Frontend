@@ -1,22 +1,23 @@
 // 공통 껍데기 레이아웃 — 교수/학생 영역 Header + Outlet
 
-import { Outlet, useLocation, useMatches } from 'react-router-dom'
+import { Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom'
 import AppLayout from '../components/layout/AppLayout/AppLayout.jsx'
 import { ROUTES } from '../shared/constants/routes.js'
-import { useAuthHeaderSession } from '../shared/auth/useAuthHeaderSession.js'
+import { clearStoredUserRole } from '../shared/auth/roleUtils.js'
 import { layoutMetaFromMatches } from './layoutMetaFromMatches.js'
 
 /** 교수 영역 layout route — AppLayout + Outlet */
 export function ProfessorAreaLayout() {
-  const { userEmail, onLogout } = useAuthHeaderSession()
+  const navigate = useNavigate()
   const meta = layoutMetaFromMatches(useMatches())
 
   return (
     <AppLayout
+      className="edu-app-layout--hub"
       contentClassName={meta.contentClassName ?? ''}
       headerProps={{
-        userEmail,
-        onLogout,
+        userEmail: 'professor@school.edu',
+        onLogout: () => navigate(ROUTES.professorDashboard),
         logoHref: ROUTES.professorDashboard,
         logoLabel: 'EDU HUB',
         logoImageOnly: true,
@@ -30,7 +31,7 @@ export function ProfessorAreaLayout() {
 
 /** 관리자 영역 layout route — AppLayout + Outlet */
 export function AdminAreaLayout() {
-  const { userEmail, onLogout } = useAuthHeaderSession()
+  const navigate = useNavigate()
   const meta = layoutMetaFromMatches(useMatches())
 
   return (
@@ -38,8 +39,13 @@ export function AdminAreaLayout() {
       className="edu-app-layout--admin-fullbleed"
       contentClassName={meta.contentClassName ?? ''}
       headerProps={{
-        userEmail,
-        onLogout,
+        userEmail: 'admin@school.edu',
+        onLogout: () => {
+          clearStoredUserRole()
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          navigate(ROUTES.home, { replace: true })
+        },
         logoHref: ROUTES.adminSubjectAccess,
         logoLabel: 'EDU HUB',
         logoImageOnly: true,
@@ -53,18 +59,20 @@ export function AdminAreaLayout() {
 
 /** 학생 영역 layout route — AppLayout + Outlet */
 export function StudentAreaLayout() {
-  const { userEmail, onLogout } = useAuthHeaderSession()
+  const navigate = useNavigate()
   const location = useLocation()
   const meta = layoutMetaFromMatches(useMatches())
   const isCourseApplyPage = location.pathname === ROUTES.studentCourseApply
 
   return (
     <AppLayout
-      className={isCourseApplyPage ? 'edu-app-layout--fullbleed' : ''}
+      className={
+        isCourseApplyPage ? 'edu-app-layout--hub edu-app-layout--fullbleed' : 'edu-app-layout--hub'
+      }
       contentClassName={meta.contentClassName ?? ''}
       headerProps={{
-        userEmail,
-        onLogout,
+        userEmail: 'student@school.edu',
+        onLogout: () => navigate(ROUTES.studentDashboard),
         logoHref: ROUTES.studentDashboard,
         logoLabel: 'EDU HUB',
         logoImageOnly: true,

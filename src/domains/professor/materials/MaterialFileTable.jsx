@@ -4,9 +4,10 @@ import MaterialFileTableRow from './MaterialFileTableRow.jsx'
  * @param {object} props
  * @param {Array<{ id: string, fileName: string, createdAt: string, updatedAt: string }>} props.files
  * @param {(fileId: string) => void} props.onReplaceFile
+ * @param {string} [props.courseId]
  * @param {(fileId: string) => void} props.onDeleteFile
  */
-export default function MaterialFileTable({ files, onReplaceFile, onDeleteFile }) {
+export default function MaterialFileTable({ files, courseId = '', onReplaceFile, onDeleteFile }) {
   const isEmpty = !files || files.length === 0
 
   return (
@@ -52,6 +53,7 @@ export default function MaterialFileTable({ files, onReplaceFile, onDeleteFile }
                 key={file.id}
                 rowNumber={index + 1}
                 file={file}
+                courseId={courseId}
                 onReplaceFile={onReplaceFile}
                 onDeleteFile={onDeleteFile}
               />

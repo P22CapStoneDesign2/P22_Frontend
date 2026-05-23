@@ -5,15 +5,15 @@
 
 .edu-quiz-solve-page {
   flex: 1;
+  width: 100%;
   min-height: 100%;
   box-sizing: border-box;
-  padding: clamp(20px, 3vw, 28px) 20px 40px;
-  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+  padding: var(--edu-hub-page-padding-y) var(--edu-hub-page-padding-x);
 }
 
 .edu-quiz-solve-page__header {
   width: 100%;
-  max-width: 1040px;
+  max-width: var(--edu-hub-container-wide);
   margin: 0 auto 20px;
   text-align: center;
 }
@@ -56,7 +56,7 @@
   gap: 24px;
   align-items: start;
   width: 100%;
-  max-width: 1040px;
+  max-width: var(--edu-hub-container-wide);
   margin: 0 auto;
   box-sizing: border-box;
 }
@@ -90,10 +90,10 @@
 }
 
 .edu-quiz-solve-layout__card {
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  border-radius: var(--edu-hub-card-radius);
+  background: var(--edu-hub-card-bg);
+  border: var(--edu-hub-card-border);
+  box-shadow: var(--edu-hub-card-shadow);
   padding: clamp(18px, 2.5vw, 26px);
   box-sizing: border-box;
   min-height: 360px;

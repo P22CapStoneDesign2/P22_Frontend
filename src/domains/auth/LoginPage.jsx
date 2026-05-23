@@ -88,10 +88,8 @@ export default function LoginPage() {
       <FindPasswordModal isOpen={findPasswordOpen} onClose={() => setFindPasswordOpen(false)} />
       <div className="edu-login__panel">
         <header className="edu-login__header">
-          <h1 className="edu-login__title">
-            <Link to={ROUTES.home} className="edu-login__logo-link" aria-label="EDU HUB 홈">
-              <EduHubBookIcon />
-            </Link>
+          <h1 className="edu-login__title" aria-label="EDU HUB">
+            <EduHubBookIcon />
           </h1>
         </header>
 

@@ -7,15 +7,15 @@
 
 .edu-quiz-create-page {
   flex: 1;
+  width: 100%;
   min-height: 100%;
   box-sizing: border-box;
-  padding: clamp(20px, 3vw, 32px) 20px 48px;
-  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+  padding: var(--edu-hub-page-padding-y) var(--edu-hub-page-padding-x);
 }
 
 .edu-quiz-create-page__header {
   width: 100%;
-  max-width: 1100px;
+  max-width: var(--edu-hub-container-wide);
   margin: 0 auto 20px;
   text-align: center;
 }
@@ -76,7 +76,7 @@
    * 잡혀 sticky가 사실상 동작하지 않습니다).
    */
   width: 100%;
-  max-width: 1100px;
+  max-width: var(--edu-hub-container-wide);
   margin: 0 auto;
   box-sizing: border-box;
 }

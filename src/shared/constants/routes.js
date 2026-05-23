@@ -37,8 +37,11 @@ export const ROUTES = {
   adminSubjectAccess: '/admin/subject-access',
 }
 
-/** 학생 교안 목록 — 강의 선택 유지용 query key */
+/** 교안 목록 — 강의 선택 유지용 query key (학생·교수 공통 키 이름) */
 export const STUDENT_MATERIALS_COURSE_QUERY_KEY = 'courseId'
+
+/** 교수 교안 관리 — 강의 선택 유지용 query key */
+export const PROFESSOR_MATERIALS_COURSE_QUERY_KEY = 'courseId'
 
 /**
  * @param {string|number} materialId
@@ -82,11 +85,28 @@ export function studentMaterialViewerPath(materialId, courseId) {
 }
 
 /**
- * @param {string|number} materialId
+ * @param {string} [courseId] 선택 강의 유지용 query
  * @returns {string}
  */
-export function professorMaterialViewerPath(materialId) {
-  return `${ROUTES.professorMaterials}/${encodeURIComponent(String(materialId))}/viewer`
+export function professorMaterialsPath(courseId) {
+  const base = ROUTES.professorMaterials
+  const id = typeof courseId === 'string' ? courseId.trim() : ''
+  if (!id) return base
+  const params = new URLSearchParams({ [PROFESSOR_MATERIALS_COURSE_QUERY_KEY]: id })
+  return `${base}?${params.toString()}`
+}
+
+/**
+ * @param {string|number} materialId
+ * @param {string} [courseId] 뷰어 종료 시 목록 복귀용
+ * @returns {string}
+ */
+export function professorMaterialViewerPath(materialId, courseId) {
+  const base = `${ROUTES.professorMaterials}/${encodeURIComponent(String(materialId))}/viewer`
+  const cid = typeof courseId === 'string' ? courseId.trim() : ''
+  if (!cid) return base
+  const params = new URLSearchParams({ [PROFESSOR_MATERIALS_COURSE_QUERY_KEY]: cid })
+  return `${base}?${params.toString()}`
 }
 
 /**

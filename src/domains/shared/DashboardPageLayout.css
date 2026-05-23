@@ -10,10 +10,10 @@
   align-items: center;
   justify-content: center;
   gap: 28px;
-  padding: clamp(24px, 5vw, 48px) 24px;
+  width: 100%;
   min-height: 100%;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+  padding: var(--edu-hub-page-padding-y) var(--edu-hub-page-padding-x);
 }
 
 .edu-dashboard__heading {
@@ -27,8 +27,8 @@
 
 .edu-dashboard__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   width: 100%;
-  max-width: 720px;
+  max-width: var(--edu-hub-container-medium);
 }

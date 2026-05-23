@@ -11,21 +11,21 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(24px, 4vw, 40px) 20px 48px;
+  width: 100%;
   min-height: 100%;
   box-sizing: border-box;
-  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+  padding: var(--edu-hub-page-padding-y) var(--edu-hub-page-padding-x);
 }
 
 .edu-stu-quiz-mat__card {
   width: 100%;
-  max-width: 520px;
+  max-width: var(--edu-hub-container-medium);
   margin: 0 auto;
   padding: clamp(22px, 3vw, 32px);
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
-  border: 1px solid #e2e8f0;
+  border-radius: var(--edu-hub-card-radius);
+  background: var(--edu-hub-card-bg);
+  box-shadow: var(--edu-hub-card-shadow);
+  border: var(--edu-hub-card-border);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;

@@ -75,7 +75,10 @@ export default function QuizResultContent({ attemptId }) {
     <>
       <div className="edu-quiz-result-layout">
         <section className="edu-quiz-result-layout__pdf">
-          <PdfViewerSection placeholderText={`교안: ${materialLabel}`} />
+          <PdfViewerSection
+            className="edu-pdf-section--quiz-result"
+            placeholderText={`교안: ${materialLabel}`}
+          />
         </section>
 
         <section className="edu-quiz-result-layout__result-card" aria-label="퀴즈 결과 카드">
