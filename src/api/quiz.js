@@ -31,6 +31,36 @@ export const deleteQuiz = (quizId) =>
   instance.delete(`/api/quiz/${encodeURIComponent(String(quizId))}`)
 
 /**
+ * POST /api/quiz/{quizId}/questions — 문제 추가
+ * @param {string|number} quizId
+ * @param {object} body
+ */
+export const addQuizQuestion = (quizId, body) =>
+  instance.post(`/api/quiz/${encodeURIComponent(String(quizId))}/questions`, body)
+
+/**
+ * PUT /api/quiz/{quizId}/questions/{questionId} — 문제 수정
+ * @param {string|number} quizId
+ * @param {string|number} questionId
+ * @param {object} body
+ */
+export const updateQuizQuestion = (quizId, questionId, body) =>
+  instance.put(
+    `/api/quiz/${encodeURIComponent(String(quizId))}/questions/${encodeURIComponent(String(questionId))}`,
+    body,
+  )
+
+/**
+ * DELETE /api/quiz/{quizId}/questions/{questionId}
+ * @param {string|number} quizId
+ * @param {string|number} questionId
+ */
+export const deleteQuizQuestion = (quizId, questionId) =>
+  instance.delete(
+    `/api/quiz/${encodeURIComponent(String(quizId))}/questions/${encodeURIComponent(String(questionId))}`,
+  )
+
+/**
  * @param {string|number} quizId
  * @param {{ answers: Array<{ questionId: string|number, studentAnswer: string }> }} body
  */

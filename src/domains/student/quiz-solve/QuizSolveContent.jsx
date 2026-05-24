@@ -197,7 +197,7 @@ export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
       <div className="edu-quiz-solve-layout edu-quiz-solve-layout--empty">
         <div className="edu-quiz-solve-layout__card">
           <p className="edu-quiz-solve-layout__empty-msg" role="status">
-            등록된 퀴즈가 없습니다.
+            등록된 문항이 없습니다.
           </p>
           <Button
             type="button"

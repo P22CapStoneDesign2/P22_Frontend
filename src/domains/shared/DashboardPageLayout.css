@@ -34,5 +34,5 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   width: 100%;
-  max-width: var(--edu-hub-container-medium);
+  max-width: min(100%, var(--edu-hub-container-wide));
 }

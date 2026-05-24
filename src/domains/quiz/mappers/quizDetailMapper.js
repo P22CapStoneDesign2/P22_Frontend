@@ -9,6 +9,23 @@ const API_MC = 'MULTIPLE_CHOICE'
 const API_SA = 'SHORT_ANSWER'
 
 /**
+ * GET /api/quiz/{id}·/edit 응답에서 문항 배열 추출
+ * @param {object|null|undefined} apiData
+ * @returns {unknown[]}
+ */
+export function extractQuizQuestionsFromApiData(apiData) {
+  if (!apiData || typeof apiData !== 'object') return []
+  const candidates = [apiData.questions, apiData.questionList, apiData.items]
+  for (const c of candidates) {
+    if (Array.isArray(c) && c.length > 0) return c
+  }
+  for (const c of candidates) {
+    if (Array.isArray(c)) return c
+  }
+  return []
+}
+
+/**
  * @param {object} q — API question 객체
  */
 function mapApiQuestionToEditorQuestion(q, { includeCorrect = false } = {}) {
@@ -30,6 +47,18 @@ function mapApiQuestionToEditorQuestion(q, { includeCorrect = false } = {}) {
       correctOptionIds = q.options
         .filter((o) => o?.correct === true && o?.id != null)
         .map((o) => String(o.id))
+      if (correctOptionIds.length === 0 && q?.correctAnswer != null) {
+        const ca = String(q.correctAnswer).trim()
+        const byId = q.options.find((o) => o?.id != null && String(o.id) === ca)
+        if (byId?.id != null) {
+          correctOptionIds = [String(byId.id)]
+        } else {
+          const idx = Number.parseInt(ca, 10)
+          if (Number.isFinite(idx) && idx > 0 && q.options[idx - 1]?.id != null) {
+            correctOptionIds = [String(q.options[idx - 1].id)]
+          }
+        }
+      }
     }
     if (type === 'shortAnswer' && q?.correctAnswer != null) {
       shortAnswer = String(q.correctAnswer)
@@ -67,7 +96,7 @@ export function mapQuizDetailToEditorBundle(apiData, routeQuizId) {
   const editorQuizId = String(apiData?.id ?? '')
   const title = typeof apiData?.title === 'string' ? apiData.title : ''
   const description = typeof apiData?.description === 'string' ? apiData.description : ''
-  const raw = Array.isArray(apiData?.questions) ? apiData.questions : []
+  const raw = extractQuizQuestionsFromApiData(apiData)
   const questions = raw.map((item) => mapApiQuestionToEditorQuestion(item))
 
   const firstAnchor = raw[0]?.anchorId
@@ -99,7 +128,7 @@ export function mapQuizEditToEditorBundle(apiData, routeQuizId) {
   const editorQuizId = String(apiData?.id ?? '')
   const title = typeof apiData?.title === 'string' ? apiData.title : ''
   const description = typeof apiData?.description === 'string' ? apiData.description : ''
-  const raw = Array.isArray(apiData?.questions) ? apiData.questions : []
+  const raw = extractQuizQuestionsFromApiData(apiData)
   const questions = raw.map((item) => mapApiQuestionToEditorQuestion(item, { includeCorrect: true }))
 
   const lessonId = apiData?.lessonId

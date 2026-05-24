@@ -5,9 +5,14 @@ import {
   fetchQuizzesData,
   fetchSubmitQuizData,
 } from '../quiz/api/quizApi.js'
-import { mapQuizEditToEditorBundle } from '../quiz/mappers/quizDetailMapper.js'
-import { mapQuizListPageDataToTableRows } from '../quiz/mappers/quizManagementMapper.js'
+import { extractQuizQuestionsFromApiData, mapQuizEditToEditorBundle } from '../quiz/mappers/quizDetailMapper.js'
+import {
+  countQuestionRows,
+  flattenQuizListToQuestionRows,
+  mapQuizListPageDataToTableRows,
+} from '../quiz/mappers/quizManagementMapper.js'
 import { mapQuizDetailToSolveQuestions } from '../student/quiz/studentQuizSolveMapper.js'
+import { fetchDeleteQuizQuestionData } from '../quiz/api/quizApi.js'
 
 const LIST_PAGE = { page: 0, size: 100 }
 
@@ -43,6 +48,7 @@ export async function fetchQuizOptionsForLesson(lessonId) {
 }
 
 /**
+ * GET /api/quiz?lessonId= 후 각 퀴즈 GET /api/quiz/{id} 로 questions flatten
  * @param {string|number} lessonId
  */
 export async function fetchQuizTableRowsForLesson(lessonId) {
@@ -50,16 +56,63 @@ export async function fetchQuizTableRowsForLesson(lessonId) {
   if (!id) return []
   try {
     const pageData = await fetchQuizzesData({ ...LIST_PAGE, lessonId: id })
-    const rows = mapQuizListPageDataToTableRows(pageData)
-    return rows.map((row) => ({
-      ...row,
-      quizSetId: row.id,
-      questionId: row.id,
-      rowNumber: row.quizNumber,
-    }))
+    const summaries = pageContent(pageData)
+    if (summaries.length === 0) return []
+
+    /** @type {Record<string, object>} */
+    const quizDetailById = {}
+
+    summaries.forEach((summary) => {
+      if (!summary || summary.id == null) return
+      const quizId = String(summary.id)
+      if (extractQuizQuestionsFromApiData(summary).length > 0) {
+        quizDetailById[quizId] = summary
+      }
+    })
+
+    const needDetailFetch = summaries.filter((summary) => {
+      if (!summary || summary.id == null) return false
+      const quizId = String(summary.id)
+      if (quizDetailById[quizId]) return false
+      const count = typeof summary.questionCount === 'number' ? summary.questionCount : 0
+      return count > 0
+    })
+
+    const detailEntries = await Promise.all(
+      needDetailFetch.map(async (summary) => {
+        const quizId = String(summary.id)
+        try {
+          const detail = await fetchQuizDetailData(quizId)
+          return [quizId, detail]
+        } catch {
+          return [quizId, null]
+        }
+      }),
+    )
+
+    detailEntries.forEach((entry) => {
+      if (!entry) return
+      const [quizId, detail] = entry
+      if (detail && typeof detail === 'object') quizDetailById[quizId] = detail
+    })
+
+    const flattened = flattenQuizListToQuestionRows(summaries, quizDetailById)
+    if (flattened.length > 0) return flattened
+
+    return mapQuizListPageDataToTableRows(pageData)
   } catch {
     return []
   }
+}
+
+/**
+ * 교안(lesson)에 속한 전체 문항 수 — 퀴즈 생성 화면 시작 번호용
+ * @param {string|number} lessonId
+ * @returns {Promise<number>}
+ */
+export async function fetchLessonQuestionCountForLesson(lessonId) {
+  const rows = await fetchQuizTableRowsForLesson(lessonId)
+  return countQuestionRows(rows)
 }
 
 /**
@@ -114,6 +167,27 @@ export async function deleteQuizSetsForSelection(items) {
   ]
   for (const qid of ids) {
     await fetchDeleteQuizData(qid)
+  }
+}
+
+/**
+ * 문항 단위 선택 삭제 — DELETE /api/quiz/{quizId}/questions/{questionId}
+ * @param {Array<{ quizSetId: string, questionId: string }>} items
+ */
+export async function deleteQuizQuestionsForSelection(items) {
+  const seen = new Set()
+  for (const item of items) {
+    const quizId = String(item.quizSetId ?? '').trim()
+    const questionId = String(item.questionId ?? '').trim()
+    const key = `${quizId}:${questionId}`
+    if (!quizId || !questionId || seen.has(key)) continue
+    if (questionId === quizId) {
+      await fetchDeleteQuizData(quizId)
+      seen.add(key)
+      continue
+    }
+    seen.add(key)
+    await fetchDeleteQuizQuestionData(quizId, questionId)
   }
 }
 

@@ -95,7 +95,7 @@ export default function QuizPreviewContent() {
       </header>
 
       {total === 0 ? (
-        <p className="edu-quiz-preview-page__empty">등록된 퀴즈가 없습니다.</p>
+        <p className="edu-quiz-preview-page__empty">등록된 문항이 없습니다.</p>
       ) : (
         <div className="edu-quiz-preview-layout">
           <aside className="edu-quiz-preview-layout__aside">

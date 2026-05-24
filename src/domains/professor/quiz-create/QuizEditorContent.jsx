@@ -5,8 +5,12 @@ import QuizQuestionFormList from './QuizQuestionFormList.jsx'
 import QuestionNavigator from './QuestionNavigator.jsx'
 import QuizEditorFloatingActions from './QuizEditorFloatingActions.jsx'
 import { ROUTES } from '../../../shared/constants/routes.js'
-import { fetchCreateQuizData, fetchUpdateQuizData } from '../../quiz/api/quizApi.js'
+import { persistQuizWithQuestions } from '../../quiz/quizPersistenceService.js'
 import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quizCreateUtils.js'
+import {
+  formatMissingAnswersAlert,
+  getQuestionNumbersMissingAnswers,
+} from './quizEditorValidation.js'
 import { useQuizFormActiveQuestionSpy } from './useQuizFormActiveQuestionSpy.js'
 
 const CANCEL_CONFIRM_MESSAGE = '작업을 취소하시겠습니까?'
@@ -35,12 +39,12 @@ export default function QuizEditorContent({
   confirmMessage,
   buildDto,
   isViewerMode = false,
+  initialPersistedQuestionIds = [],
+  displayNumberOffset = 0,
 }) {
   const isEditable = !isViewerMode
   const navigate = useNavigate()
   const formRefs = useRef({})
-
-  const displayNumberOffset = 0
 
   const [questions, setQuestions] = useState(() => {
     if (initialQuestions != null && initialQuestions.length > 0) {
@@ -211,31 +215,31 @@ export default function QuizEditorContent({
 
   const handleConfirmSave = async () => {
     if (!isEditable) return
+
+    const missing = getQuestionNumbersMissingAnswers(questions, displayNumberOffset)
+    if (missing.length > 0) {
+      window.alert(formatMissingAnswersAlert(missing))
+      return
+    }
+
     const dto = buildDto(materialId, questions, quizId)
     const lessonId = String(materialId ?? '').trim()
     if (!lessonId) {
       window.alert('교안(lesson) ID가 없습니다.')
       return
     }
-    const titleFromQuestion =
-      questions[0]?.content?.trim() || '새 퀴즈'
+    const titleFromQuestion = questions[0]?.content?.trim() || '새 퀴즈'
     try {
-      if (quizId) {
-        await fetchUpdateQuizData(quizId, {
-          title: titleFromQuestion,
-          description: '',
-        })
-      } else {
-        await fetchCreateQuizData({
-          lessonId,
-          title: titleFromQuestion,
-          description: '',
-        })
-      }
-      console.log(dto)
-      window.alert(
-        '퀴즈 메타정보가 저장되었습니다. 문항 추가·수정 API는 현재 허용 명세(§22~)에 없어 화면의 문항 내용은 서버에 반영되지 않습니다.',
-      )
+      await persistQuizWithQuestions({
+        quizId,
+        lessonId,
+        title: titleFromQuestion,
+        description: '',
+        questions,
+        initialPersistedQuestionIds,
+      })
+      void dto
+      window.alert('저장되었습니다.')
       setSaveModalOpen(false)
       navigate(ROUTES.professorQuizzes, {
         state: { lessonId, courseId: lessonId },

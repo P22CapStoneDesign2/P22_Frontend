@@ -40,15 +40,47 @@
   text-align: center;
 }
 
-.edu-mat__course-status {
+.edu-mat__course-status-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edu-mat__course-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.edu-mat__lesson-status {
   margin: 0;
   font-size: 0.875rem;
   color: #475569;
 }
 
+.edu-mat__lesson-status strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.edu-mat__course-status {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+  min-width: 0;
+}
+
 .edu-mat__course-status strong {
   color: #0f172a;
   font-weight: 600;
+}
+
+.edu-mat-rename-course-btn.edu-btn {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  padding: 7px 14px;
 }
 
 .edu-mat-input--area {
@@ -160,7 +192,7 @@
 
 .edu-mat-table {
   width: 100%;
-  min-width: 680px;
+  min-width: 900px;
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 0.8125rem;
@@ -168,23 +200,24 @@
 }
 
 .edu-mat-table__col--num {
-  width: 64px;
-  min-width: 64px;
+  width: 56px;
+  min-width: 56px;
 }
 
 .edu-mat-table__col--name {
   width: auto;
-  min-width: 160px;
+  min-width: 200px;
 }
 
-.edu-mat-table__col--date {
-  width: 108px;
-  min-width: 108px;
+.edu-mat-table__col--date-uploaded,
+.edu-mat-table__col--date-updated {
+  width: 148px;
+  min-width: 148px;
 }
 
 .edu-mat-table__col--action {
-  width: 152px;
-  min-width: 152px;
+  width: 160px;
+  min-width: 160px;
 }
 
 .edu-mat-table__caption {
@@ -290,10 +323,15 @@
 }
 
 .edu-mat-table__td--date {
+  box-sizing: border-box;
   text-align: center;
   font-variant-numeric: tabular-nums;
   color: #475569;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 14px;
+  padding-right: 14px;
 }
 
 .edu-mat-table__td--actions {

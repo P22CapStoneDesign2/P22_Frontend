@@ -1,45 +1,126 @@
 /**
- * 교수 퀴즈 관리 — GET /api/quiz 페이지 응답을 테이블 행 형태로 변환
- *
- * TODO: 백엔드에서 교안(lesson)별 퀴즈/문제 목록 API가 생기면 이 매핑·호출 파라미터를 교체해야 합니다.
- * 현재 GET /api/quiz는 퀴즈 세트 단위이며, 화면은 기존에 “문제 한 줄”처럼 보이는 컬럼을 유지하고 있습니다.
- *
- * @param {object} apiItem
- * @param {string|number} apiItem.id
- * @param {string} [apiItem.title]
- * @param {string} [apiItem.description]
- * @param {number} [apiItem.questionCount]
- * @param {string} [apiItem.updatedAt]
- * @param {string} [apiItem.createdAt]
- * @param {number} index - 0-based (표시 번호용)
+ * 교수 퀴즈 관리 — API DTO → 피그마 테이블 행 ViewModel (문항 단위)
  */
-export function mapQuizPageItemToTableRow(apiItem, index) {
-  const title = typeof apiItem.title === 'string' ? apiItem.title.trim() : ''
-  const desc = typeof apiItem.description === 'string' ? apiItem.description.trim() : ''
-  const question = title || desc || '—'
 
-  const count = typeof apiItem.questionCount === 'number' ? apiItem.questionCount : 0
-  /** @type {'multiple' | 'mixed'} */
-  const questionType = count > 1 ? 'mixed' : 'multiple'
+import { extractQuizQuestionsFromApiData } from './quizDetailMapper.js'
 
-  const updatedAt = apiItem.updatedAt ?? apiItem.createdAt ?? ''
+/**
+ * @typedef {object} QuizManagementQuestionRow
+ * @property {string} id — 테이블 row key (`quizId-questionId`)
+ * @property {number} rowNumber — 교안 전체 기준 표시 번호 (1-based)
+ * @property {string} quizSetId
+ * @property {string} questionId
+ * @property {string} question
+ * @property {'multiple' | 'shortAnswer'} questionType
+ * @property {string} updatedAt
+ */
 
-  return {
-    id: String(apiItem.id),
-    quizNumber: index + 1,
-    question,
-    questionType,
-    updatedAt,
-  }
+/**
+ * @param {string | undefined} apiType
+ * @returns {'multiple' | 'shortAnswer'}
+ */
+function mapApiQuestionTypeToTableType(apiType) {
+  if (apiType === 'SHORT_ANSWER') return 'shortAnswer'
+  return 'multiple'
 }
 
 /**
- * @param {object|null|undefined} pageData — 공통 응답 `data` (Spring Page)
- * @returns {Array<{ id: string, quizNumber: number, question: string, questionType: 'multiple'|'mixed', updatedAt: string }>}
+ * @param {unknown} a
+ * @param {unknown} b
  */
-export function mapQuizListPageDataToTableRows(pageData) {
-  const content = pageData?.content
-  if (!Array.isArray(content)) return []
-  return content.map((item, i) => mapQuizPageItemToTableRow(item, i))
+function compareQuizSummariesByCreatedAtAsc(a, b) {
+  const ta = new Date(a?.createdAt ?? 0).getTime()
+  const tb = new Date(b?.createdAt ?? 0).getTime()
+  if (ta !== tb) return ta - tb
+  return String(a?.id ?? '').localeCompare(String(b?.id ?? ''), undefined, { numeric: true })
 }
 
+/**
+ * GET /api/quiz 목록 + 각 퀴즈 상세의 questions → 문항 단위 테이블 행(flatten)
+ *
+ * @param {unknown[]} quizSummaries — 페이지 content 항목
+ * @param {Record<string, object>} quizDetailById — quizId → GET /api/quiz/{id} data
+ * @returns {QuizManagementQuestionRow[]}
+ */
+export function flattenQuizListToQuestionRows(quizSummaries, quizDetailById) {
+  if (!Array.isArray(quizSummaries)) return []
+
+  const sorted = [...quizSummaries].filter((s) => s && s.id != null).sort(compareQuizSummariesByCreatedAtAsc)
+
+  /** @type {QuizManagementQuestionRow[]} */
+  const rows = []
+  let rowNumber = 0
+
+  for (const summary of sorted) {
+    const quizId = String(summary.id)
+    const detail = quizDetailById[quizId] ?? summary
+    const questions = extractQuizQuestionsFromApiData(detail)
+    const quizUpdatedAt = detail?.updatedAt ?? summary?.updatedAt ?? summary?.createdAt ?? ''
+
+    if (questions.length === 0) {
+      const count = typeof summary.questionCount === 'number' ? summary.questionCount : 0
+      if (count <= 0) continue
+      rowNumber += 1
+      const title = String(summary.title ?? summary.description ?? '—').trim() || '—'
+      rows.push({
+        id: `${quizId}-meta`,
+        rowNumber,
+        quizSetId: quizId,
+        questionId: quizId,
+        question: title,
+        questionType: 'multiple',
+        updatedAt: String(quizUpdatedAt),
+      })
+      continue
+    }
+
+    questions.forEach((q, qIndex) => {
+      if (!q || typeof q !== 'object') return
+      const qid = q.id != null ? String(q.id) : `${quizId}-idx-${qIndex}`
+      rowNumber += 1
+      rows.push({
+        id: `${quizId}-${qid}`,
+        rowNumber,
+        quizSetId: quizId,
+        questionId: qid,
+        question: String(q.questionText ?? q.content ?? '—').trim() || '—',
+        questionType: mapApiQuestionTypeToTableType(q.questionType),
+        updatedAt: String(q.updatedAt ?? quizUpdatedAt),
+      })
+    })
+  }
+
+  return rows
+}
+
+/**
+ * @param {QuizManagementQuestionRow[]} rows
+ * @returns {number}
+ */
+export function countQuestionRows(rows) {
+  return Array.isArray(rows) ? rows.length : 0
+}
+
+/**
+ * GET /api/quiz 페이지 응답 → 문항 단위 테이블 행
+ * (목록 항목에 questions가 포함된 경우 즉시 flatten, 없으면 summary만으로 처리)
+ *
+ * @param {object|null|undefined} pageData — Spring Page `data`
+ * @returns {QuizManagementQuestionRow[]}
+ */
+export function mapQuizListPageDataToTableRows(pageData) {
+  const content = Array.isArray(pageData?.content) ? pageData.content : []
+  if (content.length === 0) return []
+
+  /** @type {Record<string, object>} */
+  const quizDetailById = {}
+  content.forEach((item) => {
+    if (!item || item.id == null) return
+    const quizId = String(item.id)
+    if (extractQuizQuestionsFromApiData(item).length > 0) {
+      quizDetailById[quizId] = item
+    }
+  })
+
+  return flattenQuizListToQuestionRows(content, quizDetailById)
+}

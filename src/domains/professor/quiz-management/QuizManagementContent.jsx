@@ -9,9 +9,13 @@ import {
   professorQuizCreatePath,
   professorQuizEditPath,
 } from '../../../shared/constants/routes.js'
-import { fetchProfessorCourseOptions } from '../../catalog/lessonCatalogService.js'
 import {
-  deleteQuizSetsForSelection,
+  fetchProfessorCourseOptions,
+  fetchQuizMgmtMaterialOptionsForCourse,
+} from '../../catalog/lessonCatalogService.js'
+import {
+  deleteQuizQuestionsForSelection,
+  fetchLessonQuestionCountForLesson,
   fetchQuizTableRowsForLesson,
 } from '../../catalog/quizCatalogService.js'
 import { restoreQuizManagementSelection } from './quizManagementRestore.js'
@@ -23,6 +27,8 @@ const NO_LESSONS_MESSAGE =
 
 const DELETE_CONFIRM_MESSAGE = '선택한 퀴즈를 삭제하시겠습니까?'
 
+const TABLE_IDLE_HINT = '교안을 선택하면 해당 교안의 퀴즈 목록이 표시됩니다.'
+
 export default function QuizManagementContent() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -31,11 +37,17 @@ export default function QuizManagementContent() {
   const [courses, setCourses] = useState([])
   const [coursesLoading, setCoursesLoading] = useState(true)
   const [selectedCourse, setSelectedCourse] = useState(null)
+
+  const [materials, setMaterials] = useState([])
+  const [materialsLoading, setMaterialsLoading] = useState(false)
+  const [selectedMaterial, setSelectedMaterial] = useState(null)
+
   const [quizzes, setQuizzes] = useState([])
   const [quizzesLoading, setQuizzesLoading] = useState(false)
   const [selectedQuestionIds, setSelectedQuestionIds] = useState(() => new Set())
 
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false)
+  const [materialDropdownOpen, setMaterialDropdownOpen] = useState(false)
   const [isNoLessonsModalOpen, setIsNoLessonsModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -57,7 +69,9 @@ export default function QuizManagementContent() {
       if (cancelled) return
       if (restored?.selectedCourse) {
         setSelectedCourse(restored.selectedCourse)
-        setQuizzes(restored.quizzes)
+        setMaterials(restored.materials ?? [])
+        setSelectedMaterial(restored.selectedMaterial ?? null)
+        setQuizzes(restored.quizzes ?? [])
       }
     })()
     return () => {
@@ -66,7 +80,8 @@ export default function QuizManagementContent() {
   }, [location.state])
 
   const selectedCount = selectedQuestionIds.size
-  const canOpenDelete = Boolean(selectedCourse) && !isDeleting
+  const lessonIdForQuiz = selectedMaterial?.value ?? ''
+  const canOpenDelete = Boolean(selectedMaterial) && !isDeleting
 
   const selectedDeleteItems = useMemo(() => {
     return quizzes
@@ -78,25 +93,33 @@ export default function QuizManagementContent() {
     setSelectedQuestionIds(new Set())
   }
 
-  const refreshQuizzes = async () => {
-    if (!selectedCourse?.value) {
+  const refreshQuizzes = async (lessonId) => {
+    const id = String(lessonId ?? '').trim()
+    if (!id) {
       setQuizzes([])
       return
     }
     setQuizzesLoading(true)
-    const rows = await fetchQuizTableRowsForLesson(selectedCourse.value)
+    const rows = await fetchQuizTableRowsForLesson(id)
     setQuizzes(rows)
     setQuizzesLoading(false)
   }
 
   const handleCourseSelect = async (option) => {
     setSelectedCourse(option)
+    setSelectedMaterial(null)
     setQuizzes([])
     clearSelection()
-    setQuizzesLoading(true)
-    const rows = await fetchQuizTableRowsForLesson(option.value)
-    setQuizzes(rows)
-    setQuizzesLoading(false)
+    setMaterialsLoading(true)
+    const opts = await fetchQuizMgmtMaterialOptionsForCourse(option.value)
+    setMaterials(opts)
+    setMaterialsLoading(false)
+  }
+
+  const handleMaterialSelect = async (option) => {
+    setSelectedMaterial(option)
+    clearSelection()
+    await refreshQuizzes(option.value)
   }
 
   const handleToggleQuestion = (questionId) => {
@@ -118,17 +141,30 @@ export default function QuizManagementContent() {
     setSelectedQuestionIds(new Set(quizzes.map((q) => q.questionId)))
   }
 
-  const handleCreateQuiz = () => {
-    if (isViewerMode || !selectedCourse) return
-    navigate(professorQuizCreatePath(selectedCourse.value), {
-      state: { lessonId: selectedCourse.value },
+  const handleCreateQuiz = async () => {
+    if (isViewerMode) return
+    if (!selectedMaterial?.value) {
+      window.alert('교안을 먼저 선택해주세요.')
+      return
+    }
+    const existingQuestionCount = await fetchLessonQuestionCountForLesson(selectedMaterial.value)
+    navigate(professorQuizCreatePath(selectedMaterial.value), {
+      state: {
+        lessonId: selectedMaterial.value,
+        courseId: selectedCourse?.value,
+        materialId: selectedMaterial.value,
+        displayNumberOffset: existingQuestionCount,
+        nextQuestionNumber: existingQuestionCount + 1,
+      },
     })
   }
 
   const handleViewQuiz = (quizSetId, questionId) => {
     navigate(professorQuizEditPath(quizSetId), {
       state: {
-        lessonId: selectedCourse?.value,
+        lessonId: lessonIdForQuiz,
+        courseId: selectedCourse?.value,
+        materialId: selectedMaterial?.value,
         initialActiveQuestionId: questionId,
       },
     })
@@ -149,11 +185,11 @@ export default function QuizManagementContent() {
   }
 
   const handleConfirmDelete = async () => {
-    if (!selectedCourse || selectedDeleteItems.length === 0 || isDeleting) return
+    if (!selectedMaterial || selectedDeleteItems.length === 0 || isDeleting) return
     setIsDeleting(true)
     try {
-      await deleteQuizSetsForSelection(selectedDeleteItems)
-      await refreshQuizzes()
+      await deleteQuizQuestionsForSelection(selectedDeleteItems)
+      await refreshQuizzes(selectedMaterial.value)
       clearSelection()
       window.alert('선택한 퀴즈가 삭제되었습니다.')
       setIsDeleteModalOpen(false)
@@ -174,6 +210,11 @@ export default function QuizManagementContent() {
     navigate(ROUTES.professorDashboard)
   }
 
+  const materialSelectDisabled = !selectedCourse || materialsLoading
+  const tableEmptyHint = !selectedMaterial
+    ? TABLE_IDLE_HINT
+    : '등록된 문항이 없습니다.'
+
   return (
     <div className="edu-quiz-mgmt">
       <div className="edu-quiz-mgmt__card">
@@ -182,13 +223,13 @@ export default function QuizManagementContent() {
         <div className="edu-quiz-mgmt__filters">
           <div className="edu-quiz-mgmt__field">
             <span className="edu-quiz-mgmt__label" id="quiz-mgmt-course-label">
-              교안
+              강의
             </span>
             <SelectDropdown
               className="edu-quiz-mgmt__select"
               options={courses}
               selected={selectedCourse}
-              placeholder={coursesLoading ? '불러오는 중…' : '교안을 선택하세요'}
+              placeholder={coursesLoading ? '불러오는 중…' : '강의를 선택하세요'}
               isOpen={courseDropdownOpen}
               onOpenChange={setCourseDropdownOpen}
               onSelect={handleCourseSelect}
@@ -196,22 +237,50 @@ export default function QuizManagementContent() {
               emptyMessage="등록된 강의가 없습니다."
             />
           </div>
+
+          <div className="edu-quiz-mgmt__field">
+            <span className="edu-quiz-mgmt__label" id="quiz-mgmt-material-label">
+              교안
+            </span>
+            <SelectDropdown
+              className="edu-quiz-mgmt__select"
+              options={materials}
+              selected={selectedMaterial}
+              placeholder={
+                !selectedCourse
+                  ? '먼저 강의를 선택하세요'
+                  : materialsLoading
+                    ? '불러오는 중…'
+                    : '교안을 선택하세요'
+              }
+              isOpen={materialDropdownOpen}
+              onOpenChange={setMaterialDropdownOpen}
+              onSelect={handleMaterialSelect}
+              disabled={materialSelectDisabled}
+              emptyMessage="등록된 교안이 없습니다."
+            />
+          </div>
         </div>
 
+        {selectedMaterial ? (
+          <p className="edu-quiz-mgmt__info-bar" role="status">
+            선택된 교안: <strong>{selectedMaterial.label}</strong>
+          </p>
+        ) : (
+          <p className="edu-quiz-mgmt__info-bar edu-quiz-mgmt__info-bar--muted" role="status">
+            {TABLE_IDLE_HINT}
+          </p>
+        )}
+
         <QuizTable
-          quizzes={quizzesLoading ? [] : quizzes}
+          quizzes={selectedMaterial && !quizzesLoading ? quizzes : []}
           selectedQuestionIds={selectedQuestionIds}
           onToggleQuestion={handleToggleQuestion}
           onToggleAll={handleToggleAll}
-          selectionDisabled={isDeleting}
+          selectionDisabled={isDeleting || !selectedMaterial}
           onViewQuiz={handleViewQuiz}
+          emptyHint={tableEmptyHint}
         />
-
-        {!quizzesLoading && selectedCourse && quizzes.length === 0 ? (
-          <p className="edu-quiz-mgmt__empty" role="status">
-            등록된 퀴즈가 없습니다.
-          </p>
-        ) : null}
 
         <div className="edu-quiz-mgmt__actions">
           {!isViewerMode ? (
@@ -219,7 +288,7 @@ export default function QuizManagementContent() {
               <Button
                 type="button"
                 variant="primary"
-                disabled={!selectedCourse}
+                disabled={!selectedMaterial}
                 onClick={handleCreateQuiz}
               >
                 퀴즈 생성
@@ -230,7 +299,7 @@ export default function QuizManagementContent() {
                 disabled={!canOpenDelete || selectedCount === 0}
                 onClick={handleOpenDeleteModal}
               >
-                선택 삭제
+                퀴즈 삭제
               </Button>
             </>
           ) : null}

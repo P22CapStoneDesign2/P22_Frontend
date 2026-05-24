@@ -48,11 +48,28 @@ export default function QuizEditPage() {
     )
   }
 
-  if (!bundle || bundle.questions.length === 0) {
+  if (!bundle) {
     return (
       <div className="edu-quiz-create-page">
         <p className="edu-quiz-create-page__meta" role="status">
-          등록된 퀴즈가 없습니다.
+          퀴즈를 불러오지 못했습니다.
+        </p>
+      </div>
+    )
+  }
+
+  if (bundle.questions.length === 0) {
+    return (
+      <div className="edu-quiz-create-page">
+        <header className="edu-quiz-create-page__header">
+          <h1 className="edu-quiz-create-page__title">{isViewerMode ? '퀴즈 보기' : '퀴즈 수정'}</h1>
+          <p className="edu-quiz-create-page__meta">
+            <span className="edu-quiz-create-page__meta-label">교안</span>{' '}
+            <span className="edu-quiz-create-page__meta-v">{displayMaterialLabel}</span>
+          </p>
+        </header>
+        <p className="edu-quiz-create-page__meta" role="status">
+          등록된 문항이 없습니다.
         </p>
       </div>
     )

@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { STUDENT_MATERIALS_COURSE_QUERY_KEY } from '../../../shared/constants/routes.js'
 import { fetchStudentLessonTableRows } from '../../catalog/lessonCatalogService.js'
 import StudentMaterialsTable from './StudentMaterialsTable.jsx'
 
@@ -6,6 +8,9 @@ import StudentMaterialsTable from './StudentMaterialsTable.jsx'
  * 학생 교안 보기 — GET /api/lessons/my
  */
 export default function StudentMaterialsContent() {
+  const [searchParams] = useSearchParams()
+  const courseIdFromUrl = searchParams.get(STUDENT_MATERIALS_COURSE_QUERY_KEY) ?? ''
+
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -44,7 +49,7 @@ export default function StudentMaterialsContent() {
           </p>
         ) : null}
 
-        <StudentMaterialsTable rows={rows} tableState={tableState} />
+        <StudentMaterialsTable rows={rows} tableState={tableState} courseId={courseIdFromUrl} />
       </div>
     </div>
   )

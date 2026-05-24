@@ -10,6 +10,7 @@ import {
   mapLessonItemToStudentTableRow,
   mapLessonsToCourseOptions,
 } from './lessonCatalogMapper.js'
+import { mapMaterialOptionsForCourseLesson } from '../quiz/mappers/quizManagementViewMapper.js'
 
 const LIST_PAGE = { page: 0, size: 200 }
 
@@ -40,7 +41,7 @@ export async function fetchProfessorCourseOptions() {
 
 /**
  * 교수 교안 관리 — GET /api/lessons 전체 메타
- * @returns {Promise<Array<{ id: string, title: string, createdAt: string, updatedAt: string }>>}
+ * @returns {Promise<Array<{ id: string, title: string, description: string, createdAt: string, updatedAt: string }>>}
  */
 export async function fetchProfessorLessonsList() {
   try {
@@ -52,6 +53,7 @@ export async function fetchProfessorLessonsList() {
         return {
           id: String(item.id),
           title: String(item.title ?? '—').trim() || '—',
+          description: item.description != null ? String(item.description) : '',
           createdAt: item.createdAt != null ? String(item.createdAt) : '',
           updatedAt: item.updatedAt != null ? String(item.updatedAt) : '',
         }
@@ -116,6 +118,23 @@ export async function fetchLessonTitle(lessonId) {
   const title = lesson?.title
   if (typeof title === 'string' && title.trim()) return title.trim()
   return '—'
+}
+
+/**
+ * 교안별 퀴즈 관리 — 강의 선택 후 교안 드롭다운 옵션
+ * API에 course 엔티티가 없어 동일 lesson을 교안 1건으로 노출 (피그마 UI 유지)
+ * @param {string|number} courseLessonId
+ * @returns {Promise<Array<{ value: string, label: string }>>}
+ */
+export async function fetchQuizMgmtMaterialOptionsForCourse(courseLessonId) {
+  const id = String(courseLessonId ?? '').trim()
+  if (!id) return []
+  try {
+    const list = await fetchProfessorLessonsList()
+    return mapMaterialOptionsForCourseLesson(list, id)
+  } catch {
+    return []
+  }
 }
 
 export { formatLessonDateLabel }

@@ -11,6 +11,7 @@ export default function QuizTableRow({
   selectionDisabled = false,
   onView,
 }) {
+  const displayNumber = quiz.rowNumber ?? index + 1
   const typeLabel = quiz.questionType === 'multiple' ? '객관식' : '단답형'
   const dateLabel = formatUpdatedAt(quiz.updatedAt)
 
@@ -23,10 +24,10 @@ export default function QuizTableRow({
           checked={checked}
           disabled={selectionDisabled}
           onChange={onToggle}
-          aria-label={`문제 ${index + 1} 선택`}
+          aria-label={`문제 ${displayNumber} 선택`}
         />
       </td>
-      <td className="edu-quiz-table__cell edu-quiz-table__cell--num">{index + 1}</td>
+      <td className="edu-quiz-table__cell edu-quiz-table__cell--num">{displayNumber}</td>
       <td className="edu-quiz-table__cell edu-quiz-table__cell--question">{quiz.question}</td>
       <td className="edu-quiz-table__cell">{typeLabel}</td>
       <td className="edu-quiz-table__cell edu-quiz-table__cell--date">{dateLabel}</td>

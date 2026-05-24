@@ -26,8 +26,8 @@ export default function MaterialFileTable({
         <colgroup>
           <col className="edu-mat-table__col edu-mat-table__col--num" />
           <col className="edu-mat-table__col edu-mat-table__col--name" />
-          <col className="edu-mat-table__col edu-mat-table__col--date" />
-          <col className="edu-mat-table__col edu-mat-table__col--date" />
+          <col className="edu-mat-table__col edu-mat-table__col--date-uploaded" />
+          <col className="edu-mat-table__col edu-mat-table__col--date-updated" />
           <col className="edu-mat-table__col edu-mat-table__col--action" />
         </colgroup>
         <thead>

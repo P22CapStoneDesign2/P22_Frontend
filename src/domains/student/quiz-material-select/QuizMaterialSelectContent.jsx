@@ -103,13 +103,13 @@ export default function QuizMaterialSelectContent() {
               onOpenChange={setQuizDropdownOpen}
               onSelect={handleQuizSelect}
               disabled={!selectedLesson || quizzesLoading}
-              emptyMessage="등록된 퀴즈가 없습니다."
+              emptyMessage="등록된 문항이 없습니다."
             />
           </div>
 
           {selectedLesson && !quizzesLoading && quizzes.length === 0 ? (
             <p className="edu-stu-quiz-mat__hint" role="status">
-              등록된 퀴즈가 없습니다.
+              등록된 문항이 없습니다.
             </p>
           ) : null}
 

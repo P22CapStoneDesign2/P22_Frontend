@@ -14,6 +14,7 @@ import {
 } from '../../../shared/constants/routes.js'
 import { resolvePdfFileForViewer } from './materialPdfAuth.js'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
+import { createHeaderLogoutHandler } from '../../../app/headerLogoutHandler.js'
 import './MaterialPdfViewerPage.css'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -248,19 +249,17 @@ export default function MaterialPdfViewerPage() {
     navigate(studentMaterialsPath(courseId || undefined))
   }, [navigate, isProfessorRoute, courseIdFromQuery, mid])
 
-  const handleLogout = useCallback(() => {
-    navigate(logoHref)
-  }, [navigate, logoHref])
+  const onLogout = useCallback(() => createHeaderLogoutHandler(navigate)(), [navigate])
 
   const headerProps = useMemo(
     () => ({
       userEmail,
-      onLogout: handleLogout,
+      onLogout,
       logoHref,
       logoLabel: 'EDU HUB',
       logoImageOnly: true,
     }),
-    [userEmail, handleLogout, logoHref],
+    [userEmail, onLogout, logoHref],
   )
 
   const subbarTitle = metaLoading

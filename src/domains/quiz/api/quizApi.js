@@ -10,6 +10,9 @@ export {
   updateQuiz,
   deleteQuiz,
   submitQuiz,
+  addQuizQuestion,
+  updateQuizQuestion,
+  deleteQuizQuestion,
 } from '../../../api/quiz.js'
 
 import { apiResponseData } from '../../../api/apiResponse.js'
@@ -21,6 +24,9 @@ import {
   updateQuiz as updateQuizAxios,
   deleteQuiz as deleteQuizAxios,
   submitQuiz as submitQuizAxios,
+  addQuizQuestion as addQuizQuestionAxios,
+  updateQuizQuestion as updateQuizQuestionAxios,
+  deleteQuizQuestion as deleteQuizQuestionAxios,
 } from '../../../api/quiz.js'
 
 /** @param {Parameters<typeof getQuizzesAxios>[0]} [params] */
@@ -62,5 +68,23 @@ export async function fetchDeleteQuizData(quizId) {
 /** @param {string|number} quizId @param {Parameters<typeof submitQuizAxios>[1]} body */
 export async function fetchSubmitQuizData(quizId, body) {
   const res = await submitQuizAxios(quizId, body)
+  return apiResponseData(res)
+}
+
+/** @param {string|number} quizId @param {object} body */
+export async function fetchAddQuizQuestionData(quizId, body) {
+  const res = await addQuizQuestionAxios(quizId, body)
+  return apiResponseData(res)
+}
+
+/** @param {string|number} quizId @param {string|number} questionId @param {object} body */
+export async function fetchUpdateQuizQuestionData(quizId, questionId, body) {
+  const res = await updateQuizQuestionAxios(quizId, questionId, body)
+  return apiResponseData(res)
+}
+
+/** @param {string|number} quizId @param {string|number} questionId */
+export async function fetchDeleteQuizQuestionData(quizId, questionId) {
+  const res = await deleteQuizQuestionAxios(quizId, questionId)
   return apiResponseData(res)
 }

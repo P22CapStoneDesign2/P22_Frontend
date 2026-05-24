@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import QuizCreateContent from './QuizCreateContent.jsx'
 import { useMaterialDisplayTitle } from '../../catalog/useMaterialDisplayTitle.js'
 import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
@@ -6,9 +6,11 @@ import './QuizCreatePage.css'
 
 export default function QuizCreatePage() {
   const { materialId } = useParams()
+  const location = useLocation()
   const { isViewerMode } = useIsViewerMode()
   const mid = materialId ?? ''
   const materialLabel = useMaterialDisplayTitle(mid)
+  const displayNumberOffset = Number(location.state?.displayNumberOffset ?? 0) || 0
 
   return (
     <div className="edu-quiz-create-page">
@@ -19,7 +21,7 @@ export default function QuizCreatePage() {
           <span className="edu-quiz-create-page__meta-v">{materialLabel}</span>
         </p>
       </header>
-      <QuizCreateContent materialId={mid} />
+      <QuizCreateContent materialId={mid} displayNumberOffset={displayNumberOffset} />
     </div>
   )
 }
