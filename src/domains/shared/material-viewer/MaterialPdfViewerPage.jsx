@@ -14,6 +14,8 @@ import {
 } from '../../../shared/constants/routes.js'
 import { resolvePdfFileForViewer } from './materialPdfAuth.js'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
+import PrivateRoute from '../../../shared/PrivateRoute.jsx'
+import { useAuthHeaderSession } from '../../../shared/auth/useAuthHeaderSession.js'
 import './MaterialPdfViewerPage.css'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -39,7 +41,7 @@ export default function MaterialPdfViewerPage() {
   const courseIdFromQuery = searchParams.get(courseQueryKey) ?? ''
   const logoHref = isProfessorRoute ? ROUTES.professorDashboard : ROUTES.studentDashboard
 
-  const [userEmail] = useState('user@school.edu')
+  const { userEmail, onLogout } = useAuthHeaderSession()
 
   const [title, setTitle] = useState('')
   const [metaLoading, setMetaLoading] = useState(true)
@@ -248,19 +250,15 @@ export default function MaterialPdfViewerPage() {
     navigate(studentMaterialsPath(courseId || undefined))
   }, [navigate, isProfessorRoute, courseIdFromQuery, mid])
 
-  const handleLogout = useCallback(() => {
-    navigate(logoHref)
-  }, [navigate, logoHref])
-
   const headerProps = useMemo(
     () => ({
       userEmail,
-      onLogout: handleLogout,
+      onLogout,
       logoHref,
       logoLabel: 'EDU HUB',
       logoImageOnly: true,
     }),
-    [userEmail, handleLogout, logoHref],
+    [userEmail, onLogout, logoHref],
   )
 
   const subbarTitle = metaLoading
@@ -272,6 +270,7 @@ export default function MaterialPdfViewerPage() {
         : '교안 뷰어'
 
   return (
+    <PrivateRoute>
     <AppLayout
       className="edu-app-layout--material-pdf-fullbleed"
       headerProps={headerProps}
@@ -401,5 +400,6 @@ export default function MaterialPdfViewerPage() {
         </main>
       </div>
     </AppLayout>
+    </PrivateRoute>
   )
 }

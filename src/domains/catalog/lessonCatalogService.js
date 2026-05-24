@@ -40,7 +40,7 @@ export async function fetchProfessorCourseOptions() {
 
 /**
  * 교수 교안 관리 — GET /api/lessons 전체 메타
- * @returns {Promise<Array<{ id: string, title: string, createdAt: string, updatedAt: string }>>}
+ * @returns {Promise<Array<{ id: string, title: string, description: string, createdAt: string, updatedAt: string }>>}
  */
 export async function fetchProfessorLessonsList() {
   try {
@@ -52,6 +52,7 @@ export async function fetchProfessorLessonsList() {
         return {
           id: String(item.id),
           title: String(item.title ?? '—').trim() || '—',
+          description: item.description != null ? String(item.description) : '',
           createdAt: item.createdAt != null ? String(item.createdAt) : '',
           updatedAt: item.updatedAt != null ? String(item.updatedAt) : '',
         }
@@ -116,6 +117,25 @@ export async function fetchLessonTitle(lessonId) {
   const title = lesson?.title
   if (typeof title === 'string' && title.trim()) return title.trim()
   return '—'
+}
+
+/**
+ * 교안별 퀴즈 관리 — 강의(lesson) 선택 후 교안 옵션
+ * API에 강의/교안 계층이 없어 동일 lesson을 교안 1건으로 노출합니다.
+ * @param {string|number} courseLessonId — 강의 dropdown에서 선택한 lesson id
+ * @returns {Promise<Array<{ value: string, label: string }>>}
+ */
+export async function fetchQuizMgmtMaterialOptionsForCourse(courseLessonId) {
+  const id = String(courseLessonId ?? '').trim()
+  if (!id) return []
+  try {
+    const list = await fetchProfessorLessonsList()
+    const lesson = list.find((l) => l.id === id)
+    if (!lesson) return []
+    return [{ value: lesson.id, label: lesson.title }]
+  } catch {
+    return []
+  }
 }
 
 export { formatLessonDateLabel }

@@ -11,6 +11,7 @@ export default function QuizTable({
   onToggleAll,
   onViewQuiz,
   selectionDisabled = false,
+  emptyHint = '등록된 퀴즈가 없습니다. 교안을 선택하거나 퀴즈를 생성해 보세요.',
 }) {
   const isEmpty = !quizzes || quizzes.length === 0
   const allIds = isEmpty ? [] : quizzes.map((q) => q.questionId)
@@ -58,7 +59,7 @@ export default function QuizTable({
           {isEmpty ? (
             <tr>
               <td colSpan={6} className="edu-quiz-table__empty">
-                등록된 퀴즈가 없습니다. 교안을 선택하거나 퀴즈를 생성해 보세요.
+                {emptyHint}
               </td>
             </tr>
           ) : (

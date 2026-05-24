@@ -7,6 +7,10 @@ import QuizEditorFloatingActions from './QuizEditorFloatingActions.jsx'
 import { ROUTES } from '../../../shared/constants/routes.js'
 import { fetchCreateQuizData, fetchUpdateQuizData } from '../../quiz/api/quizApi.js'
 import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quizCreateUtils.js'
+import {
+  formatMissingAnswersAlert,
+  getQuestionNumbersMissingAnswers,
+} from './quizEditorValidation.js'
 import { useQuizFormActiveQuestionSpy } from './useQuizFormActiveQuestionSpy.js'
 
 const CANCEL_CONFIRM_MESSAGE = '작업을 취소하시겠습니까?'
@@ -211,6 +215,13 @@ export default function QuizEditorContent({
 
   const handleConfirmSave = async () => {
     if (!isEditable) return
+
+    const missing = getQuestionNumbersMissingAnswers(questions, displayNumberOffset)
+    if (missing.length > 0) {
+      window.alert(formatMissingAnswersAlert(missing))
+      return
+    }
+
     const dto = buildDto(materialId, questions, quizId)
     const lessonId = String(materialId ?? '').trim()
     if (!lessonId) {

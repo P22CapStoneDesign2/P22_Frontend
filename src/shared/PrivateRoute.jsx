@@ -3,12 +3,11 @@
 
 import { Navigate } from 'react-router-dom'
 import { ROUTES } from './constants/routes.js'
+import { getAccessToken } from './auth/tokenStorage.js'
 
 export default function PrivateRoute({ children }) {
-  const token = localStorage.getItem('accessToken')
-
-  if (!token) {
-    return <Navigate to={ROUTES.login} replace />
+  if (!getAccessToken()) {
+    return <Navigate to={ROUTES.home} replace />
   }
 
   return children

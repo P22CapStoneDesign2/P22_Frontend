@@ -3,28 +3,32 @@
 import { Outlet, useLocation, useMatches, useNavigate } from 'react-router-dom'
 import AppLayout from '../components/layout/AppLayout/AppLayout.jsx'
 import { ROUTES } from '../shared/constants/routes.js'
-import { clearStoredUserRole } from '../shared/auth/roleUtils.js'
+import { logoutAndNavigate } from '../shared/auth/performLogout.js'
+import { useAuthHeaderSession } from '../shared/auth/useAuthHeaderSession.js'
+import PrivateRoute from '../shared/PrivateRoute.jsx'
 import { layoutMetaFromMatches } from './layoutMetaFromMatches.js'
 
 /** 교수 영역 layout route — AppLayout + Outlet */
 export function ProfessorAreaLayout() {
-  const navigate = useNavigate()
   const meta = layoutMetaFromMatches(useMatches())
+  const { userEmail, onLogout } = useAuthHeaderSession()
 
   return (
     <AppLayout
       className="edu-app-layout--hub"
       contentClassName={meta.contentClassName ?? ''}
       headerProps={{
-        userEmail: 'professor@school.edu',
-        onLogout: () => navigate(ROUTES.professorDashboard),
+        userEmail,
+        onLogout,
         logoHref: ROUTES.professorDashboard,
         logoLabel: 'EDU HUB',
         logoImageOnly: true,
         breadcrumbItems: meta.breadcrumbItems,
       }}
     >
-      <Outlet />
+      <PrivateRoute>
+        <Outlet />
+      </PrivateRoute>
     </AppLayout>
   )
 }
@@ -40,12 +44,7 @@ export function AdminAreaLayout() {
       contentClassName={meta.contentClassName ?? ''}
       headerProps={{
         userEmail: 'admin@school.edu',
-        onLogout: () => {
-          clearStoredUserRole()
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('refreshToken')
-          navigate(ROUTES.home, { replace: true })
-        },
+        onLogout: () => logoutAndNavigate(navigate, ROUTES.home),
         logoHref: ROUTES.adminSubjectAccess,
         logoLabel: 'EDU HUB',
         logoImageOnly: true,
@@ -59,10 +58,10 @@ export function AdminAreaLayout() {
 
 /** 학생 영역 layout route — AppLayout + Outlet */
 export function StudentAreaLayout() {
-  const navigate = useNavigate()
   const location = useLocation()
   const meta = layoutMetaFromMatches(useMatches())
   const isCourseApplyPage = location.pathname === ROUTES.studentCourseApply
+  const { userEmail, onLogout } = useAuthHeaderSession()
 
   return (
     <AppLayout
@@ -71,15 +70,17 @@ export function StudentAreaLayout() {
       }
       contentClassName={meta.contentClassName ?? ''}
       headerProps={{
-        userEmail: 'student@school.edu',
-        onLogout: () => navigate(ROUTES.studentDashboard),
+        userEmail,
+        onLogout,
         logoHref: ROUTES.studentDashboard,
         logoLabel: 'EDU HUB',
         logoImageOnly: true,
         breadcrumbItems: meta.breadcrumbItems,
       }}
     >
-      <Outlet />
+      <PrivateRoute>
+        <Outlet />
+      </PrivateRoute>
     </AppLayout>
   )
 }
