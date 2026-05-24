@@ -14,20 +14,23 @@ export function useAuthHeaderSession(refreshKey) {
   const [userEmail, setUserEmail] = useState('')
 
   const syncSession = useCallback(async () => {
-    if (!getAccessToken()) {
-      setUserEmail('')
-      return
-    }
+    if (!getAccessToken()) return ''
     try {
       const res = await getMe()
-      setUserEmail(res.data?.data?.email ?? '')
+      return res.data?.data?.email ?? ''
     } catch {
-      setUserEmail('')
+      return ''
     }
   }, [])
 
   useEffect(() => {
-    void syncSession()
+    let cancelled = false
+    syncSession().then((email) => {
+      if (!cancelled) setUserEmail(email)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [syncSession, refreshKey])
 
   const onLogout = useCallback(() => logoutAndNavigate(navigate), [navigate])

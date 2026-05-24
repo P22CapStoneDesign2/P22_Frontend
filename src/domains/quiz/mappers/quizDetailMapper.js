@@ -11,7 +11,7 @@ const API_SA = 'SHORT_ANSWER'
 /**
  * @param {object} q — API question 객체
  */
-function mapApiQuestionToEditorQuestion(q) {
+function mapApiQuestionToEditorQuestion(q, { includeCorrect = false } = {}) {
   const qt = q?.questionType
   const type = qt === API_MC ? 'multipleChoice' : 'shortAnswer'
 
@@ -22,9 +22,19 @@ function mapApiQuestionToEditorQuestion(q) {
       }))
     : []
 
-  // correctAnswer·correct 보기 정보가 응답에 없으면 정답 preload 불가
-  const correctOptionIds = []
-  const shortAnswer = ''
+  let correctOptionIds = []
+  let shortAnswer = ''
+
+  if (includeCorrect) {
+    if (type === 'multipleChoice' && Array.isArray(q?.options)) {
+      correctOptionIds = q.options
+        .filter((o) => o?.correct === true && o?.id != null)
+        .map((o) => String(o.id))
+    }
+    if (type === 'shortAnswer' && q?.correctAnswer != null) {
+      shortAnswer = String(q.correctAnswer)
+    }
+  }
 
   return {
     id: String(q?.id ?? ''),
@@ -58,11 +68,42 @@ export function mapQuizDetailToEditorBundle(apiData, routeQuizId) {
   const title = typeof apiData?.title === 'string' ? apiData.title : ''
   const description = typeof apiData?.description === 'string' ? apiData.description : ''
   const raw = Array.isArray(apiData?.questions) ? apiData.questions : []
-  const questions = raw.map(mapApiQuestionToEditorQuestion)
+  const questions = raw.map((item) => mapApiQuestionToEditorQuestion(item))
 
   const firstAnchor = raw[0]?.anchorId
   const materialId =
     firstAnchor != null && firstAnchor !== '' && firstAnchor !== undefined ? String(firstAnchor) : ''
+
+  let initialActiveQuestionId = questions[0]?.id ?? ''
+  if (routeQuizId != null && String(routeQuizId) !== '') {
+    const hit = questions.find((p) => p.id === String(routeQuizId))
+    if (hit) initialActiveQuestionId = hit.id
+  }
+
+  return {
+    editorQuizId,
+    materialId,
+    title,
+    description,
+    questions,
+    initialActiveQuestionId,
+  }
+}
+
+/**
+ * GET /api/quiz/{id}/edit — 교수 수정 preload
+ * @param {object} apiData
+ * @param {string|undefined} routeQuizId
+ */
+export function mapQuizEditToEditorBundle(apiData, routeQuizId) {
+  const editorQuizId = String(apiData?.id ?? '')
+  const title = typeof apiData?.title === 'string' ? apiData.title : ''
+  const description = typeof apiData?.description === 'string' ? apiData.description : ''
+  const raw = Array.isArray(apiData?.questions) ? apiData.questions : []
+  const questions = raw.map((item) => mapApiQuestionToEditorQuestion(item, { includeCorrect: true }))
+
+  const lessonId = apiData?.lessonId
+  const materialId = lessonId != null ? String(lessonId) : ''
 
   let initialActiveQuestionId = questions[0]?.id ?? ''
   if (routeQuizId != null && String(routeQuizId) !== '') {

@@ -40,6 +40,22 @@
   text-align: center;
 }
 
+.edu-mat__course-status {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+}
+
+.edu-mat__course-status strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.edu-mat-input--area {
+  resize: vertical;
+  min-height: 72px;
+}
+
 .edu-mat-modal-course {
   display: flex;
   flex-direction: column;

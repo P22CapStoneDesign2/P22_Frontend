@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import { getMaterialDisplayLabel } from '../../professor/materials/professorMaterialsStorage.js'
+import { useMaterialDisplayTitle } from '../../catalog/useMaterialDisplayTitle.js'
 import { loadStudentQuizAttempt } from '../quiz/studentQuizData.js'
 import QuizResultContent from './QuizResultContent.jsx'
 import './QuizResultPage.css'
@@ -8,7 +8,7 @@ export default function QuizResultPage() {
   const { attemptId } = useParams()
   const aid = attemptId ?? ''
   const attempt = loadStudentQuizAttempt(aid)
-  const materialLabel = getMaterialDisplayLabel(attempt?.materialId ?? '')
+  const materialLabel = useMaterialDisplayTitle(attempt?.materialId ?? '')
 
   return (
     <div className="edu-quiz-result-page">

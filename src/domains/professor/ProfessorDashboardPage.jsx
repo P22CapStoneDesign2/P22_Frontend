@@ -17,7 +17,5 @@ const PROFESSOR_MENU_ITEMS = [
 ]
 
 export default function ProfessorDashboardPage() {
-  return (
-    <DashboardPageLayout heading="메뉴를 선택하세요" menuItems={PROFESSOR_MENU_ITEMS} />
-  )
+  return <DashboardPageLayout menuItems={PROFESSOR_MENU_ITEMS} />
 }

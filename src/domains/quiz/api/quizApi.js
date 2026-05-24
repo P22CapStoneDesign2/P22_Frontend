@@ -1,104 +1,66 @@
-import { httpClient } from '../../../shared/api/httpClient.js'
-import { rejectQuizMutationIfStudent } from '../../../shared/auth/quizMutationGuard.js'
-
 /**
- * @param {Record<string, string | number | boolean | undefined | null>} params
+ * @deprecated import from `src/api/quiz.js` — axios instance 단일 경로
+ * 하위 호환 re-export
  */
-function toSearchParams(params) {
-  const sp = new URLSearchParams()
-  Object.entries(params).forEach(([k, v]) => {
-    if (v === undefined || v === null) return
-    sp.set(k, String(v))
-  })
-  return sp.toString()
+export {
+  getQuizzes,
+  getQuizDetail,
+  getQuizForEdit,
+  createQuiz,
+  updateQuiz,
+  deleteQuiz,
+  submitQuiz,
+} from '../../../api/quiz.js'
+
+import { apiResponseData } from '../../../api/apiResponse.js'
+import {
+  getQuizzes as getQuizzesAxios,
+  getQuizDetail as getQuizDetailAxios,
+  getQuizForEdit as getQuizForEditAxios,
+  createQuiz as createQuizAxios,
+  updateQuiz as updateQuizAxios,
+  deleteQuiz as deleteQuizAxios,
+  submitQuiz as submitQuizAxios,
+} from '../../../api/quiz.js'
+
+/** @param {Parameters<typeof getQuizzesAxios>[0]} [params] */
+export async function fetchQuizzesData(params) {
+  const res = await getQuizzesAxios(params)
+  return apiResponseData(res)
 }
 
-/**
- * @param {object} payload — 명세: title, description?
- */
-export function createQuiz(payload) {
-  const denied = rejectQuizMutationIfStudent()
-  if (denied) return denied
-  return httpClient('/api/quiz', { method: 'POST', json: payload })
+/** @param {string|number} quizId */
+export async function fetchQuizDetailData(quizId) {
+  const res = await getQuizDetailAxios(quizId)
+  return apiResponseData(res)
 }
 
-/**
- * @param {Record<string, string | number | undefined | null>} [params] — page, size, sort 등
- */
-export function getQuizzes(params = {}) {
-  const q = toSearchParams(params)
-  const path = q ? `/api/quiz?${q}` : '/api/quiz'
-  return httpClient(path, { method: 'GET' })
+/** @param {string|number} quizId */
+export async function fetchQuizForEditData(quizId) {
+  const res = await getQuizForEditAxios(quizId)
+  return apiResponseData(res)
 }
 
-export function getQuizDetail(quizId) {
-  return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}`, { method: 'GET' })
+/** @param {Parameters<typeof createQuizAxios>[0]} body */
+export async function fetchCreateQuizData(body) {
+  const res = await createQuizAxios(body)
+  return apiResponseData(res)
 }
 
-/**
- * @param {string|number} quizId
- * @param {object} payload — 명세: title, description?
- */
-export function updateQuiz(quizId, payload) {
-  const denied = rejectQuizMutationIfStudent()
-  if (denied) return denied
-  return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}`, {
-    method: 'PUT',
-    json: payload,
-  })
+/** @param {string|number} quizId @param {Parameters<typeof updateQuizAxios>[1]} body */
+export async function fetchUpdateQuizData(quizId, body) {
+  const res = await updateQuizAxios(quizId, body)
+  return apiResponseData(res)
 }
 
-export function deleteQuiz(quizId) {
-  const denied = rejectQuizMutationIfStudent()
-  if (denied) return denied
-  return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}`, { method: 'DELETE' })
+/** @param {string|number} quizId */
+export async function fetchDeleteQuizData(quizId) {
+  const res = await deleteQuizAxios(quizId)
+  return apiResponseData(res)
 }
 
-/**
- * @param {string|number} quizId
- * @param {object} payload — 문제 추가 본문 (명세 §20)
- */
-export function addQuestion(quizId, payload) {
-  const denied = rejectQuizMutationIfStudent()
-  if (denied) return denied
-  return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}/questions`, {
-    method: 'POST',
-    json: payload,
-  })
-}
-
-export function updateQuestion(quizId, questionId, payload) {
-  const denied = rejectQuizMutationIfStudent()
-  if (denied) return denied
-  const q = encodeURIComponent(String(quizId))
-  const qq = encodeURIComponent(String(questionId))
-  return httpClient(`/api/quiz/${q}/questions/${qq}`, { method: 'PUT', json: payload })
-}
-
-export function deleteQuestion(quizId, questionId) {
-  const denied = rejectQuizMutationIfStudent()
-  if (denied) return denied
-  const q = encodeURIComponent(String(quizId))
-  const qq = encodeURIComponent(String(questionId))
-  return httpClient(`/api/quiz/${q}/questions/${qq}`, { method: 'DELETE' })
-}
-
-/**
- * @param {string|number} quizId
- * @param {{ answers: Array<{ questionId: string|number, studentAnswer: string }> }} payload
- */
-export function submitQuiz(quizId, payload) {
-  return httpClient(`/api/quiz/${encodeURIComponent(String(quizId))}/submit`, {
-    method: 'POST',
-    json: payload,
-  })
-}
-
-/**
- * @param {Record<string, string | number | undefined | null>} [params] — page, size 등
- */
-export function getWrongAnswers(params = {}) {
-  const q = toSearchParams(params)
-  const path = q ? `/api/quiz/wrong-answers?${q}` : '/api/quiz/wrong-answers'
-  return httpClient(path, { method: 'GET' })
+/** @param {string|number} quizId @param {Parameters<typeof submitQuizAxios>[1]} body */
+export async function fetchSubmitQuizData(quizId, body) {
+  const res = await submitQuizAxios(quizId, body)
+  return apiResponseData(res)
 }

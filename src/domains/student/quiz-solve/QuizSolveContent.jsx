@@ -1,16 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
+import { ROUTES, studentQuizResultPath } from '../../../shared/constants/routes.js'
 import {
-  ROUTES,
-  studentQuizResultPath,
-} from '../../../shared/constants/routes.js'
-import {
-  buildGradedQuizAttempt,
-  loadStudentSolveQuestions,
-  saveStudentQuizAttempt,
-} from '../quiz/studentQuizData.js'
+  fetchStudentSolveSessionByQuizId,
+  fetchSubmitQuizData,
+} from '../../catalog/quizCatalogService.js'
+import { buildQuestionEnrichmentByIdFromSolveQuestions } from '../../quiz/mappers/quizResultMapper.js'
+import { mapSubmitResponseToResultBundle } from '../../quiz/mappers/quizResultMapper.js'
+import { mapSolveStateToSubmitRequest } from '../../quiz/mappers/quizSubmitMapper.js'
+import { saveStudentQuizAttempt } from '../quiz/studentQuizData.js'
 import QuestionNavigator from './QuestionNavigator.jsx'
 import QuestionContent from './QuestionContent.jsx'
 import QuizNavigationButtons from './QuizNavigationButtons.jsx'
@@ -24,15 +24,42 @@ function scrollSolveToTop() {
 /**
  * 퀴즈 풀이 본문: 한 문제당 한 페이지, activeQuestionIndex / answers / 제출 모달
  */
-export default function QuizSolveContent({ materialId }) {
+/** @param {{ materialId: string }} props — 라우트 `:materialId` 슬롯에 quizId가 전달됨 */
+export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
   const navigate = useNavigate()
   const mainRef = useRef(null)
 
-  const questions = useMemo(() => loadStudentSolveQuestions(materialId), [materialId])
+  const [questions, setQuestions] = useState([])
+  const [quizId, setQuizId] = useState('')
+  const [loadedLessonKey, setLoadedLessonKey] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState({})
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false)
   const [mcLimitNotice, setMcLimitNotice] = useState({ questionId: null, message: '' })
+
+  const loadKey = quizIdFromRoute
+  const sessionLoading = Boolean(loadKey.trim()) && loadedLessonKey !== loadKey
+
+  useEffect(() => {
+    let cancelled = false
+    if (!loadKey.trim()) return
+    fetchStudentSolveSessionByQuizId(loadKey).then((session) => {
+      if (cancelled) return
+      if (session) {
+        setQuestions(session.questions)
+        setQuizId(session.quizId)
+      } else {
+        setQuestions([])
+        setQuizId('')
+      }
+      setLoadedLessonKey(loadKey)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [loadKey])
 
   const total = questions.length
   const currentQuestion = total > 0 ? questions[activeQuestionIndex] : null
@@ -100,29 +127,70 @@ export default function QuizSolveContent({ materialId }) {
     setIsSubmitModalOpen(true)
   }
 
-  const handleConfirmSubmit = () => {
-    const dto = buildQuizSubmitDto(materialId, questions, answers)
+  const handleConfirmSubmit = async () => {
+    if (submitting || !quizId) return
+    const dto = buildQuizSubmitDto(quizIdFromRoute, questions, answers)
     console.log(dto)
 
-    const graded = buildGradedQuizAttempt(materialId, answers)
-    setIsSubmitModalOpen(false)
-
-    if (!graded) {
-      window.alert('등록된 퀴즈가 없습니다.')
-      navigate(ROUTES.studentQuizMaterials)
-      return
+    setSubmitting(true)
+    try {
+      const payload = mapSolveStateToSubmitRequest(questions, answers)
+      const apiData = await fetchSubmitQuizData(quizId, payload)
+      const enrichment = buildQuestionEnrichmentByIdFromSolveQuestions(questions)
+      const graded = mapSubmitResponseToResultBundle(apiData, {
+        materialId: quizIdFromRoute,
+        questionEnrichmentById: enrichment,
+      })
+      setIsSubmitModalOpen(false)
+      saveStudentQuizAttempt(graded)
+      navigate(studentQuizResultPath(graded.attemptId), { state: { resultBundle: graded } })
+    } catch (err) {
+      setIsSubmitModalOpen(false)
+      const msg = err instanceof Error ? err.message : '퀴즈 제출에 실패했습니다.'
+      window.alert(msg)
+    } finally {
+      setSubmitting(false)
     }
-
-    saveStudentQuizAttempt(graded)
-    navigate(studentQuizResultPath(graded.attemptId), { state: { resultBundle: graded } })
   }
 
   const handleCancelSubmit = () => {
+    if (submitting) return
     setIsSubmitModalOpen(false)
   }
 
   const isPrevDisabled = activeQuestionIndex <= 0 || total === 0
   const isNextDisabled = activeQuestionIndex >= total - 1 || total === 0
+
+  if (!quizIdFromRoute.trim()) {
+    return (
+      <div className="edu-quiz-solve-layout edu-quiz-solve-layout--empty">
+        <div className="edu-quiz-solve-layout__card">
+          <p className="edu-quiz-solve-layout__empty-msg" role="status">
+            퀴즈 정보가 없습니다. 퀴즈 선택 화면에서 다시 시작해 주세요.
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => navigate(ROUTES.studentQuizMaterials)}
+          >
+            퀴즈 선택으로 돌아가기
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (sessionLoading) {
+    return (
+      <div className="edu-quiz-solve-layout edu-quiz-solve-layout--empty">
+        <div className="edu-quiz-solve-layout__card">
+          <p className="edu-quiz-solve-layout__empty-msg" role="status">
+            퀴즈를 불러오는 중…
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   if (total === 0) {
     return (

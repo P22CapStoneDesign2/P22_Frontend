@@ -6,8 +6,17 @@ import MaterialFileTableRow from './MaterialFileTableRow.jsx'
  * @param {(fileId: string) => void} props.onReplaceFile
  * @param {string} [props.courseId]
  * @param {(fileId: string) => void} props.onDeleteFile
+ * @param {(fileId: string) => void} [props.onOpenViewer]
+ * @param {string} [props.emptyHint]
  */
-export default function MaterialFileTable({ files, courseId = '', onReplaceFile, onDeleteFile }) {
+export default function MaterialFileTable({
+  files,
+  courseId = '',
+  onReplaceFile,
+  onDeleteFile,
+  onOpenViewer,
+  emptyHint = '등록된 교안 파일이 없습니다.',
+}) {
   const isEmpty = !files || files.length === 0
 
   return (
@@ -30,10 +39,10 @@ export default function MaterialFileTable({ files, courseId = '', onReplaceFile,
               교안 파일명
             </th>
             <th scope="col" className="edu-mat-table__th edu-mat-table__th--date">
-              등록한 날짜
+              업로드 날짜
             </th>
             <th scope="col" className="edu-mat-table__th edu-mat-table__th--date">
-              수정한 날짜
+              마지막 수정 날짜
             </th>
             <th scope="col" className="edu-mat-table__th edu-mat-table__th--action">
               관리
@@ -44,7 +53,7 @@ export default function MaterialFileTable({ files, courseId = '', onReplaceFile,
           {isEmpty ? (
             <tr>
               <td colSpan={5} className="edu-mat-table__empty">
-                등록된 교안 파일이 없습니다.
+                {emptyHint}
               </td>
             </tr>
           ) : (
@@ -56,6 +65,7 @@ export default function MaterialFileTable({ files, courseId = '', onReplaceFile,
                 courseId={courseId}
                 onReplaceFile={onReplaceFile}
                 onDeleteFile={onDeleteFile}
+                onOpenViewer={onOpenViewer}
               />
             ))
           )}

@@ -43,12 +43,20 @@ export const STUDENT_MATERIALS_COURSE_QUERY_KEY = 'courseId'
 /** 교수 교안 관리 — 강의 선택 유지용 query key */
 export const PROFESSOR_MATERIALS_COURSE_QUERY_KEY = 'courseId'
 
+/** 학생 퀴즈 풀이 — 강의(lesson) 선택 유지용 query key */
+export const STUDENT_QUIZ_LESSON_QUERY_KEY = 'lessonId'
+
 /**
  * @param {string|number} materialId
+ * @param {string} [lessonId] 강의 선택 유지·API 퀴즈 조회용
  * @returns {string}
  */
-export function studentQuizSolvePath(materialId) {
-  return `${ROUTES.studentQuizRoot}/${encodeURIComponent(String(materialId))}`
+export function studentQuizSolvePath(materialId, lessonId) {
+  const base = `${ROUTES.studentQuizRoot}/${encodeURIComponent(String(materialId))}`
+  const lid = typeof lessonId === 'string' ? lessonId.trim() : ''
+  if (!lid) return base
+  const params = new URLSearchParams({ [STUDENT_QUIZ_LESSON_QUERY_KEY]: lid })
+  return `${base}?${params.toString()}`
 }
 
 /**

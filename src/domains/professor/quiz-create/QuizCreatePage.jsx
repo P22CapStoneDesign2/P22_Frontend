@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import QuizCreateContent from './QuizCreateContent.jsx'
-import { getMaterialDisplayLabel } from '../materials/professorMaterialsStorage.js'
+import { useMaterialDisplayTitle } from '../../catalog/useMaterialDisplayTitle.js'
 import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
 import './QuizCreatePage.css'
 
@@ -8,7 +8,7 @@ export default function QuizCreatePage() {
   const { materialId } = useParams()
   const { isViewerMode } = useIsViewerMode()
   const mid = materialId ?? ''
-  const materialLabel = getMaterialDisplayLabel(mid)
+  const materialLabel = useMaterialDisplayTitle(mid)
 
   return (
     <div className="edu-quiz-create-page">

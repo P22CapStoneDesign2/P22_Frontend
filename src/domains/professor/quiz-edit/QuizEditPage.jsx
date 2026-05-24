@@ -1,8 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import QuizEditContent from './QuizEditContent.jsx'
-import { getMockQuizEditBundle } from './mockQuizEditData.js'
-import { getMaterialIdForQuizSet } from '../../quiz/storage/professorQuizzesStorage.js'
-import { getMaterialDisplayLabel } from '../materials/professorMaterialsStorage.js'
+import { fetchProfessorQuizEditBundle } from '../../catalog/quizCatalogService.js'
+import { useMaterialDisplayTitle } from '../../catalog/useMaterialDisplayTitle.js'
 import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
 import '../quiz-create/QuizCreatePage.css'
 
@@ -15,12 +15,50 @@ export default function QuizEditPage() {
   const materialId =
     location.state?.materialId ??
     location.state?.selectedMaterialId ??
-    getMaterialIdForQuizSet(quizId) ??
     ''
 
-  const bundle = getMockQuizEditBundle(quizId, focusQuestionId, materialId)
-  const resolvedMaterialId = bundle.materialId || materialId
-  const materialLabel = getMaterialDisplayLabel(resolvedMaterialId)
+  const [bundle, setBundle] = useState(null)
+  const [loading, setLoading] = useState(() => Boolean(quizId))
+
+  useEffect(() => {
+    if (!quizId) return
+    let cancelled = false
+    fetchProfessorQuizEditBundle(quizId, quizId, focusQuestionId).then((b) => {
+      if (cancelled) return
+      setBundle(b)
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [quizId, focusQuestionId])
+
+  const lessonIdForLabel =
+    bundle?.lessonId || materialId || location.state?.lessonId || ''
+  const fetchedLabel = useMaterialDisplayTitle(lessonIdForLabel)
+  const displayMaterialLabel = lessonIdForLabel ? fetchedLabel : '—'
+
+  if (loading) {
+    return (
+      <div className="edu-quiz-create-page">
+        <p className="edu-quiz-create-page__meta" role="status">
+          퀴즈를 불러오는 중…
+        </p>
+      </div>
+    )
+  }
+
+  if (!bundle || bundle.questions.length === 0) {
+    return (
+      <div className="edu-quiz-create-page">
+        <p className="edu-quiz-create-page__meta" role="status">
+          등록된 퀴즈가 없습니다.
+        </p>
+      </div>
+    )
+  }
+
+  const resolvedLessonId = lessonIdForLabel
 
   return (
     <div className="edu-quiz-create-page">
@@ -28,12 +66,12 @@ export default function QuizEditPage() {
         <h1 className="edu-quiz-create-page__title">{isViewerMode ? '퀴즈 보기' : '퀴즈 수정'}</h1>
         <p className="edu-quiz-create-page__meta">
           <span className="edu-quiz-create-page__meta-label">교안</span>{' '}
-          <span className="edu-quiz-create-page__meta-v">{materialLabel}</span>
+          <span className="edu-quiz-create-page__meta-v">{displayMaterialLabel}</span>
         </p>
       </header>
       <QuizEditContent
         quizId={quizId ?? ''}
-        materialId={bundle.materialId || materialId}
+        materialId={resolvedLessonId}
         initialQuestions={bundle.questions}
         initialActiveQuestionId={bundle.initialActiveQuestionId}
         initialPersistedQuestionIds={bundle.persistedQuestionIds}

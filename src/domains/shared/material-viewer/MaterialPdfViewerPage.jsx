@@ -3,13 +3,8 @@ import { useNavigate, useParams, useSearchParams, useMatch } from 'react-router-
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
-import {
-  getMaterialDetail,
-  getMaterialViewer,
-  parseAspectRatioString,
-  parseMaterialResponse,
-  postMaterialProgress,
-} from '../../../api/materials.js'
+import { parseAspectRatioString, readPdfUrlFromLesson } from '../../../shared/utils/pdfMeta.js'
+import { fetchLessonDetail } from '../../catalog/lessonCatalogService.js'
 import {
   PROFESSOR_MATERIALS_COURSE_QUERY_KEY,
   ROUTES,
@@ -17,11 +12,6 @@ import {
   studentMaterialsPath,
   STUDENT_MATERIALS_COURSE_QUERY_KEY,
 } from '../../../shared/constants/routes.js'
-import {
-  findCourseIdForMaterial,
-  getMaterialDisplayLabel,
-  loadProfessorMaterialsDto,
-} from '../../professor/materials/professorMaterialsStorage.js'
 import { resolvePdfFileForViewer } from './materialPdfAuth.js'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
 import './MaterialPdfViewerPage.css'
@@ -32,17 +22,16 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString()
 
 /**
- * 교안 PDF 전용 뷰어 (학생·교수 공통 라우트).
- * - 학생: `ROUTES.studentMaterialViewer`
- * - 교수: `ROUTES.professorMaterialViewer`
+ * 교안 PDF 뷰어 — GET /api/lessons/{id} 응답의 PDF URL 필드 사용 (명세 §11 확장).
+ * 라우트 `:materialId` 슬롯 = lessonId.
  */
 export default function MaterialPdfViewerPage() {
-  const { materialId } = useParams()
+  const { materialId: lessonIdParam } = useParams()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const isProfessorRoute = Boolean(useMatch(ROUTES.professorMaterialViewer))
 
-  const mid = materialId ?? ''
+  const mid = lessonIdParam ?? ''
 
   const courseQueryKey = isProfessorRoute
     ? PROFESSOR_MATERIALS_COURSE_QUERY_KEY
@@ -136,46 +125,36 @@ export default function MaterialPdfViewerPage() {
     setNumPages(0)
     setApiPageCount(null)
     setAspectRatioCss('16 / 9')
-    const storageTitle = getMaterialDisplayLabel(mid)
-    if (storageTitle && storageTitle !== '—') setTitle(storageTitle)
-    else setTitle('')
-
     ;(async () => {
       try {
-        const viewerRes = await getMaterialViewer(mid)
+        const lesson = await fetchLessonDetail(mid)
         if (cancelled) return
 
-        const viewer = parseMaterialResponse(viewerRes)
-
-        let detail = null
-        try {
-          const detailRes = await getMaterialDetail(mid)
-          if (!cancelled) detail = parseMaterialResponse(detailRes)
-        } catch {
-          detail = null
-        }
-        if (cancelled) return
-
-        if (detail?.title) setTitle(String(detail.title))
-        else if (viewer?.title) setTitle(String(viewer.title))
-        else setTitle(`교안 · ${mid}`)
-
-        const pageHint = Number(viewer?.pageCount) || Number(detail?.pageCount)
-        if (Number.isFinite(pageHint) && pageHint > 0) setApiPageCount(pageHint)
-
-        const ar =
-          parseAspectRatioString(viewer?.aspectRatio) ||
-          parseAspectRatioString(detail?.aspectRatio)
-        if (ar) setAspectRatioCss(ar)
-
-        const pdfUrl = viewer?.pdfUrl
-        if (!pdfUrl) {
-          setMetaError('PDF 주소를 불러오지 못했습니다.')
+        if (!lesson) {
+          setMetaError('교안을 찾을 수 없습니다.')
           setMetaLoading(false)
           return
         }
 
-        setAllowDownload(viewer?.allowDownload !== false)
+        if (lesson.title) setTitle(String(lesson.title))
+        else setTitle(`교안 · ${mid}`)
+
+        const pageHint = Number(lesson.pageCount ?? lesson.page_count)
+        if (Number.isFinite(pageHint) && pageHint > 0) setApiPageCount(pageHint)
+
+        const ar = parseAspectRatioString(lesson.aspectRatio ?? lesson.aspect_ratio)
+        if (ar) setAspectRatioCss(ar)
+
+        const pdfUrl = readPdfUrlFromLesson(lesson)
+        if (!pdfUrl) {
+          setMetaError(
+            'PDF URL이 없습니다. GET /api/lessons/{id} 응답에 pdfUrl(또는 동등 필드)이 필요합니다.',
+          )
+          setMetaLoading(false)
+          return
+        }
+
+        setAllowDownload(lesson.allowDownload !== false)
 
         const { file, revoke } = await resolvePdfFileForViewer(String(pdfUrl))
         if (cancelled) {
@@ -203,14 +182,6 @@ export default function MaterialPdfViewerPage() {
       revokeRef.current = null
     }
   }, [mid])
-
-  useEffect(() => {
-    if (!mid || !pageNumber || metaLoading || !pdfFile) return
-    const t = window.setTimeout(() => {
-      postMaterialProgress(mid, pageNumber).catch(() => {})
-    }, 700)
-    return () => window.clearTimeout(t)
-  }, [mid, pageNumber, metaLoading, pdfFile])
 
   const onDocumentLoadSuccess = useCallback(({ numPages: n }) => {
     setNumPages(n)
@@ -269,10 +240,7 @@ export default function MaterialPdfViewerPage() {
 
   const handleExit = useCallback(() => {
     const fromQuery = courseIdFromQuery.trim()
-    const courseId =
-      fromQuery ||
-      findCourseIdForMaterial(loadProfessorMaterialsDto(), mid) ||
-      ''
+    const courseId = fromQuery || ''
     if (isProfessorRoute) {
       navigate(professorMaterialsPath(courseId || undefined))
       return

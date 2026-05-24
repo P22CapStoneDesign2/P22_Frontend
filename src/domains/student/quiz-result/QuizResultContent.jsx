@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import PdfViewerSection from '../../../components/media/PdfViewerSection/PdfViewerSection.jsx'
-import { getMaterialDisplayLabel } from '../../professor/materials/professorMaterialsStorage.js'
 import { ROUTES } from '../../../shared/constants/routes.js'
 import { loadStudentQuizAttempt } from '../quiz/studentQuizData.js'
 import QuestionResultNavigator from './QuestionResultNavigator.jsx'
@@ -29,7 +28,7 @@ export default function QuizResultContent({ attemptId }) {
   const [isExitModalOpen, setIsExitModalOpen] = useState(false)
 
   const materialId = resultBundle?.materialId ?? ''
-  const materialLabel = getMaterialDisplayLabel(materialId)
+  const materialLabel = materialId ? `교안 ID ${materialId}` : '—'
 
   const total = resultQuestions.length
   const currentQuestion = total > 0 ? resultQuestions[currentQuestionIndex] : null

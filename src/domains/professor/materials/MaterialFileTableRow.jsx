@@ -8,6 +8,7 @@ import { professorMaterialViewerPath } from '../../../shared/constants/routes.js
  * @param {string} [props.courseId]
  * @param {(fileId: string) => void} props.onReplaceFile
  * @param {(fileId: string) => void} props.onDeleteFile
+ * @param {(fileId: string) => void} [props.onOpenViewer]
  */
 export default function MaterialFileTableRow({
   rowNumber,
@@ -15,18 +16,34 @@ export default function MaterialFileTableRow({
   courseId = '',
   onReplaceFile,
   onDeleteFile,
+  onOpenViewer,
 }) {
+  const viewerPath = professorMaterialViewerPath(file.id, courseId)
+
+  const handleLinkClick = (e) => {
+    if (typeof onOpenViewer !== 'function') return
+    e.preventDefault()
+    onOpenViewer(file.id)
+  }
+
   return (
     <tr className="edu-mat-table__row">
       <td className="edu-mat-table__td edu-mat-table__td--num">{rowNumber}</td>
       <td className="edu-mat-table__td edu-mat-table__td--name">
-        <Link
-          className="edu-mat-table__link"
-          to={professorMaterialViewerPath(file.id, courseId)}
-          title={file.fileName}
-        >
-          {file.fileName}
-        </Link>
+        {typeof onOpenViewer === 'function' ? (
+          <a
+            href={viewerPath}
+            className="edu-mat-table__link"
+            title={file.fileName}
+            onClick={handleLinkClick}
+          >
+            {file.fileName}
+          </a>
+        ) : (
+          <Link className="edu-mat-table__link" to={viewerPath} title={file.fileName}>
+            {file.fileName}
+          </Link>
+        )}
       </td>
       <td className="edu-mat-table__td edu-mat-table__td--date">{file.createdAt}</td>
       <td className="edu-mat-table__td edu-mat-table__td--date">{file.updatedAt}</td>

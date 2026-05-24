@@ -1,15 +1,11 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import QuizQuestionFormList from './QuizQuestionFormList.jsx'
 import QuestionNavigator from './QuestionNavigator.jsx'
 import QuizEditorFloatingActions from './QuizEditorFloatingActions.jsx'
 import { ROUTES } from '../../../shared/constants/routes.js'
-import {
-  countExistingQuestionsForMaterial,
-  saveMaterialQuestionsConsolidated,
-  saveNewQuizForMaterial,
-} from '../../quiz/storage/professorQuizzesStorage.js'
+import { fetchCreateQuizData, fetchUpdateQuizData } from '../../quiz/api/quizApi.js'
 import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quizCreateUtils.js'
 import { useQuizFormActiveQuestionSpy } from './useQuizFormActiveQuestionSpy.js'
 
@@ -36,25 +32,15 @@ export default function QuizEditorContent({
   quizId = null,
   initialQuestions = null,
   initialActiveQuestionId = null,
-  initialPersistedQuestionIds = null,
-  isMaterialEditMode = false,
   confirmMessage,
   buildDto,
   isViewerMode = false,
 }) {
   const isEditable = !isViewerMode
-  const isCreateMode = !isMaterialEditMode
   const navigate = useNavigate()
   const formRefs = useRef({})
-  const initialPersistedRef = useRef(
-    Array.isArray(initialPersistedQuestionIds) ? [...initialPersistedQuestionIds] : [],
-  )
 
-  const displayNumberOffset = useMemo(() => {
-    if (isMaterialEditMode) return 0
-    if (!isCreateMode) return 0
-    return countExistingQuestionsForMaterial(materialId)
-  }, [isMaterialEditMode, isCreateMode, materialId])
+  const displayNumberOffset = 0
 
   const [questions, setQuestions] = useState(() => {
     if (initialQuestions != null && initialQuestions.length > 0) {
@@ -223,24 +209,41 @@ export default function QuizEditorContent({
     setSaveModalOpen(true)
   }
 
-  const handleConfirmSave = () => {
+  const handleConfirmSave = async () => {
     if (!isEditable) return
     const dto = buildDto(materialId, questions, quizId)
-    if (isMaterialEditMode) {
-      const persistResult = saveMaterialQuestionsConsolidated(
-        materialId,
-        questions,
-        initialPersistedRef.current,
-      )
-      console.log({ dto, persistResult })
-    } else {
-      const newQuizSetId = saveNewQuizForMaterial(materialId, questions)
-      console.log({ dto, newQuizSetId })
+    const lessonId = String(materialId ?? '').trim()
+    if (!lessonId) {
+      window.alert('교안(lesson) ID가 없습니다.')
+      return
     }
-    setSaveModalOpen(false)
-    navigate(ROUTES.professorQuizzes, {
-      state: { selectedMaterialId: materialId, materialId },
-    })
+    const titleFromQuestion =
+      questions[0]?.content?.trim() || '새 퀴즈'
+    try {
+      if (quizId) {
+        await fetchUpdateQuizData(quizId, {
+          title: titleFromQuestion,
+          description: '',
+        })
+      } else {
+        await fetchCreateQuizData({
+          lessonId,
+          title: titleFromQuestion,
+          description: '',
+        })
+      }
+      console.log(dto)
+      window.alert(
+        '퀴즈 메타정보가 저장되었습니다. 문항 추가·수정 API는 현재 허용 명세(§22~)에 없어 화면의 문항 내용은 서버에 반영되지 않습니다.',
+      )
+      setSaveModalOpen(false)
+      navigate(ROUTES.professorQuizzes, {
+        state: { lessonId, courseId: lessonId },
+      })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '저장에 실패했습니다.'
+      window.alert(msg)
+    }
   }
 
   const handleCancelSave = () => {
@@ -258,7 +261,7 @@ export default function QuizEditorContent({
   const handleConfirmCancel = () => {
     setIsCancelModalOpen(false)
     navigate(ROUTES.professorQuizzes, {
-      state: { selectedMaterialId: materialId, materialId },
+      state: { lessonId: materialId, courseId: materialId },
     })
   }
 

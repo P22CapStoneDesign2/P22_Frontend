@@ -1,110 +1,118 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
-import { countExistingQuestionsForMaterial } from '../../quiz/storage/professorQuizzesStorage.js'
 import {
-  courseOptionsFromDto,
-  loadProfessorMaterialsDto,
-  materialOptionsForCourseFromDto,
-} from '../../professor/materials/professorMaterialsStorage.js'
+  fetchStudentCourseOptions,
+} from '../../catalog/lessonCatalogService.js'
+import { fetchQuizOptionsForLesson } from '../../catalog/quizCatalogService.js'
 import { studentQuizSolvePath } from '../../../shared/constants/routes.js'
 import './QuizMaterialSelectPage.css'
 
 /**
- * 퀴즈 풀기 — 강의·교안 선택 (교수 교안·퀴즈 저장소와 동일 소스)
+ * 퀴즈 풀기 — GET /api/lessons/my + GET /api/quiz?lessonId=
  */
 export default function QuizMaterialSelectContent() {
   const navigate = useNavigate()
 
-  const materialsDto = useMemo(() => loadProfessorMaterialsDto(), [])
-  const courses = useMemo(() => courseOptionsFromDto(materialsDto), [materialsDto])
+  const [lessons, setLessons] = useState([])
+  const [lessonsLoading, setLessonsLoading] = useState(true)
+  const [quizzes, setQuizzes] = useState([])
+  const [quizzesLessonId, setQuizzesLessonId] = useState('')
+  const [selectedLesson, setSelectedLesson] = useState(null)
+  const [selectedQuiz, setSelectedQuiz] = useState(null)
 
-  const [materials, setMaterials] = useState([])
-  const [selectedCourse, setSelectedCourse] = useState(null)
-  const [selectedMaterial, setSelectedMaterial] = useState(null)
+  const [lessonDropdownOpen, setLessonDropdownOpen] = useState(false)
+  const [quizDropdownOpen, setQuizDropdownOpen] = useState(false)
 
-  const [courseDropdownOpen, setCourseDropdownOpen] = useState(false)
-  const [materialDropdownOpen, setMaterialDropdownOpen] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    fetchStudentCourseOptions().then((opts) => {
+      if (!cancelled) {
+        setLessons(opts)
+        setLessonsLoading(false)
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  const questionCount = useMemo(() => {
-    if (!selectedMaterial?.value) return 0
-    return countExistingQuestionsForMaterial(selectedMaterial.value)
-  }, [selectedMaterial])
-
-  const handleCourseSelect = (option) => {
-    setSelectedCourse(option)
-    setMaterials(materialOptionsForCourseFromDto(materialsDto, option.value))
-    setSelectedMaterial(null)
+  const handleLessonSelect = async (option) => {
+    setSelectedLesson(option)
+    setSelectedQuiz(null)
+    setQuizzes([])
+    setQuizzesLessonId('')
+    const opts = await fetchQuizOptionsForLesson(option.value)
+    setQuizzes(opts)
+    setQuizzesLessonId(option.value)
   }
 
-  const handleMaterialSelect = (option) => {
-    setSelectedMaterial(option)
+  const handleQuizSelect = (option) => {
+    setSelectedQuiz(option)
   }
 
-  const materialSelectDisabled = !selectedCourse
-  const hasMaterialsForCourse = Boolean(selectedCourse && materials.length > 0)
-  const showNoQuizHint = Boolean(selectedMaterial && questionCount === 0)
-  const canStartQuiz = Boolean(selectedCourse && selectedMaterial && questionCount > 0)
+  const quizzesLoading = Boolean(selectedLesson?.value) && quizzesLessonId !== selectedLesson.value
+  const canStartQuiz = Boolean(selectedLesson && selectedQuiz)
 
   const handleStartQuiz = () => {
-    if (!canStartQuiz || !selectedMaterial) return
-    navigate(studentQuizSolvePath(selectedMaterial.value))
+    if (!canStartQuiz || !selectedQuiz || !selectedLesson) return
+    navigate(studentQuizSolvePath(selectedQuiz.value, selectedLesson.value))
   }
 
   return (
     <div className="edu-stu-quiz-mat">
       <div className="edu-stu-quiz-mat__card">
         <h1 className="edu-stu-quiz-mat__title">퀴즈 풀기</h1>
-        <p className="edu-stu-quiz-mat__intro">퀴즈를 풀 강의와 교안을 선택하세요.</p>
+        <p className="edu-stu-quiz-mat__intro">교안과 퀴즈를 선택하세요.</p>
 
         <div className="edu-stu-quiz-mat__filters">
           <div className="edu-stu-quiz-mat__field">
-            <span className="edu-stu-quiz-mat__label" id="stu-quiz-mat-course-label">
-              강의
+            <span className="edu-stu-quiz-mat__label" id="stu-quiz-mat-lesson-label">
+              교안
             </span>
             <SelectDropdown
               className="edu-stu-quiz-mat__select"
-              options={courses}
-              selected={selectedCourse}
-              placeholder="강의를 선택하세요"
-              isOpen={courseDropdownOpen}
-              onOpenChange={setCourseDropdownOpen}
-              onSelect={handleCourseSelect}
+              options={lessons}
+              selected={selectedLesson}
+              placeholder={lessonsLoading ? '불러오는 중…' : '교안을 선택하세요'}
+              isOpen={lessonDropdownOpen}
+              onOpenChange={setLessonDropdownOpen}
+              onSelect={handleLessonSelect}
+              disabled={lessonsLoading}
               emptyMessage="등록된 강의가 없습니다."
             />
           </div>
 
           <div className="edu-stu-quiz-mat__field">
-            <span className="edu-stu-quiz-mat__label" id="stu-quiz-mat-material-label">
-              교안
+            <span className="edu-stu-quiz-mat__label" id="stu-quiz-mat-quiz-label">
+              퀴즈
             </span>
             <SelectDropdown
               className="edu-stu-quiz-mat__select"
-              options={materials}
-              selected={selectedMaterial}
+              options={quizzes}
+              selected={selectedQuiz}
               placeholder={
-                materialSelectDisabled ? '먼저 강의를 선택하세요' : '교안을 선택하세요'
+                !selectedLesson
+                  ? '먼저 교안을 선택하세요'
+                  : quizzesLoading
+                    ? '불러오는 중…'
+                    : '퀴즈를 선택하세요'
               }
-              isOpen={materialDropdownOpen}
-              onOpenChange={setMaterialDropdownOpen}
-              onSelect={handleMaterialSelect}
-              disabled={materialSelectDisabled}
-              emptyMessage="등록된 교안이 없습니다."
+              isOpen={quizDropdownOpen}
+              onOpenChange={setQuizDropdownOpen}
+              onSelect={handleQuizSelect}
+              disabled={!selectedLesson || quizzesLoading}
+              emptyMessage="등록된 퀴즈가 없습니다."
             />
           </div>
 
-          {selectedCourse && !hasMaterialsForCourse ? (
-            <p className="edu-stu-quiz-mat__hint" role="status">
-              등록된 교안이 없습니다.
-            </p>
-          ) : null}
-
-          {showNoQuizHint ? (
+          {selectedLesson && !quizzesLoading && quizzes.length === 0 ? (
             <p className="edu-stu-quiz-mat__hint" role="status">
               등록된 퀴즈가 없습니다.
             </p>
           ) : null}
+
         </div>
 
         <div className="edu-stu-quiz-mat__actions">

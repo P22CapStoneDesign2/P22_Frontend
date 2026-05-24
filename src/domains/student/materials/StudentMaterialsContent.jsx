@@ -1,79 +1,50 @@
-import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
-import { STUDENT_MATERIALS_COURSE_QUERY_KEY } from '../../../shared/constants/routes.js'
-import {
-  courseOptionsFromDto,
-  loadProfessorMaterialsDto,
-  materialTableRowsForCourseFromDto,
-} from '../../professor/materials/professorMaterialsStorage.js'
+import { useEffect, useState } from 'react'
+import { fetchStudentLessonTableRows } from '../../catalog/lessonCatalogService.js'
 import StudentMaterialsTable from './StudentMaterialsTable.jsx'
 
 /**
- * 학생 교안 보기 — 강의 선택 즉시 목록 표시, courseId query로 선택 유지
+ * 학생 교안 보기 — GET /api/lessons/my
  */
 export default function StudentMaterialsContent() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const materialsDto = useMemo(() => loadProfessorMaterialsDto(), [])
-  const courses = useMemo(() => courseOptionsFromDto(materialsDto), [materialsDto])
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const [courseDropdownOpen, setCourseDropdownOpen] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    fetchStudentLessonTableRows().then((list) => {
+      if (cancelled) return
+      setRows(
+        list.map((r) => ({
+          materialId: r.lessonId,
+          fileName: r.title,
+          uploadDateDisplay: r.dateLabel,
+          rowNumber: r.rowNumber,
+        })),
+      )
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
-  const courseIdFromUrl = searchParams.get(STUDENT_MATERIALS_COURSE_QUERY_KEY) ?? ''
-
-  const selectedCourse = useMemo(() => {
-    if (!courseIdFromUrl) return null
-    return courses.find((c) => c.value === courseIdFromUrl) ?? null
-  }, [courses, courseIdFromUrl])
-
-  const tableRows = useMemo(() => {
-    if (!selectedCourse?.value) return []
-    return materialTableRowsForCourseFromDto(materialsDto, selectedCourse.value)
-  }, [materialsDto, selectedCourse])
-
-  const tableState = !selectedCourse ? 'idle' : tableRows.length === 0 ? 'empty' : 'rows'
-
-  const handleCourseSelect = (option) => {
-    const next = new URLSearchParams(searchParams)
-    next.set(STUDENT_MATERIALS_COURSE_QUERY_KEY, option.value)
-    setSearchParams(next, { replace: true })
-  }
+  const tableState = loading ? 'idle' : rows.length === 0 ? 'empty' : 'rows'
 
   return (
     <div className="edu-stu-mat-list">
       <div className="edu-stu-mat-list__card">
         <h1 className="edu-stu-mat-list__title">교안 보기</h1>
-        <p className="edu-stu-mat-list__intro">강의를 선택한 뒤 등록된 교안을 확인하고 뷰어로 열 수 있습니다.</p>
+        <p className="edu-stu-mat-list__intro">
+          승인된 교안 목록입니다. 제목을 눌러 상세·PDF를 확인할 수 있습니다.
+        </p>
 
-        <div className="edu-stu-mat-list__toolbar">
-          <div className="edu-stu-mat-list__field">
-            <span className="edu-stu-mat-list__label" id="stu-mat-course-label">
-              강의
-            </span>
-            <SelectDropdown
-              className="edu-stu-mat-list__select"
-              options={courses}
-              selected={selectedCourse}
-              placeholder="강의를 선택하세요"
-              isOpen={courseDropdownOpen}
-              onOpenChange={setCourseDropdownOpen}
-              onSelect={handleCourseSelect}
-              emptyMessage="등록된 강의가 없습니다."
-            />
-          </div>
-        </div>
-
-        {selectedCourse ? (
+        {loading ? (
           <p className="edu-stu-mat-list__course-status" role="status">
-            선택된 강의: <strong>{selectedCourse.label}</strong>
+            교안 목록을 불러오는 중…
           </p>
         ) : null}
 
-        <StudentMaterialsTable
-          rows={tableRows}
-          tableState={tableState}
-          courseId={selectedCourse?.value ?? ''}
-        />
+        <StudentMaterialsTable rows={rows} tableState={tableState} />
       </div>
     </div>
   )

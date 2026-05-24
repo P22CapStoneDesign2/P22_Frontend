@@ -67,3 +67,31 @@ export const rejectLessonEnrollment = (lessonId, enrollmentId) =>
   instance.post(
     `/api/lessons/${encodeURIComponent(String(lessonId))}/enrollments/${encodeURIComponent(String(enrollmentId))}/reject`,
   )
+
+/**
+ * POST /api/lessons — 교안(lesson) 생성
+ * @param {{ title: string, description?: string }} body
+ */
+export const createLesson = (body) => instance.post('/api/lessons', body)
+
+/**
+ * PUT /api/lessons/{id}
+ * @param {string|number} lessonId
+ * @param {{ title: string, description?: string }} body
+ */
+export const updateLesson = (lessonId, body) =>
+  instance.put(`/api/lessons/${encodeURIComponent(String(lessonId))}`, body)
+
+/**
+ * DELETE /api/lessons/{id}
+ * @param {string|number} lessonId
+ */
+export const deleteLesson = (lessonId) =>
+  instance.delete(`/api/lessons/${encodeURIComponent(String(lessonId))}`)
+
+/**
+ * GET /api/lessons/{id} — 교안 단건 조회
+ * @param {string|number} lessonId
+ */
+export const getLesson = (lessonId) =>
+  instance.get(`/api/lessons/${encodeURIComponent(String(lessonId))}`)

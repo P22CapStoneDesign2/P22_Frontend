@@ -35,7 +35,7 @@ export default function StudentMaterialsTable({ rows, tableState, courseId = '' 
           {tableState === 'idle' ? (
             <tr>
               <td colSpan={3} className="edu-stu-mat-table__empty">
-                강의를 선택하면 등록된 교안 목록이 표시됩니다.
+                교안 목록을 불러오는 중입니다.
               </td>
             </tr>
           ) : isEmpty ? (

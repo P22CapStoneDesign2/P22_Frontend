@@ -1,12 +1,12 @@
 import { useParams } from 'react-router-dom'
-import { getMaterialDisplayLabel } from '../../professor/materials/professorMaterialsStorage.js'
+import { useMaterialDisplayTitle } from '../../catalog/useMaterialDisplayTitle.js'
 import QuizSolveContent from './QuizSolveContent.jsx'
 import './QuizSolvePage.css'
 
 export default function QuizSolvePage() {
   const { materialId } = useParams()
   const mid = materialId ?? ''
-  const materialLabel = getMaterialDisplayLabel(mid)
+  const materialLabel = useMaterialDisplayTitle(mid)
 
   return (
     <div className="edu-quiz-solve-page">

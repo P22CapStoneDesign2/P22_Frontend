@@ -38,7 +38,5 @@ export default function StudentDashboardPage() {
     [handleCourseApplyClick],
   )
 
-  return (
-    <DashboardPageLayout heading="메뉴를 선택하세요" menuItems={menuItems} />
-  )
+  return <DashboardPageLayout menuItems={menuItems} />
 }
