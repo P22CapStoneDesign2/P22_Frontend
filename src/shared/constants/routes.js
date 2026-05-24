@@ -33,8 +33,10 @@ export const ROUTES = {
   /** `/student/quiz/:materialId` 의 공통 접두 (표시·조립용) */
   studentQuizRoot: '/student/quiz',
 
-  /** 관리자(ADMIN) — 과목 접근 권한 관리 */
+  /** 관리자(ADMIN) — 교안 수강 신청 관리 */
   adminSubjectAccess: '/admin/subject-access',
+  /** 관리자(ADMIN) — 교수 회원가입 승인 */
+  adminProfessorSignups: '/admin/professor-signups',
 }
 
 /** 교안 목록 — 강의 선택 유지용 query key (학생·교수 공통 키 이름) */

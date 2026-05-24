@@ -356,8 +356,6 @@ export default function AdminSubjectAccessPage() {
 
   return (
     <div className="edu-admin-access">
-      <h1 className="edu-admin-access__page-title">교안 수강 신청 관리</h1>
-
       <div className="edu-admin-access__grid">
         <section className="edu-admin-access__panel" aria-labelledby="admin-panel-subjects">
           <h2 id="admin-panel-subjects" className="edu-admin-access__col-head edu-admin-access__col-head--c1">

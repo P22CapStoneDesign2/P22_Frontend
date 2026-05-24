@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { ROUTES } from '../shared/constants/routes.js'
 import { AdminAreaLayout, ProfessorAreaLayout, StudentAreaLayout } from './RouteLayouts.jsx'
 import AdminSubjectAccessPage from '../domains/admin/subject-access/AdminSubjectAccessPage.jsx'
+import AdminProfessorSignupPage from '../domains/admin/professor-signup/AdminProfessorSignupPage.jsx'
 import LandingPage from '../domains/landing/LandingPage.jsx'
 import LoginPage from '../domains/auth/LoginPage.jsx'
 import SignUpPage from '../domains/auth/SignUpPage.jsx'
@@ -56,6 +57,9 @@ const adminMeta = {
   subjectAccess: {
     contentClassName: 'edu-admin-access-app-layout-content',
   },
+  professorSignups: {
+    contentClassName: 'edu-admin-prof-signup-app-layout-content',
+  },
 }
 
 //학생 메타 데이터
@@ -85,6 +89,11 @@ const appRouter = createBrowserRouter([
         path: 'subject-access',
         element: <AdminSubjectAccessPage />,
         handle: { layoutMeta: adminMeta.subjectAccess },
+      },
+      {
+        path: 'professor-signups',
+        element: <AdminProfessorSignupPage />,
+        handle: { layoutMeta: adminMeta.professorSignups },
       },
     ],
   },

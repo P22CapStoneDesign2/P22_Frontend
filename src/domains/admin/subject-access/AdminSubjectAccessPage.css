@@ -28,7 +28,8 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: clamp(16px, 2vh, 24px) clamp(20px, 3vw, 40px) clamp(24px, 3vh, 36px);
+  --edu-admin-section-gap: 12px;
+  padding: clamp(20px, 3vh, 32px) clamp(20px, 3vw, 40px) clamp(24px, 3vh, 36px);
   box-sizing: border-box;
   background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
   background-attachment: fixed;
@@ -38,27 +39,12 @@
   text-align: center;
 }
 
-.edu-admin-access__page-title {
-  margin: 0;
-  flex-shrink: 0;
-  width: 100%;
-  box-sizing: border-box;
-  padding: clamp(12px, 2vh, 20px) clamp(16px, 2vw, 24px) clamp(32px, 4vh, 44px);
-  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: #0f172a;
-  text-align: center;
-  line-height: 1.35;
-}
-
-/* 3열 × 4행(제목·검색·테이블·버튼) — 행 정렬 */
 .edu-admin-access__grid {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) minmax(0, 1.35fr) minmax(0, 1.35fr);
   grid-template-rows: auto auto 1fr auto;
   column-gap: clamp(12px, 1.5vw, 20px);
-  row-gap: 12px;
+  row-gap: var(--edu-admin-section-gap);
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;

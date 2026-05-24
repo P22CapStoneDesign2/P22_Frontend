@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { EduHubBookIcon } from '../../../shared/icons/eduHubIcons.jsx'
 import './Header.css'
 
@@ -73,6 +73,8 @@ function HeaderLogo({ logoHref, logoLabel, showBrandIcon, logoImageOnly }) {
  * @param {boolean} [props.logoImageOnly] eduhub_logo.png만 왼쪽에 표시
  * @param {boolean} [props.hideLogo] true면 로고 비표시
  * @param {string} [props.className]
+ * @typedef {{ label: string, to: string }} HeaderNavLink
+ * @param {HeaderNavLink[]} [props.navLinks] 상단바 탭형 이동 링크 (관리자 등)
  * @param {BreadcrumbItem[]} [props.breadcrumbItems] 현재 경로 표시 (없거나 빈 배열이면 비표시)
  * @param {boolean} [props.logoCentered] true면 로고를 상단바 가운데, 우측 액션은 오른쪽
  */
@@ -89,8 +91,10 @@ export default function Header({
   hideLogo = false,
   className = '',
   breadcrumbItems,
+  navLinks,
   logoCentered = false,
 }) {
+  const location = useLocation()
   const isPublic = variant === 'public'
   const showLoginLink = isPublic || Boolean(loginHref && !onLogout && !userEmail)
   const logo = hideLogo ? null : (
@@ -103,6 +107,7 @@ export default function Header({
   )
 
   const showBreadcrumb = Array.isArray(breadcrumbItems) && breadcrumbItems.length > 0
+  const showNavLinks = Array.isArray(navLinks) && navLinks.length > 0
 
   return (
     <header
@@ -111,6 +116,23 @@ export default function Header({
       <div className="edu-header__inner">
         <div className="edu-header__primary">
           {logo}
+          {showNavLinks ? (
+            <nav className="edu-header__nav" aria-label="관리자 메뉴">
+              {navLinks.map((item) => {
+                const isActive = location.pathname === item.to
+                return (
+                  <Link
+                    key={item.to}
+                    className={`edu-header__nav-link${isActive ? ' edu-header__nav-link--active' : ''}`}
+                    to={item.to}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </nav>
+          ) : null}
           {showBreadcrumb ? (
             <nav className="edu-header__breadcrumb" aria-label="현재 위치">
               <ol className="edu-header__breadcrumb-list">
