@@ -19,6 +19,8 @@ import {
   fetchQuizTableRowsForLesson,
 } from '../../catalog/quizCatalogService.js'
 import { restoreQuizManagementSelection } from './quizManagementRestore.js'
+import { useProfessorAccountGate } from '../hooks/useProfessorAccountGate.js'
+import ProfessorPendingNotice from '../components/ProfessorPendingNotice.jsx'
 import QuizTable from './QuizTable.jsx'
 import './QuizManagementPage.css'
 
@@ -33,6 +35,7 @@ export default function QuizManagementContent() {
   const navigate = useNavigate()
   const location = useLocation()
   const { isViewerMode } = useIsViewerMode()
+  const { isProfessorPending, canMutateProfessorContent } = useProfessorAccountGate()
 
   const [courses, setCourses] = useState([])
   const [coursesLoading, setCoursesLoading] = useState(true)
@@ -143,6 +146,10 @@ export default function QuizManagementContent() {
 
   const handleCreateQuiz = async () => {
     if (isViewerMode) return
+    if (!canMutateProfessorContent) {
+      window.alert('관리자 승인 대기 중입니다. 승인 후 퀴즈를 생성할 수 있습니다.')
+      return
+    }
     if (!selectedMaterial?.value) {
       window.alert('교안을 먼저 선택해주세요.')
       return
@@ -220,6 +227,8 @@ export default function QuizManagementContent() {
       <div className="edu-quiz-mgmt__card">
         <h1 className="edu-quiz-mgmt__title">교안별 퀴즈 관리</h1>
 
+        {isProfessorPending ? <ProfessorPendingNotice /> : null}
+
         <div className="edu-quiz-mgmt__filters">
           <div className="edu-quiz-mgmt__field">
             <span className="edu-quiz-mgmt__label" id="quiz-mgmt-course-label">
@@ -288,7 +297,7 @@ export default function QuizManagementContent() {
               <Button
                 type="button"
                 variant="primary"
-                disabled={!selectedMaterial}
+                disabled={!selectedMaterial || !canMutateProfessorContent}
                 onClick={handleCreateQuiz}
               >
                 퀴즈 생성
@@ -296,7 +305,7 @@ export default function QuizManagementContent() {
               <Button
                 type="button"
                 variant="danger"
-                disabled={!canOpenDelete || selectedCount === 0}
+                disabled={!canOpenDelete || selectedCount === 0 || !canMutateProfessorContent}
                 onClick={handleOpenDeleteModal}
               >
                 퀴즈 삭제

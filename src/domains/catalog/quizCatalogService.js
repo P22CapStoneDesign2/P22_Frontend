@@ -73,9 +73,8 @@ export async function fetchQuizTableRowsForLesson(lessonId) {
     const needDetailFetch = summaries.filter((summary) => {
       if (!summary || summary.id == null) return false
       const quizId = String(summary.id)
-      if (quizDetailById[quizId]) return false
-      const count = typeof summary.questionCount === 'number' ? summary.questionCount : 0
-      return count > 0
+      const embedded = quizDetailById[quizId] ?? summary
+      return extractQuizQuestionsFromApiData(embedded).length === 0
     })
 
     const detailEntries = await Promise.all(

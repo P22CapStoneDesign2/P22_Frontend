@@ -2,9 +2,18 @@
 import instance from './axios.js'
 
 /**
- * @param {{ page?: number, size?: number, sort?: string, lessonId?: string|number }} [params]
+ * @param {{ page?: number, size?: number, sort?: string, lessonId?: string|number, materialId?: string|number }} [params]
+ * 백엔드 query 파라미터명은 materialId (lessonId는 프론트 호환용으로 materialId로 매핑)
  */
-export const getQuizzes = (params = {}) => instance.get('/api/quiz', { params })
+export const getQuizzes = (params = {}) => {
+  const { lessonId, materialId, ...rest } = params ?? {}
+  const query = { ...rest }
+  const mid = materialId ?? lessonId
+  if (mid != null && String(mid).trim() !== '') {
+    query.materialId = mid
+  }
+  return instance.get('/api/quiz', { params: query })
+}
 
 /** @param {string|number} quizId */
 export const getQuizDetail = (quizId) =>
@@ -15,7 +24,22 @@ export const getQuizForEdit = (quizId) =>
   instance.get(`/api/quiz/${encodeURIComponent(String(quizId))}/edit`)
 
 /**
- * @param {{ title: string, description?: string, lessonId: string|number }} body
+ * @param {{
+ *   title: string,
+ *   description?: string,
+ *   materialId: string|number,
+ *   questions?: Array<{
+ *     questionText: string,
+ *     questionType: 'MULTIPLE_CHOICE' | 'SHORT_ANSWER',
+ *     options?: Array<{ optionText: string, correct?: boolean }>,
+ *     correctAnswer: string,
+ *     explanation?: string,
+ *     score?: number,
+ *     anchorId?: number|null,
+ *     lessonPage?: number|null,
+ *     lessonParagraph?: number|null,
+ *   }>,
+ * }} body
  */
 export const createQuiz = (body) => instance.post('/api/quiz', body)
 

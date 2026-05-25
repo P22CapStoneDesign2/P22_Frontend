@@ -75,7 +75,8 @@ export default function QuizEditPage() {
     )
   }
 
-  const resolvedLessonId = lessonIdForLabel
+  const resolvedLessonId =
+    bundle.lessonId || lessonIdForLabel || location.state?.lessonId || ''
 
   return (
     <div className="edu-quiz-create-page">

@@ -9,7 +9,9 @@ import {
   formatLessonDateLabel,
   mapLessonItemToStudentTableRow,
   mapLessonsToCourseOptions,
+  mapLessonsToCourseOptionsWithDisplayNames,
 } from './lessonCatalogMapper.js'
+import { readAllCourseDisplayTitles } from '../professor/materials/professorCourseDisplayStorage.js'
 import { mapMaterialOptionsForCourseLesson } from '../quiz/mappers/quizManagementViewMapper.js'
 
 const LIST_PAGE = { page: 0, size: 200 }
@@ -33,7 +35,8 @@ function safeLessonContent(res) {
 export async function fetchProfessorCourseOptions() {
   try {
     const res = await getLessons(LIST_PAGE)
-    return mapLessonsToCourseOptions(safeLessonContent(res))
+    const displayById = readAllCourseDisplayTitles()
+    return mapLessonsToCourseOptionsWithDisplayNames(safeLessonContent(res), displayById)
   } catch {
     return []
   }

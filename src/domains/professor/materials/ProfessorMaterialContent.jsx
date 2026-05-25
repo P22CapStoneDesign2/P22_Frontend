@@ -14,10 +14,19 @@ import { fetchLessonDetail, fetchProfessorLessonsList } from '../../catalog/less
 import { readPdfUrlFromLesson } from '../../../shared/utils/pdfMeta.js'
 import MaterialFileTable from './MaterialFileTable.jsx'
 import {
+  DEFAULT_LESSON_MATERIAL_TITLE,
   mapCourseDropdownOptions,
   mapLessonsToCourseIdList,
   mapSelectedLessonToMaterialRows,
 } from './materialsViewMapper.js'
+import {
+  readAllCourseDisplayTitles,
+  removeCourseDisplayTitle,
+  resolveCourseDisplayLabel,
+  writeCourseDisplayTitle,
+} from './professorCourseDisplayStorage.js'
+import { useProfessorAccountGate } from '../hooks/useProfessorAccountGate.js'
+import ProfessorPendingNotice from '../components/ProfessorPendingNotice.jsx'
 import { formatMaterialUploadDate } from './materialUtils.js'
 import './ProfessorMaterialPage.css'
 
@@ -28,9 +37,8 @@ const SAVE_CONFIRM_MESSAGE = '저장하시겠습니까?'
 
 const PDF_UPLOAD_ALERT = 'PDF 업로드 API가 아직 연결되지 않았습니다.'
 
-const COURSE_RENAME_API_ALERT = '강의명 수정 API가 아직 연결되지 않았습니다.'
-
 export default function ProfessorMaterialContent() {
+  const { isProfessorPending, canMutateProfessorContent } = useProfessorAccountGate()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -84,16 +92,14 @@ export default function ProfessorMaterialContent() {
       nextLessonTitles[l.id] = l.title
     })
     setLessonMetaById(meta)
-    setLessonTitleById((prev) => ({ ...prev, ...nextLessonTitles }))
-    setCourseNameById((prev) => {
-      const next = { ...prev }
-      list.forEach((l) => {
-        if (next[l.id] == null || next[l.id] === '') {
-          next[l.id] = l.title
-        }
-      })
-      return next
+    setLessonTitleById(nextLessonTitles)
+    const stored = readAllCourseDisplayTitles()
+    /** @type {Record<string, string>} */
+    const nextCourseNames = {}
+    list.forEach((l) => {
+      nextCourseNames[l.id] = resolveCourseDisplayLabel(l.id, l.title)
     })
+    setCourseNameById({ ...stored, ...nextCourseNames })
   }, [])
 
   const reloadLessons = useCallback(async () => {
@@ -149,6 +155,10 @@ export default function ProfessorMaterialContent() {
   )
 
   const handleOpenCreateCourseModal = () => {
+    if (!canMutateProfessorContent) {
+      window.alert('관리자 승인 대기 중입니다. 승인 후 강의를 추가할 수 있습니다.')
+      return
+    }
     setNewCourseName('')
     setIsCreateCourseModalOpen(true)
   }
@@ -173,7 +183,7 @@ export default function ProfessorMaterialContent() {
       window.alert('강의명을 입력해주세요.')
       return
     }
-    window.alert(COURSE_RENAME_API_ALERT)
+    writeCourseDisplayTitle(selectedCourseId, name)
     setCourseNameById((prev) => ({ ...prev, [selectedCourseId]: name }))
     setIsRenameCourseModalOpen(false)
   }
@@ -182,7 +192,7 @@ export default function ProfessorMaterialContent() {
     const name = newCourseName.trim()
     if (!name) return
     try {
-      const res = await createLesson({ title: name })
+      const res = await createLesson({ title: DEFAULT_LESSON_MATERIAL_TITLE })
       const data = apiResponseData(res)
       const id = data?.id
       if (id == null) {
@@ -190,9 +200,10 @@ export default function ProfessorMaterialContent() {
         return
       }
       const lessonId = String(id)
+      writeCourseDisplayTitle(lessonId, name)
       const list = await reloadLessons()
       const created = list.find((l) => l.id === lessonId)
-      const lessonTitle = created?.title ?? name
+      const lessonTitle = created?.title ?? DEFAULT_LESSON_MATERIAL_TITLE
       setCourseNameById((prev) => ({ ...prev, [lessonId]: name }))
       setLessonTitleById((prev) => ({ ...prev, [lessonId]: lessonTitle }))
       setSelectedCourseId(lessonId)
@@ -253,6 +264,7 @@ export default function ProfessorMaterialContent() {
     try {
       await deleteLesson(deleteTargetLessonId)
       await reloadLessons()
+      removeCourseDisplayTitle(deleteTargetLessonId)
       setCourseNameById((prev) => {
         const next = { ...prev }
         delete next[deleteTargetLessonId]
@@ -310,6 +322,8 @@ export default function ProfessorMaterialContent() {
       <div className="edu-mat__card">
         <h1 className="edu-mat__title">교안 관리</h1>
 
+        {isProfessorPending ? <ProfessorPendingNotice /> : null}
+
         <div className="edu-mat__field">
           <span className="edu-mat__label" id="edu-mat-course-select-label">
             강의 선택
@@ -324,10 +338,14 @@ export default function ProfessorMaterialContent() {
             onSelect={handleCourseSelect}
             disabled={lessonsLoading}
             emptyMessage="등록된 강의가 없습니다."
-            footerAction={{
-              label: '+ 강의 추가하기',
-              onSelect: handleOpenCreateCourseModal,
-            }}
+            footerAction={
+              canMutateProfessorContent
+                ? {
+                    label: '+ 강의 추가하기',
+                    onSelect: handleOpenCreateCourseModal,
+                  }
+                : undefined
+            }
           />
         </div>
 
@@ -355,7 +373,7 @@ export default function ProfessorMaterialContent() {
               type="button"
               variant="secondary"
               className="edu-mat-add-file-btn"
-              disabled={!selectedCourseId}
+              disabled={!selectedCourseId || !canMutateProfessorContent}
               onClick={handleAddFileClick}
             >
               파일 추가

@@ -6,6 +6,7 @@ import QuestionNavigator from './QuestionNavigator.jsx'
 import QuizEditorFloatingActions from './QuizEditorFloatingActions.jsx'
 import { ROUTES } from '../../../shared/constants/routes.js'
 import { persistQuizWithQuestions } from '../../quiz/quizPersistenceService.js'
+import { parseLessonIdForApi } from '../../quiz/mappers/quizMapper.js'
 import { cloneQuestionsForState, createNewQuestion, genQuizItemId } from './quizCreateUtils.js'
 import {
   formatMissingAnswersAlert,
@@ -30,9 +31,12 @@ const CANCEL_CONFIRM_MESSAGE = '작업을 취소하시겠습니까?'
  * @param {boolean} [props.isViewerMode] 학생 보기 전용 — 수정·저장·추가 비활성
  * @param {boolean} [props.isMaterialEditMode] 교안 전체 문항 수정
  * @param {string[]} [props.initialPersistedQuestionIds] 수정 진입 시 저장소에 있던 문항 id
+ * @param {boolean} [props.professorFeaturesLocked] PROF PENDING 등 — 저장·추가 비활성
+ * @param {string} [props.lessonId] POST /api/quiz lessonId (materialId보다 우선)
  */
 export default function QuizEditorContent({
   materialId,
+  lessonId: lessonIdProp,
   quizId = null,
   initialQuestions = null,
   initialActiveQuestionId = null,
@@ -41,8 +45,9 @@ export default function QuizEditorContent({
   isViewerMode = false,
   initialPersistedQuestionIds = [],
   displayNumberOffset = 0,
+  professorFeaturesLocked = false,
 }) {
-  const isEditable = !isViewerMode
+  const isEditable = !isViewerMode && !professorFeaturesLocked
   const navigate = useNavigate()
   const formRefs = useRef({})
 
@@ -222,17 +227,22 @@ export default function QuizEditorContent({
       return
     }
 
-    const dto = buildDto(materialId, questions, quizId)
-    const lessonId = String(materialId ?? '').trim()
-    if (!lessonId) {
-      window.alert('교안(lesson) ID가 없습니다.')
+    const resolvedLessonId =
+      lessonIdProp != null && String(lessonIdProp).trim()
+        ? String(lessonIdProp).trim()
+        : String(materialId ?? '').trim()
+
+    if (parseLessonIdForApi(resolvedLessonId) == null) {
+      window.alert('교안을 선택해주세요.')
       return
     }
+
+    const dto = buildDto(materialId, questions, quizId)
     const titleFromQuestion = questions[0]?.content?.trim() || '새 퀴즈'
     try {
       await persistQuizWithQuestions({
         quizId,
-        lessonId,
+        lessonId: resolvedLessonId,
         title: titleFromQuestion,
         description: '',
         questions,
@@ -242,10 +252,15 @@ export default function QuizEditorContent({
       window.alert('저장되었습니다.')
       setSaveModalOpen(false)
       navigate(ROUTES.professorQuizzes, {
-        state: { lessonId, courseId: lessonId },
+        state: { lessonId: resolvedLessonId, courseId: resolvedLessonId },
       })
     } catch (err) {
+      if (err instanceof Error && err.message === 'LESSON_ID_REQUIRED') {
+        window.alert('교안을 선택해주세요.')
+        return
+      }
       const msg = err instanceof Error ? err.message : '저장에 실패했습니다.'
+      console.error('QUIZ SAVE FAILED', msg, err)
       window.alert(msg)
     }
   }

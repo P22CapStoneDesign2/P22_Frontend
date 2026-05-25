@@ -19,9 +19,25 @@ export function mapLessonItemToCourseOption(item) {
  * @returns {Array<{ value: string, label: string }>}
  */
 export function mapLessonsToCourseOptions(content) {
+  return mapLessonsToCourseOptionsWithDisplayNames(content, {})
+}
+
+/**
+ * @param {unknown[]} content
+ * @param {Record<string, string>} courseDisplayByLessonId — UI 강의 표시명(lessonId → label)
+ * @returns {Array<{ value: string, label: string }>}
+ */
+export function mapLessonsToCourseOptionsWithDisplayNames(content, courseDisplayByLessonId = {}) {
   if (!Array.isArray(content)) return []
   return content
-    .map(mapLessonItemToCourseOption)
+    .map((item) => {
+      if (!item || typeof item !== 'object' || item.id == null) return null
+      const id = String(item.id)
+      const apiTitle = String(item.title ?? item.name ?? '—').trim() || '—'
+      const display = courseDisplayByLessonId[id]
+      const label = (typeof display === 'string' && display.trim() ? display.trim() : apiTitle) || '—'
+      return { value: id, label }
+    })
     .filter((o) => o != null)
 }
 

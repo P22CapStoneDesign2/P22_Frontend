@@ -2,6 +2,9 @@
  * 교안 관리 — API lesson DTO → 피그마 UI ViewModel (강의명/교안명 분리)
  */
 
+/** 강의 추가 시 API lesson.title 기본값 (강의 표시명과 분리) */
+export const DEFAULT_LESSON_MATERIAL_TITLE = '새 교안'
+
 /**
  * @param {Array<{ id: string, title: string }>} lessons
  * @returns {Array<{ id: string }>}

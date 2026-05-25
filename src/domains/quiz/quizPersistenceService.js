@@ -5,22 +5,14 @@ import {
   fetchUpdateQuizData,
   fetchUpdateQuizQuestionData,
 } from './api/quizApi.js'
+import { getApiErrorMessage } from '../../api/apiErrorMessage.js'
 import {
+  buildQuizCreateApiPayload,
   isPersistedQuestionId,
   mapEditorQuestionToApiQuestionPayload,
   mapEditorQuestionToApiQuestionUpdatePayload,
+  parseLessonIdForApi,
 } from './mappers/quizMapper.js'
-
-/**
- * @param {string|number} lessonId
- */
-function anchorOverridesForLesson(lessonId) {
-  const s = String(lessonId ?? '').trim()
-  if (!s) return {}
-  const n = Number(s)
-  if (Number.isFinite(n)) return { anchorId: n }
-  return {}
-}
 
 /**
  * 퀴즈 메타 + 문항 저장 (POST/PUT /api/quiz, §22~23 문제 API)
@@ -42,27 +34,37 @@ export async function persistQuizWithQuestions({
   questions,
   initialPersistedQuestionIds = [],
 }) {
-  const lessonIdStr = String(lessonId ?? '').trim()
-  if (!lessonIdStr) {
-    throw new Error('교안(lesson) ID가 없습니다.')
+  const lessonIdNum = parseLessonIdForApi(lessonId)
+  if (lessonIdNum == null) {
+    throw new Error('LESSON_ID_REQUIRED')
   }
 
   let effectiveQuizId = quizId != null ? String(quizId).trim() : ''
   if (!effectiveQuizId) {
-    const created = await fetchCreateQuizData({
-      lessonId: lessonIdStr,
+    const payload = buildQuizCreateApiPayload({
+      lessonId: lessonIdNum,
       title,
       description,
+      questions,
     })
-    if (created?.id == null) {
-      throw new Error('퀴즈 생성에 실패했습니다.')
+    console.log('QUIZ CREATE PAYLOAD', JSON.stringify(payload, null, 2))
+    try {
+      const created = await fetchCreateQuizData(payload)
+      if (created?.id == null) {
+        throw new Error('퀴즈 생성에 실패했습니다.')
+      }
+      effectiveQuizId = String(created.id)
+      return effectiveQuizId
+    } catch (err) {
+      const message = getApiErrorMessage(err, '퀴즈 생성에 실패했습니다.')
+      console.error('QUIZ CREATE FAILED', message, err?.response?.data)
+      throw new Error(message)
     }
-    effectiveQuizId = String(created.id)
-  } else {
-    await fetchUpdateQuizData(effectiveQuizId, { title, description })
   }
 
-  const overrides = anchorOverridesForLesson(lessonIdStr)
+  await fetchUpdateQuizData(effectiveQuizId, { title, description })
+
+  const questionOverrides = {}
   const currentIds = new Set(questions.map((q) => q.id).filter(Boolean))
   const initialSet = new Set(
     (initialPersistedQuestionIds ?? []).filter((id) => isPersistedQuestionId(id)),
@@ -74,12 +76,12 @@ export async function persistQuizWithQuestions({
       await fetchUpdateQuizQuestionData(
         effectiveQuizId,
         q.id,
-        mapEditorQuestionToApiQuestionUpdatePayload(q, { ...overrides, score }),
+        mapEditorQuestionToApiQuestionUpdatePayload(q, { ...questionOverrides, score }),
       )
     } else {
       await fetchAddQuizQuestionData(
         effectiveQuizId,
-        mapEditorQuestionToApiQuestionPayload(q, { ...overrides, score }),
+        mapEditorQuestionToApiQuestionPayload(q, { ...questionOverrides, score }),
       )
     }
   }

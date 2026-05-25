@@ -1,15 +1,22 @@
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useParams, useSearchParams } from 'react-router-dom'
 import QuizCreateContent from './QuizCreateContent.jsx'
+import { resolveQuizCreateLessonId } from './resolveQuizCreateLessonId.js'
 import { useMaterialDisplayTitle } from '../../catalog/useMaterialDisplayTitle.js'
 import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
 import './QuizCreatePage.css'
 
 export default function QuizCreatePage() {
-  const { materialId } = useParams()
+  const { materialId: materialIdParam } = useParams()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const { isViewerMode } = useIsViewerMode()
-  const mid = materialId ?? ''
-  const materialLabel = useMaterialDisplayTitle(mid)
+  const lessonId = resolveQuizCreateLessonId({
+    materialIdParam,
+    searchParams,
+    locationState: location.state,
+  })
+  // lessonId = 교안(lesson) ID. mid 등 미선언 별칭 사용 금지(ReferenceError 방지).
+  const materialLabel = useMaterialDisplayTitle(lessonId)
   const displayNumberOffset = Number(location.state?.displayNumberOffset ?? 0) || 0
 
   return (
@@ -21,7 +28,7 @@ export default function QuizCreatePage() {
           <span className="edu-quiz-create-page__meta-v">{materialLabel}</span>
         </p>
       </header>
-      <QuizCreateContent materialId={mid} displayNumberOffset={displayNumberOffset} />
+      <QuizCreateContent lessonId={lessonId} displayNumberOffset={displayNumberOffset} />
     </div>
   )
 }
