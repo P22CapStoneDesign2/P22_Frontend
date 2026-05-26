@@ -228,6 +228,16 @@
   min-width: 0;
 }
 
+.edu-signup__code-timer {
+  flex-shrink: 0;
+  min-width: 2.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: #dc2626;
+}
+
 .edu-signup__sent-mark {
   flex-shrink: 0;
   width: 1.35rem;

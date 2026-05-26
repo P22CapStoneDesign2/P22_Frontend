@@ -26,6 +26,18 @@ export const getLessons = (params = {}) => instance.get('/api/lessons', { params
 export const getAdminLessons = (params = {}) => instance.get('/api/admin/lessons', { params })
 
 /**
+ * 관리자 화면용 교안 목록 — `/api/admin/lessons` 실패 시 `/api/lessons` 폴백
+ * @param {{ page?: number, size?: number, sort?: string }} [params]
+ */
+export async function getLessonsForAdmin(params = {}) {
+  try {
+    return await getAdminLessons(params)
+  } catch {
+    return getLessons(params)
+  }
+}
+
+/**
  * GET /api/lessons/my — 학생 본인 APPROVED 교안 목록
  * @param {{ page?: number, size?: number }} [params]
  */
