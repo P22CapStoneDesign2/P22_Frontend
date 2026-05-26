@@ -252,8 +252,12 @@
   width: 44px;
 }
 
+.edu-admin-access__table--enrollment col.edu-admin-access__col-lesson {
+  width: 22%;
+}
+
 .edu-admin-access__table--enrollment col.edu-admin-access__col-name {
-  width: 24%;
+  width: 18%;
 }
 
 .edu-admin-access__table--enrollment col.edu-admin-access__col-nick {
@@ -293,6 +297,10 @@
   border-bottom: 1px solid #94a3b8;
   vertical-align: middle;
   text-align: center;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .edu-admin-access__table-body--empty {
@@ -323,6 +331,8 @@
   text-align: center;
   vertical-align: middle;
   box-sizing: border-box;
+  overflow: visible;
+  white-space: normal;
 }
 
 .edu-admin-access__table--enrollment .edu-admin-access__cell-check input[type='checkbox'] {
@@ -349,6 +359,7 @@
 .edu-admin-access__subject-select {
   display: block;
   width: 100%;
+  max-width: 100%;
   padding: 0;
   margin: 0;
   border: none;
@@ -357,6 +368,9 @@
   color: inherit;
   text-align: center;
   cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .edu-admin-access__subject-select:hover {
