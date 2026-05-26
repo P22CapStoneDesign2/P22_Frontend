@@ -7,7 +7,7 @@ import {
   verifyEmailCode,
 } from '../../api/auth'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ROUTES } from '../../shared/constants/routes.js'
 import {
@@ -21,13 +21,22 @@ import {
   isValidDisplayNickname,
   isValidSignupUsername,
 } from '../../shared/validation/signUpProfile.js'
+import PrivacyPolicyModal from './PrivacyPolicyModal.jsx'
 import './SignUpPage.css'
 
+
+const MAIL_CODE_TIMER_SECONDS = 5 * 60
 
 function isValidEmail(value) {
   const v = value.trim()
   if (!v) return false
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+}
+
+function formatCountdownMmSs(totalSeconds) {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
 function isValidSignUpPassword(value) {
@@ -67,15 +76,6 @@ function SignUpFieldStatusIcon({ status }) {
   )
 }
 
-const PRIVACY_POLICY_TEXT = `EDU HUB 개인정보 처리 방침 (요약)
-
-1. 수집 항목: 이름, 닉네임, 이메일 등 서비스 제공에 필요한 최소 정보
-2. 이용 목적: 회원 식별, 강의·퀴즈 서비스 운영, 공지 전달
-3. 보유 기간: 회원 탈퇴 시 지체 없이 파기(법령에 따른 예외는 제외)
-4. 동의 철회: 언제든지 동의를 철회할 수 있으며, 철회 시 일부 서비스 이용이 제한될 수 있습니다.
-
-(실제 서비스 연동 시 법무 검토한 전문을 넣어 주세요.)`
-
 export default function SignUpPage() {
   const navigate = useNavigate()
   const [name, setName] = useState('')
@@ -95,8 +95,19 @@ export default function SignUpPage() {
   const [passwordVisible, setPasswordVisible] = useState(false)
   const [passwordConfirmVisible, setPasswordConfirmVisible] = useState(false)
   const [agreePrivacy, setAgreePrivacy] = useState(false)
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false)
+  const [codeTimerSeconds, setCodeTimerSeconds] = useState(0)
 
   const mailVerified = mailSent && codeVerified
+  const codeTimerActive = codeTimerSeconds > 0
+
+  useEffect(() => {
+    if (!codeTimerActive) return undefined
+    const timerId = window.setInterval(() => {
+      setCodeTimerSeconds((prev) => (prev <= 1 ? 0 : prev - 1))
+    }, 1000)
+    return () => window.clearInterval(timerId)
+  }, [codeTimerActive])
 
   const nameStatus = nameFieldStatus(name)
   const nickStatus = !nicknameCheckMessage ? 'none' : nicknameChecked ? 'ok' : 'bad'
@@ -129,6 +140,7 @@ export default function SignUpPage() {
       setMailSent(true)
       setCodeVerified(false)
       setVerifyCode('')
+      setCodeTimerSeconds(MAIL_CODE_TIMER_SECONDS)
     } catch (error) {
       const message = error.response?.data?.message
       window.alert(message || '인증번호 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.')
@@ -138,6 +150,7 @@ export default function SignUpPage() {
   }
 
   const handleVerifyCode = async () => {
+    if (codeVerified) return
     if (!mailSent) {
       window.alert('먼저 인증번호 받기를 눌러 주세요.')
       return
@@ -255,8 +268,6 @@ export default function SignUpPage() {
     }
   }
 
-  const sendCodeDisabled = mailVerified || mailSending
-
   return (
     <div className="edu-signup">
       <div className="edu-signup__logo-corner">
@@ -358,17 +369,20 @@ export default function SignUpPage() {
                 <button
                   type="button"
                   className="btn btn--primary btn--sm edu-signup__send-code-btn"
-                  disabled={sendCodeDisabled || mailSending}
                   onClick={handleSendMail}
                 >
-                  {mailSending
-                    ? '발송 중…'
-                    : mailVerified
-                      ? '인증 완료'
-                      : mailSent
-                        ? '재발송'
-                        : '인증번호 받기'}
+                  {mailSending ? '발송 중…' : mailSent ? '재발송' : '인증번호 받기'}
                 </button>
+                {codeTimerActive ? (
+                  <span
+                    className="edu-signup__code-timer"
+                    role="timer"
+                    aria-live="polite"
+                    aria-label={`인증번호 유효 시간 ${formatCountdownMmSs(codeTimerSeconds)}`}
+                  >
+                    {formatCountdownMmSs(codeTimerSeconds)}
+                  </span>
+                ) : null}
                 {mailSent ? (
                   <span className="edu-signup__sent-mark" aria-hidden="true">
                     ✓
@@ -399,7 +413,6 @@ export default function SignUpPage() {
                   <button
                     type="button"
                     className="btn btn--surface btn--sm edu-signup__verify-confirm-btn"
-                    disabled={codeVerified || !mailSent || codeVerifying}
                     onClick={handleVerifyCode}
                   >
                     {codeVerifying ? '확인 중…' : '확인'}
@@ -498,7 +511,7 @@ export default function SignUpPage() {
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
-                      window.alert(PRIVACY_POLICY_TEXT)
+                      setPrivacyModalOpen(true)
                     }}
                   >
                     개인정보 활용에 관한 동의
@@ -517,6 +530,7 @@ export default function SignUpPage() {
           </div>
         </form>
       </div>
+      <PrivacyPolicyModal isOpen={privacyModalOpen} onClose={() => setPrivacyModalOpen(false)} />
     </div>
   )
 }

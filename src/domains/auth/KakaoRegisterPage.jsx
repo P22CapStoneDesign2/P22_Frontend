@@ -19,6 +19,7 @@ import {
   isValidSignupUsername,
 } from '../../shared/validation/signUpProfile.js'
 import { EduHubBookIcon } from '../../shared/icons/eduHubIcons.jsx'
+import PrivacyPolicyModal from './PrivacyPolicyModal.jsx'
 import './KakaoRegisterPage.css'
 
 function isValidEmail(value) {
@@ -50,15 +51,6 @@ function ProfileFieldStatusIcon({ status }) {
   )
 }
 
-const PRIVACY_POLICY_TEXT = `EDU HUB 개인정보 처리 방침 (요약)
-
-1. 수집 항목: 카카오 계정의 식별자, 이름, 닉네임, 이메일 등 서비스 제공에 필요한 최소 정보
-2. 이용 목적: 회원 식별, 강의·퀴즈 서비스 운영, 공지 전달
-3. 보유 기간: 회원 탈퇴 시 지체 없이 파기(법령에 따른 예외는 제외)
-4. 동의 철회: 언제든지 동의를 철회할 수 있으며, 철회 시 일부 서비스 이용이 제한될 수 있습니다.
-
-(실제 서비스 연동 시 법무 검토한 전문을 넣어 주세요.)`
-
 export default function KakaoRegisterPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -74,6 +66,7 @@ export default function KakaoRegisterPage() {
   const [nicknameCheckMessage, setNicknameCheckMessage] = useState('')
   const [nicknameChecking, setNicknameChecking] = useState(false)
   const [agreePrivacy, setAgreePrivacy] = useState(false)
+  const [privacyModalOpen, setPrivacyModalOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   /* pendingToken 없으면 비정상 진입 — 안내 후 로그인 화면으로 */
@@ -296,18 +289,22 @@ export default function KakaoRegisterPage() {
 
           <div className="kakao-register__field kakao-register__field--agree">
             <label className="kakao-register__checkbox-label">
-              <button
-                type="button"
-                className="kakao-register__policy-link"
-                onClick={() => window.alert(PRIVACY_POLICY_TEXT)}
-              >
-                개인정보 활용에 관한 동의
-              </button>
               <input
                 type="checkbox"
                 checked={agreePrivacy}
                 onChange={(e) => setAgreePrivacy(e.target.checked)}
               />
+              <button
+                type="button"
+                className="kakao-register__policy-link"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setPrivacyModalOpen(true)
+                }}
+              >
+                개인정보 활용에 관한 동의
+              </button>
             </label>
           </div>
 
@@ -322,6 +319,7 @@ export default function KakaoRegisterPage() {
           </div>
         </form>
       </div>
+      <PrivacyPolicyModal isOpen={privacyModalOpen} onClose={() => setPrivacyModalOpen(false)} />
     </div>
   )
 }

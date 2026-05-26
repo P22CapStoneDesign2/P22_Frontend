@@ -89,7 +89,9 @@ export default function LoginPage() {
       <div className="edu-login__panel">
         <header className="edu-login__header">
           <h1 className="edu-login__title" aria-label="EDU HUB">
-            <EduHubBookIcon />
+            <Link to={ROUTES.home} className="edu-login__logo-link" aria-label="EDU HUB 홈, 랜딩으로">
+              <EduHubBookIcon />
+            </Link>
           </h1>
         </header>
 
