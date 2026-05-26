@@ -11,6 +11,7 @@ import './MultipleChoiceEditor.css'
  * @param {(questionId: string, optionId: string, text: string) => void} props.onOptionTextChange
  * @param {(questionId: string, optionId: string) => void} props.onCorrectChange  체크 토글
  * @param {(questionId: string) => void} props.onAddOption
+ * @param {(questionId: string, optionId: string) => void} props.onDeleteOption
  */
 export default function MultipleChoiceEditor({
   questionId,
@@ -19,6 +20,7 @@ export default function MultipleChoiceEditor({
   onOptionTextChange,
   onCorrectChange,
   onAddOption,
+  onDeleteOption,
   readOnly = false,
 }) {
   const correctSet = new Set(Array.isArray(correctOptionIds) ? correctOptionIds : [])
@@ -65,6 +67,16 @@ export default function MultipleChoiceEditor({
                 placeholder={`보기 ${index + 1}`}
                 aria-label={`보기 ${index + 1} 내용`}
               />
+              {!readOnly ? (
+                <button
+                  type="button"
+                  className="edu-mc-editor__delete-btn"
+                  onClick={() => onDeleteOption(questionId, opt.id)}
+                  aria-label={`보기 ${index + 1} 삭제`}
+                >
+                  ×
+                </button>
+              ) : null}
             </li>
           )
         })}

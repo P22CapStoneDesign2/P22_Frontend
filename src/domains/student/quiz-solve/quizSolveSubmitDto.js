@@ -14,13 +14,13 @@ function readMcSelectedIds(answer) {
 
 /**
  * 제출 DTO 생성 (콘솔 출력·추후 API용)
- * @param {string} materialId
+ * @param {string} quizId
  * @param {Array<object>} questions
  * @param {Record<string, object>} answersByQuestionId
  */
-export function buildQuizSubmitDto(materialId, questions, answersByQuestionId) {
+export function buildQuizSubmitDto(quizId, questions, answersByQuestionId) {
   return {
-    materialId,
+    quizId,
     answers: questions.map((q) => {
       const a = answersByQuestionId[q.id]
       if (q.type === 'multipleChoice') {

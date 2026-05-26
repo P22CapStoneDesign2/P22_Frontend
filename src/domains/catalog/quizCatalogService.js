@@ -124,8 +124,15 @@ export async function fetchStudentSolveSessionByQuizId(quizId) {
     const detail = await fetchQuizDetailData(id)
     const questions = mapQuizDetailToSolveQuestions(detail)
     if (questions.length === 0) return null
+    const materialId =
+      detail?.materialId != null
+        ? String(detail.materialId)
+        : detail?.lessonId != null
+          ? String(detail.lessonId)
+          : ''
     const lessonId = detail?.lessonId != null ? String(detail.lessonId) : ''
-    return { quizId: id, questions, lessonId }
+    const quizTitle = typeof detail?.title === 'string' ? detail.title.trim() : ''
+    return { quizId: id, questions, materialId, lessonId, quizTitle }
   } catch {
     return null
   }
@@ -146,7 +153,9 @@ export async function fetchProfessorQuizEditBundle(quizId, routeQuizId, focusQue
       if (hit) initialActiveQuestionId = hit.id
     }
     return {
-      lessonId: bundle.materialId,
+      quizId: id,
+      materialId: bundle.materialId,
+      quizTitle: bundle.title,
       questions: bundle.questions,
       persistedQuestionIds: bundle.questions.map((q) => q.id),
       primaryQuizSetId: bundle.editorQuizId || id,

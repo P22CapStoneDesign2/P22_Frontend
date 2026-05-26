@@ -35,6 +35,7 @@ export function buildQuestionEnrichmentByIdFromSolveQuestions(questions) {
  *
  * @param {object} apiData — 명세 §23 `data` 객체
  * @param {object} [options]
+ * @param {string} [options.quizId]
  * @param {string} [options.materialId] — 교안 PDF 등에 사용 (제출 응답에 없으면 빈 문자열)
  * @param {string} [options.attemptId] — 없으면 `submissionId` 문자열 사용
  * @param {Record<string, { type?: 'multipleChoice'|'shortAnswer', options?: Array<{ id: string, text: string }> }>} [options.questionEnrichmentById]
@@ -96,6 +97,12 @@ function mapAnswerRowToResultQuestion(row, questionNumber, questionEnrichmentByI
 }
 
 export function mapSubmitResponseToResultBundle(apiData, options = {}) {
+  const quizId =
+    options.quizId != null && String(options.quizId).trim() !== ''
+      ? String(options.quizId)
+      : apiData?.quizId != null
+        ? String(apiData.quizId)
+        : ''
   const materialId = options.materialId != null ? String(options.materialId) : ''
   const attemptId =
     options.attemptId != null && String(options.attemptId) !== ''
@@ -111,6 +118,7 @@ export function mapSubmitResponseToResultBundle(apiData, options = {}) {
 
   return {
     attemptId,
+    quizId,
     materialId,
     questions,
   }

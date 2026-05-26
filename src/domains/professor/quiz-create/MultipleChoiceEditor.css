@@ -29,7 +29,7 @@
 
 .edu-mc-editor__item {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 10px;
   align-items: center;
 }
@@ -83,4 +83,32 @@
   margin: 0;
   font-size: 0.8125rem;
   color: #64748b;
+}
+
+.edu-mc-editor__delete-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.edu-mc-editor__delete-btn:hover {
+  background: #fef2f2;
+  border-color: #f5c4c4;
+  color: #b91c1c;
+}
+
+.edu-mc-editor__delete-btn:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
 }

@@ -1,6 +1,8 @@
 import { apiResponseData } from '../../api/apiResponse.js'
 import {
   getLesson,
+  getLessonMaterial,
+  getLessonMaterials,
   getLessons,
   getMyLessons,
   lessonPageContent,
@@ -9,10 +11,11 @@ import {
   formatLessonDateLabel,
   mapLessonItemToStudentTableRow,
   mapLessonsToCourseOptions,
-  mapLessonsToCourseOptionsWithDisplayNames,
 } from './lessonCatalogMapper.js'
-import { readAllCourseDisplayTitles } from '../professor/materials/professorCourseDisplayStorage.js'
-import { mapMaterialOptionsForCourseLesson } from '../quiz/mappers/quizManagementViewMapper.js'
+import {
+  mapLessonMaterialList,
+  mapLessonMaterialsToDropdownOptions,
+} from './lessonMaterialMapper.js'
 
 const LIST_PAGE = { page: 0, size: 200 }
 
@@ -35,8 +38,25 @@ function safeLessonContent(res) {
 export async function fetchProfessorCourseOptions() {
   try {
     const res = await getLessons(LIST_PAGE)
-    const displayById = readAllCourseDisplayTitles()
-    return mapLessonsToCourseOptionsWithDisplayNames(safeLessonContent(res), displayById)
+    return mapLessonsToCourseOptions(safeLessonContent(res))
+  } catch {
+    return []
+  }
+}
+
+/**
+ * GET /api/lessons/{lessonId}/materials
+ * @param {string|number} lessonId
+ */
+export async function fetchLessonMaterialsForLesson(lessonId) {
+  const id = String(lessonId ?? '').trim()
+  if (!id) return []
+  try {
+    const res = await getLessonMaterials(id, LIST_PAGE)
+    return mapLessonMaterialList(safeLessonContent(res)).map((m) => ({
+      ...m,
+      lessonId: m.lessonId || id,
+    }))
   } catch {
     return []
   }
@@ -124,20 +144,40 @@ export async function fetchLessonTitle(lessonId) {
 }
 
 /**
- * 교안별 퀴즈 관리 — 강의 선택 후 교안 드롭다운 옵션
- * API에 course 엔티티가 없어 동일 lesson을 교안 1건으로 노출 (피그마 UI 유지)
- * @param {string|number} courseLessonId
- * @returns {Promise<Array<{ value: string, label: string }>>}
+ * GET /api/lessons/{lessonId}/materials/{materialId}
+ * @param {string|number} lessonId
+ * @param {string|number} materialId
  */
-export async function fetchQuizMgmtMaterialOptionsForCourse(courseLessonId) {
-  const id = String(courseLessonId ?? '').trim()
-  if (!id) return []
+export async function fetchMaterialDetail(lessonId, materialId) {
+  const lid = String(lessonId ?? '').trim()
+  const mid = String(materialId ?? '').trim()
+  if (!lid || !mid) return null
   try {
-    const list = await fetchProfessorLessonsList()
-    return mapMaterialOptionsForCourseLesson(list, id)
+    const res = await getLessonMaterial(lid, mid)
+    return apiResponseData(res)
   } catch {
-    return []
+    return null
   }
+}
+
+/**
+ * @param {string|number} lessonId
+ * @param {string|number} materialId
+ */
+export async function fetchMaterialTitle(lessonId, materialId) {
+  const material = await fetchMaterialDetail(lessonId, materialId)
+  const title = material?.title
+  if (typeof title === 'string' && title.trim()) return title.trim()
+  return '—'
+}
+
+/**
+ * 교안별 퀴즈 관리 — GET /api/lessons/{lessonId}/materials
+ * @param {string|number} lessonId
+ */
+export async function fetchQuizMgmtMaterialOptionsForCourse(lessonId) {
+  const materials = await fetchLessonMaterialsForLesson(lessonId)
+  return mapLessonMaterialsToDropdownOptions(materials)
 }
 
 export { formatLessonDateLabel }

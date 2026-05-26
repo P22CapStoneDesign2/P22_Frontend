@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import QuizEditContent from './QuizEditContent.jsx'
 import { fetchProfessorQuizEditBundle } from '../../catalog/quizCatalogService.js'
-import { useMaterialDisplayTitle } from '../../catalog/useMaterialDisplayTitle.js'
+import { fetchMaterialTitle } from '../../catalog/lessonCatalogService.js'
+import { useQuizDisplayTitle } from '../../catalog/useQuizDisplayTitle.js'
 import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
 import '../quiz-create/QuizCreatePage.css'
 
@@ -12,13 +13,16 @@ export default function QuizEditPage() {
   const { isViewerMode } = useIsViewerMode()
 
   const focusQuestionId = location.state?.initialActiveQuestionId ?? null
-  const materialId =
-    location.state?.materialId ??
-    location.state?.selectedMaterialId ??
-    ''
+  const lessonIdFromState = String(location.state?.courseId ?? location.state?.lessonId ?? '').trim()
+  const materialIdFromState = String(
+    location.state?.materialId ?? location.state?.selectedMaterialId ?? '',
+  ).trim()
 
   const [bundle, setBundle] = useState(null)
   const [loading, setLoading] = useState(() => Boolean(quizId))
+  const [materialTitle, setMaterialTitle] = useState('')
+
+  const quizTitleFromApi = useQuizDisplayTitle(quizId, { forEdit: true })
 
   useEffect(() => {
     if (!quizId) return
@@ -33,10 +37,26 @@ export default function QuizEditPage() {
     }
   }, [quizId, focusQuestionId])
 
-  const lessonIdForLabel =
-    bundle?.lessonId || materialId || location.state?.lessonId || ''
-  const fetchedLabel = useMaterialDisplayTitle(lessonIdForLabel)
-  const displayMaterialLabel = lessonIdForLabel ? fetchedLabel : '—'
+  const materialId = String(bundle?.materialId ?? materialIdFromState ?? '').trim()
+  const lessonId = lessonIdFromState
+
+  useEffect(() => {
+    if (!lessonId || !materialId) return
+    let cancelled = false
+    ;(async () => {
+      const title = await fetchMaterialTitle(lessonId, materialId)
+      if (!cancelled) setMaterialTitle(title)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [lessonId, materialId])
+
+  const displayMaterialLabel = useMemo(() => {
+    if (materialTitle && materialTitle !== '—') return materialTitle
+    if (bundle?.quizTitle) return bundle.quizTitle
+    return quizTitleFromApi
+  }, [materialTitle, bundle?.quizTitle, quizTitleFromApi])
 
   if (loading) {
     return (
@@ -75,9 +95,6 @@ export default function QuizEditPage() {
     )
   }
 
-  const resolvedLessonId =
-    bundle.lessonId || lessonIdForLabel || location.state?.lessonId || ''
-
   return (
     <div className="edu-quiz-create-page">
       <header className="edu-quiz-create-page__header">
@@ -89,7 +106,7 @@ export default function QuizEditPage() {
       </header>
       <QuizEditContent
         quizId={quizId ?? ''}
-        materialId={resolvedLessonId}
+        materialId={materialId}
         initialQuestions={bundle.questions}
         initialActiveQuestionId={bundle.initialActiveQuestionId}
         initialPersistedQuestionIds={bundle.persistedQuestionIds}

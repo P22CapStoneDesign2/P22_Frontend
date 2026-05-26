@@ -11,6 +11,7 @@ export default function QuizQuestionFormList({
   onOptionTextChange,
   onCorrectOptionChange,
   onAddOption,
+  onDeleteOption,
   onShortAnswerChange,
   onExplanationChange,
   isEditable = true,
@@ -39,6 +40,7 @@ export default function QuizQuestionFormList({
             onOptionTextChange={onOptionTextChange}
             onCorrectOptionChange={onCorrectOptionChange}
             onAddOption={onAddOption}
+            onDeleteOption={onDeleteOption}
             onShortAnswerChange={onShortAnswerChange}
             onExplanationChange={onExplanationChange}
             isEditable={isEditable}

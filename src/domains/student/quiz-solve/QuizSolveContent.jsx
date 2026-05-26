@@ -2,36 +2,33 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
-import { ROUTES, studentQuizResultPath } from '../../../shared/constants/routes.js'
-import {
-  fetchStudentSolveSessionByQuizId,
-  fetchSubmitQuizData,
-} from '../../catalog/quizCatalogService.js'
-import { buildQuestionEnrichmentByIdFromSolveQuestions } from '../../quiz/mappers/quizResultMapper.js'
-import { mapSubmitResponseToResultBundle } from '../../quiz/mappers/quizResultMapper.js'
+import { ROUTES } from '../../../shared/constants/routes.js'
+import { fetchStudentSolveSessionByQuizId, fetchSubmitQuizData } from '../../catalog/quizCatalogService.js'
 import { mapSolveStateToSubmitRequest } from '../../quiz/mappers/quizSubmitMapper.js'
-import { saveStudentQuizAttempt } from '../quiz/studentQuizData.js'
 import QuestionNavigator from './QuestionNavigator.jsx'
 import QuestionContent from './QuestionContent.jsx'
 import QuizNavigationButtons from './QuizNavigationButtons.jsx'
 import { buildQuizSubmitDto } from './quizSolveSubmitDto.js'
 import { toggleMultipleChoiceSelection } from './multipleChoiceSelectionUtils.js'
+import {
+  buildResultBundleFromSubmitResponse,
+  getQuizSubmitErrorMessage,
+  handleQuizAlreadySubmittedError,
+  navigateToQuizResult,
+} from './studentQuizSubmitFlow.js'
 
 function scrollSolveToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-/**
- * 퀴즈 풀이 본문: 한 문제당 한 페이지, activeQuestionIndex / answers / 제출 모달
- */
-/** @param {{ materialId: string }} props — 라우트 `:materialId` 슬롯에 quizId가 전달됨 */
-export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
+/** @param {{ quizId: string }} props — 라우트 `quiz/:materialId` 슬롯 값 = quizId */
+export default function QuizSolveContent({ quizId: quizIdFromRoute }) {
   const navigate = useNavigate()
   const mainRef = useRef(null)
 
   const [questions, setQuestions] = useState([])
   const [quizId, setQuizId] = useState('')
-  const [loadedLessonKey, setLoadedLessonKey] = useState('')
+  const [loadedQuizKey, setLoadedQuizKey] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0)
@@ -40,7 +37,7 @@ export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
   const [mcLimitNotice, setMcLimitNotice] = useState({ questionId: null, message: '' })
 
   const loadKey = quizIdFromRoute
-  const sessionLoading = Boolean(loadKey.trim()) && loadedLessonKey !== loadKey
+  const sessionLoading = Boolean(loadKey.trim()) && loadedQuizKey !== loadKey
 
   useEffect(() => {
     let cancelled = false
@@ -54,7 +51,7 @@ export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
         setQuestions([])
         setQuizId('')
       }
-      setLoadedLessonKey(loadKey)
+      setLoadedQuizKey(loadKey)
     })
     return () => {
       cancelled = true
@@ -83,8 +80,8 @@ export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
           message: `정답은 ${maxCount}개까지 선택할 수 있습니다.`,
         })
       } else {
-        setMcLimitNotice((prev) =>
-          prev.questionId === questionId ? { questionId: null, message: '' } : prev,
+        setMcLimitNotice((prevNotice) =>
+          prevNotice.questionId === questionId ? { questionId: null, message: '' } : prevNotice,
         )
       }
 
@@ -129,25 +126,22 @@ export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
 
   const handleConfirmSubmit = async () => {
     if (submitting || !quizId) return
-    const dto = buildQuizSubmitDto(quizIdFromRoute, questions, answers)
-    console.log(dto)
+
+    buildQuizSubmitDto(quizId, questions, answers)
 
     setSubmitting(true)
     try {
       const payload = mapSolveStateToSubmitRequest(questions, answers)
       const apiData = await fetchSubmitQuizData(quizId, payload)
-      const enrichment = buildQuestionEnrichmentByIdFromSolveQuestions(questions)
-      const graded = mapSubmitResponseToResultBundle(apiData, {
-        materialId: quizIdFromRoute,
-        questionEnrichmentById: enrichment,
-      })
+      const graded = buildResultBundleFromSubmitResponse(apiData, quizId, questions)
       setIsSubmitModalOpen(false)
-      saveStudentQuizAttempt(graded)
-      navigate(studentQuizResultPath(graded.attemptId), { state: { resultBundle: graded } })
+      navigateToQuizResult(navigate, graded)
     } catch (err) {
       setIsSubmitModalOpen(false)
-      const msg = err instanceof Error ? err.message : '퀴즈 제출에 실패했습니다.'
-      window.alert(msg)
+      if (handleQuizAlreadySubmittedError(err, quizId, questions, navigate)) {
+        return
+      }
+      window.alert(getQuizSubmitErrorMessage(err))
     } finally {
       setSubmitting(false)
     }
@@ -230,6 +224,7 @@ export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
             <QuestionContent
               question={currentQuestion}
               answer={currentQuestion ? answers[currentQuestion.id] : undefined}
+              readOnly={false}
               mcLimitMessage={
                 mcLimitNotice.questionId === currentQuestion?.id ? mcLimitNotice.message : ''
               }
@@ -252,6 +247,7 @@ export default function QuizSolveContent({ materialId: quizIdFromRoute }) {
               isPrevDisabled={isPrevDisabled}
               isNextDisabled={isNextDisabled}
               isLastQuestion={isLastQuestion}
+              submitLabel="제출"
             />
           </div>
         </div>

@@ -15,6 +15,9 @@ import {
 import { useQuizFormActiveQuestionSpy } from './useQuizFormActiveQuestionSpy.js'
 
 const CANCEL_CONFIRM_MESSAGE = '작업을 취소하시겠습니까?'
+const DELETE_OPTION_CONFIRM_MESSAGE = '보기를 삭제하시겠습니까?'
+const MC_OPTION_MIN_COUNT_MESSAGE = '객관식 보기는 최소 2개 이상 필요합니다.'
+const MIN_MC_OPTIONS = 2
 
 /**
  * 퀴즈 생성·수정 공통 본문
@@ -72,6 +75,8 @@ export default function QuizEditorContent({
 
   const [saveModalOpen, setSaveModalOpen] = useState(false)
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
+  /** @type {[{ questionId: string, optionId: string } | null]} */
+  const [deleteOptionTarget, setDeleteOptionTarget] = useState(null)
 
   const handleActiveQuestionFromScroll = useCallback((questionId) => {
     setActiveQuestionId(questionId)
@@ -172,7 +177,6 @@ export default function QuizEditorContent({
 
   /**
    * 객관식 정답은 복수 선택. 동일 ID가 이미 있으면 해제, 없으면 추가 (토글).
-   * options 변경/삭제 시 잔존 ID를 정리하지는 않음 — 보기 ID 자체는 안정적이므로 충분.
    */
   const handleCorrectOptionChange = (questionId, optionId) => {
     if (!isEditable) return
@@ -197,6 +201,39 @@ export default function QuizEditorContent({
           : { ...q, options: [...(q.options ?? []), { id: genQuizItemId(), text: '' }] },
       ),
     )
+  }
+
+  const handleDeleteOptionRequest = (questionId, optionId) => {
+    if (!isEditable) return
+    const question = questions.find((q) => q.id === questionId)
+    const optionCount = question?.options?.length ?? 0
+    if (optionCount <= MIN_MC_OPTIONS) {
+      window.alert(MC_OPTION_MIN_COUNT_MESSAGE)
+      return
+    }
+    setDeleteOptionTarget({ questionId, optionId })
+  }
+
+  const handleConfirmDeleteOption = () => {
+    if (!deleteOptionTarget) return
+    const { questionId, optionId } = deleteOptionTarget
+    setQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id !== questionId) return q
+        return {
+          ...q,
+          options: (q.options ?? []).filter((o) => o.id !== optionId),
+          correctOptionIds: (Array.isArray(q.correctOptionIds) ? q.correctOptionIds : []).filter(
+            (id) => id !== optionId,
+          ),
+        }
+      }),
+    )
+    setDeleteOptionTarget(null)
+  }
+
+  const handleCancelDeleteOption = () => {
+    setDeleteOptionTarget(null)
   }
 
   const handleShortAnswerChange = (questionId, value) => {
@@ -307,6 +344,7 @@ export default function QuizEditorContent({
             onOptionTextChange={handleOptionTextChange}
             onCorrectOptionChange={handleCorrectOptionChange}
             onAddOption={handleAddOption}
+            onDeleteOption={handleDeleteOptionRequest}
             onShortAnswerChange={handleShortAnswerChange}
             onExplanationChange={handleExplanationChange}
           />
@@ -343,6 +381,15 @@ export default function QuizEditorContent({
         cancelText="취소"
         onConfirm={handleConfirmCancel}
         onCancel={handleDismissCancelModal}
+      />
+
+      <ConfirmModal
+        isOpen={deleteOptionTarget != null}
+        message={DELETE_OPTION_CONFIRM_MESSAGE}
+        confirmText="확인"
+        cancelText="취소"
+        onConfirm={handleConfirmDeleteOption}
+        onCancel={handleCancelDeleteOption}
       />
     </>
   )

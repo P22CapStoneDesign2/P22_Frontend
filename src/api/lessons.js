@@ -90,8 +90,50 @@ export const deleteLesson = (lessonId) =>
   instance.delete(`/api/lessons/${encodeURIComponent(String(lessonId))}`)
 
 /**
- * GET /api/lessons/{id} — 교안 단건 조회
+ * GET /api/lessons/{lessonId} — 강의 단건
  * @param {string|number} lessonId
  */
 export const getLesson = (lessonId) =>
   instance.get(`/api/lessons/${encodeURIComponent(String(lessonId))}`)
+
+/**
+ * GET /api/lessons/{lessonId}/materials/{materialId}
+ * @param {string|number} lessonId
+ * @param {string|number} materialId
+ */
+export const getLessonMaterial = (lessonId, materialId) =>
+  instance.get(
+    `/api/lessons/${encodeURIComponent(String(lessonId))}/materials/${encodeURIComponent(String(materialId))}`,
+  )
+
+function materialsBasePath(lessonId) {
+  return `/api/lessons/${encodeURIComponent(String(lessonId))}/materials`
+}
+
+/**
+ * POST /api/lessons/{lessonId}/materials
+ * @param {string|number} lessonId
+ * @param {{ title: string, description?: string }} body
+ */
+export const createLessonMaterial = (lessonId, body) =>
+  instance.post(materialsBasePath(lessonId), body)
+
+/**
+ * GET /api/lessons/{lessonId}/materials
+ * @param {string|number} lessonId
+ * @param {{ page?: number, size?: number, sort?: string }} [params]
+ */
+export const getLessonMaterials = (lessonId, params = {}) =>
+  instance.get(materialsBasePath(lessonId), { params })
+
+/**
+ * PUT /api/lessons/{lessonId}/materials/{materialId}
+ */
+export const updateLessonMaterial = (lessonId, materialId, body) =>
+  instance.put(`${materialsBasePath(lessonId)}/${encodeURIComponent(String(materialId))}`, body)
+
+/**
+ * DELETE /api/lessons/{lessonId}/materials/{materialId}
+ */
+export const deleteLessonMaterial = (lessonId, materialId) =>
+  instance.delete(`${materialsBasePath(lessonId)}/${encodeURIComponent(String(materialId))}`)

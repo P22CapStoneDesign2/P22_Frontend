@@ -6,7 +6,15 @@ export function genStudentAttemptId() {
 }
 
 /**
- * @returns {Array<{ attemptId: string, materialId: string, questions: object[] }>}
+ * @typedef {object} StudentQuizAttemptBundle
+ * @property {string} attemptId
+ * @property {string} quizId
+ * @property {string} [materialId]
+ * @property {object[]} questions
+ */
+
+/**
+ * @returns {StudentQuizAttemptBundle[]}
  */
 function loadAllAttempts() {
   try {
@@ -21,27 +29,56 @@ function loadAllAttempts() {
 }
 
 /**
- * @param {{ attemptId: string, materialId: string, questions: object[] }} bundle
+ * @param {StudentQuizAttemptBundle} bundle
  */
-export function saveStudentQuizAttempt(bundle) {
-  if (!bundle?.attemptId) return
-  const attempts = loadAllAttempts().filter((a) => a.attemptId !== bundle.attemptId)
+function persistAttempts(attempts) {
   try {
-    localStorage.setItem(
-      STUDENT_QUIZ_ATTEMPTS_STORAGE_KEY,
-      JSON.stringify({ attempts: [...attempts, bundle] }),
-    )
+    localStorage.setItem(STUDENT_QUIZ_ATTEMPTS_STORAGE_KEY, JSON.stringify({ attempts }))
   } catch {
     /* quota */
   }
 }
 
 /**
+ * @param {StudentQuizAttemptBundle} bundle
+ */
+export function saveStudentQuizAttempt(bundle) {
+  if (!bundle?.attemptId) return
+  const quizId = String(bundle.quizId ?? bundle.materialId ?? '').trim()
+  const normalized = {
+    ...bundle,
+    quizId: quizId || String(bundle.quizId ?? ''),
+  }
+  const attempts = loadAllAttempts().filter((a) => {
+    if (a.attemptId === normalized.attemptId) return false
+    const existingQuizId = String(a.quizId ?? a.materialId ?? '').trim()
+    if (quizId && existingQuizId === quizId) return false
+    return true
+  })
+  persistAttempts([...attempts, normalized])
+}
+
+/**
  * @param {string} attemptId
- * @returns {{ attemptId: string, materialId: string, questions: object[] } | null}
+ * @returns {StudentQuizAttemptBundle | null}
  */
 export function loadStudentQuizAttempt(attemptId) {
   const id = String(attemptId ?? '').trim()
   if (!id) return null
   return loadAllAttempts().find((a) => a.attemptId === id) ?? null
+}
+
+/**
+ * quizId 기준 최신 제출 결과 (서버 결과 조회 API 없을 때 재방문용)
+ * @param {string|number} quizId
+ * @returns {StudentQuizAttemptBundle | null}
+ */
+export function loadStudentQuizAttemptByQuizId(quizId) {
+  const id = String(quizId ?? '').trim()
+  if (!id) return null
+  const matches = loadAllAttempts().filter(
+    (a) => String(a.quizId ?? a.materialId ?? '').trim() === id,
+  )
+  if (matches.length === 0) return null
+  return matches[matches.length - 1]
 }

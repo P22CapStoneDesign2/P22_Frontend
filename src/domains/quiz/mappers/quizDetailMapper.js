@@ -131,8 +131,12 @@ export function mapQuizEditToEditorBundle(apiData, routeQuizId) {
   const raw = extractQuizQuestionsFromApiData(apiData)
   const questions = raw.map((item) => mapApiQuestionToEditorQuestion(item, { includeCorrect: true }))
 
-  const lessonId = apiData?.lessonId
-  const materialId = lessonId != null ? String(lessonId) : ''
+  const materialId =
+    apiData?.materialId != null
+      ? String(apiData.materialId)
+      : apiData?.lessonId != null
+        ? String(apiData.lessonId)
+        : ''
 
   let initialActiveQuestionId = questions[0]?.id ?? ''
   if (routeQuizId != null && String(routeQuizId) !== '') {

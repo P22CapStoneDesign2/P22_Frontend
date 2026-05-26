@@ -17,6 +17,7 @@ const QuizQuestionForm = forwardRef(function QuizQuestionForm(
     onOptionTextChange,
     onCorrectOptionChange,
     onAddOption,
+    onDeleteOption,
     onShortAnswerChange,
     onExplanationChange,
     isEditable = true,
@@ -74,6 +75,7 @@ const QuizQuestionForm = forwardRef(function QuizQuestionForm(
           onOptionTextChange={onOptionTextChange}
           onCorrectChange={onCorrectOptionChange}
           onAddOption={onAddOption}
+          onDeleteOption={onDeleteOption}
           readOnly={readOnly}
         />
       ) : (

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
@@ -8,98 +8,116 @@ import {
   ROUTES,
   professorMaterialViewerPath,
 } from '../../../shared/constants/routes.js'
-import { createLesson, deleteLesson, updateLesson } from '../../../api/lessons.js'
+import {
+  createLesson,
+  createLessonMaterial,
+  deleteLesson,
+  deleteLessonMaterial,
+  updateLesson,
+  updateLessonMaterial,
+} from '../../../api/lessons.js'
 import { apiResponseData } from '../../../api/apiResponse.js'
-import { fetchLessonDetail, fetchProfessorLessonsList } from '../../catalog/lessonCatalogService.js'
+import {
+  fetchLessonMaterialsForLesson,
+  fetchMaterialDetail,
+  fetchProfessorLessonsList,
+} from '../../catalog/lessonCatalogService.js'
 import { readPdfUrlFromLesson } from '../../../shared/utils/pdfMeta.js'
 import MaterialFileTable from './MaterialFileTable.jsx'
 import {
-  DEFAULT_LESSON_MATERIAL_TITLE,
+  DEFAULT_MATERIAL_TITLE,
   mapCourseDropdownOptions,
   mapLessonsToCourseIdList,
-  mapSelectedLessonToMaterialRows,
+  mapMaterialsToTableRows,
 } from './materialsViewMapper.js'
-import {
-  readAllCourseDisplayTitles,
-  removeCourseDisplayTitle,
-  resolveCourseDisplayLabel,
-  writeCourseDisplayTitle,
-} from './professorCourseDisplayStorage.js'
 import { useProfessorAccountGate } from '../hooks/useProfessorAccountGate.js'
 import ProfessorPendingNotice from '../components/ProfessorPendingNotice.jsx'
 import { formatMaterialUploadDate } from './materialUtils.js'
 import './ProfessorMaterialPage.css'
 
-const DELETE_CONFIRM_MESSAGE =
+const DELETE_MATERIAL_CONFIRM_MESSAGE =
   '교안 파일을 삭제하면 관련된 퀴즈들도 모두 삭제됩니다. 정말 삭제하시겠습니까?'
+
+const DELETE_COURSE_CONFIRM_MESSAGE =
+  '강의를 삭제하면 해당 강의의 교안과 퀴즈도 함께 삭제될 수 있습니다. 정말 삭제하시겠습니까?'
 
 const SAVE_CONFIRM_MESSAGE = '저장하시겠습니까?'
 
 const PDF_UPLOAD_ALERT = 'PDF 업로드 API가 아직 연결되지 않았습니다.'
+const MATERIAL_LESSON_MISMATCH_MESSAGE = '선택된 강의와 교안 정보가 일치하지 않습니다.'
 
 export default function ProfessorMaterialContent() {
   const { isProfessorPending, canMutateProfessorContent } = useProfessorAccountGate()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
-  /** @type {Array<{ id: string }>} 강의(드롭다운) 목록 — lessonId와 1:1 매핑(백엔드 course API 없음) */
   const [courseList, setCourseList] = useState([])
-  /** @type {Record<string, string>} 강의 표시명(UI 전용, lesson.title과 독립) */
-  const [courseNameById, setCourseNameById] = useState({})
-  /** @type {Record<string, string>} 교안(lesson) 제목 */
+  /** 강의명 — GET /api/lessons 의 lesson.title 만 */
   const [lessonTitleById, setLessonTitleById] = useState({})
-  /** @type {Record<string, { createdAt: string, updatedAt: string, description: string }>} */
-  const [lessonMetaById, setLessonMetaById] = useState({})
   const [lessonsLoading, setLessonsLoading] = useState(true)
 
-  const [selectedCourseId, setSelectedCourseId] = useState(null)
+  const [selectedLessonId, setSelectedLessonId] = useState(null)
+  /** 교안 목록 — GET /api/lessons/{lessonId}/materials */
+  const [materials, setMaterials] = useState([])
+  /** 현재 materials가 속한 lessonId (선택 강의와 일치할 때만 테이블에 표시) */
+  const [materialsLessonId, setMaterialsLessonId] = useState(null)
+  const [materialsLoading, setMaterialsLoading] = useState(false)
+  const selectedLessonIdRef = useRef(null)
 
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false)
   const [isCreateCourseModalOpen, setIsCreateCourseModalOpen] = useState(false)
   const [newCourseName, setNewCourseName] = useState('')
 
-  const [editLessonId, setEditLessonId] = useState(null)
-  const [editingLessonTitle, setEditingLessonTitle] = useState('')
-  const [isEditLessonModalOpen, setIsEditLessonModalOpen] = useState(false)
-  const [isUpdatingLessonTitle, setIsUpdatingLessonTitle] = useState(false)
+  const [isCreateMaterialModalOpen, setIsCreateMaterialModalOpen] = useState(false)
+  const [newMaterialTitle, setNewMaterialTitle] = useState('')
+  const [isCreatingMaterial, setIsCreatingMaterial] = useState(false)
+
+  const [editMaterialId, setEditMaterialId] = useState(null)
+  const [editingMaterialTitle, setEditingMaterialTitle] = useState('')
+  const [isEditMaterialModalOpen, setIsEditMaterialModalOpen] = useState(false)
+  const [isUpdatingMaterialTitle, setIsUpdatingMaterialTitle] = useState(false)
 
   const [isRenameCourseModalOpen, setIsRenameCourseModalOpen] = useState(false)
   const [editingCourseName, setEditingCourseName] = useState('')
+  const [isUpdatingCourseName, setIsUpdatingCourseName] = useState(false)
+
+  const [deleteTargetMaterialId, setDeleteTargetMaterialId] = useState(null)
+  const [isDeleteMaterialModalOpen, setIsDeleteMaterialModalOpen] = useState(false)
+  const [isDeletingMaterial, setIsDeletingMaterial] = useState(false)
 
   const [deleteTargetLessonId, setDeleteTargetLessonId] = useState(null)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isDeleteCourseModalOpen, setIsDeleteCourseModalOpen] = useState(false)
+  const [isDeletingCourse, setIsDeletingCourse] = useState(false)
+
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
 
-  const courseIdFromUrl = searchParams.get(PROFESSOR_MATERIALS_COURSE_QUERY_KEY) ?? ''
+  const lessonIdFromUrl = searchParams.get(PROFESSOR_MATERIALS_COURSE_QUERY_KEY) ?? ''
 
-  const selectedCourseName = selectedCourseId
-    ? (courseNameById[selectedCourseId] ?? '').trim() || '—'
+  const selectedLessonTitle = selectedLessonId
+    ? (lessonTitleById[selectedLessonId] ?? '').trim() || '—'
     : ''
 
-  /** 선택 강의에 연결된 교안(현재 1:1 — lessonId = courseId) */
-  const selectedLessonId = selectedCourseId
+  selectedLessonIdRef.current = selectedLessonId
+
+  const resetMaterialUiState = useCallback(() => {
+    setMaterials([])
+    setMaterialsLessonId(null)
+    setEditMaterialId(null)
+    setEditingMaterialTitle('')
+    setIsEditMaterialModalOpen(false)
+    setDeleteTargetMaterialId(null)
+    setIsDeleteMaterialModalOpen(false)
+    setIsCreateMaterialModalOpen(false)
+    setNewMaterialTitle('')
+  }, [])
 
   const applyLessonsList = useCallback((list) => {
     setCourseList(mapLessonsToCourseIdList(list))
-    const meta = {}
     const nextLessonTitles = {}
     list.forEach((l) => {
-      meta[l.id] = {
-        createdAt: l.createdAt,
-        updatedAt: l.updatedAt,
-        description: l.description ?? '',
-      }
       nextLessonTitles[l.id] = l.title
     })
-    setLessonMetaById(meta)
     setLessonTitleById(nextLessonTitles)
-    const stored = readAllCourseDisplayTitles()
-    /** @type {Record<string, string>} */
-    const nextCourseNames = {}
-    list.forEach((l) => {
-      nextCourseNames[l.id] = resolveCourseDisplayLabel(l.id, l.title)
-    })
-    setCourseNameById({ ...stored, ...nextCourseNames })
   }, [])
 
   const reloadLessons = useCallback(async () => {
@@ -107,6 +125,75 @@ export default function ProfessorMaterialContent() {
     applyLessonsList(list)
     return list
   }, [applyLessonsList])
+
+  const loadMaterialsForLesson = useCallback(async (lessonId) => {
+    const id = String(lessonId ?? '').trim()
+    if (!id) {
+      setMaterials([])
+      setMaterialsLessonId(null)
+      setMaterialsLoading(false)
+      return []
+    }
+
+    setMaterials([])
+    setMaterialsLessonId(null)
+    setMaterialsLoading(true)
+
+    try {
+      const list = await fetchLessonMaterialsForLesson(id)
+      if (selectedLessonIdRef.current !== id) {
+        return []
+      }
+      setMaterials(list)
+      setMaterialsLessonId(id)
+      return list
+    } catch {
+      if (selectedLessonIdRef.current === id) {
+        setMaterials([])
+        setMaterialsLessonId(id)
+      }
+      return []
+    } finally {
+      if (selectedLessonIdRef.current === id) {
+        setMaterialsLoading(false)
+      }
+    }
+  }, [])
+
+  const reloadMaterialsForSelectedLesson = useCallback(async () => {
+    const id = selectedLessonIdRef.current
+    if (!id) {
+      resetMaterialUiState()
+      return []
+    }
+    return loadMaterialsForLesson(id)
+  }, [loadMaterialsForLesson, resetMaterialUiState])
+
+  const findMaterialInActiveLesson = useCallback(
+    (materialId) => {
+      if (!materialId || !selectedLessonId || materialsLessonId !== selectedLessonId) {
+        return null
+      }
+      return materials.find((m) => m.materialId === materialId) ?? null
+    },
+    [materials, materialsLessonId, selectedLessonId],
+  )
+
+  const assertMaterialMatchesSelectedLesson = useCallback(
+    (material) => {
+      if (!material || !selectedLessonId) return false
+      return String(material.lessonId) === String(selectedLessonId)
+    },
+    [selectedLessonId],
+  )
+
+  const handleMaterialLessonMismatch = useCallback(async () => {
+    window.alert(MATERIAL_LESSON_MISMATCH_MESSAGE)
+    resetMaterialUiState()
+    if (selectedLessonIdRef.current) {
+      await loadMaterialsForLesson(selectedLessonIdRef.current)
+    }
+  }, [loadMaterialsForLesson, resetMaterialUiState])
 
   useEffect(() => {
     let cancelled = false
@@ -119,40 +206,51 @@ export default function ProfessorMaterialContent() {
   }, [reloadLessons])
 
   useEffect(() => {
-    if (!courseIdFromUrl) {
-      setSelectedCourseId(null)
+    if (!lessonIdFromUrl) {
+      setSelectedLessonId(null)
+      resetMaterialUiState()
       return
     }
     if (courseList.length === 0) return
-    const exists = courseList.some((c) => c.id === courseIdFromUrl)
-    setSelectedCourseId(exists ? courseIdFromUrl : null)
-  }, [courseIdFromUrl, courseList])
+    const exists = courseList.some((c) => c.id === lessonIdFromUrl)
+    setSelectedLessonId(exists ? lessonIdFromUrl : null)
+  }, [lessonIdFromUrl, courseList, resetMaterialUiState])
+
+  useEffect(() => {
+    if (!selectedLessonId) {
+      resetMaterialUiState()
+      setMaterialsLoading(false)
+      return
+    }
+    resetMaterialUiState()
+    loadMaterialsForLesson(selectedLessonId)
+  }, [selectedLessonId, loadMaterialsForLesson, resetMaterialUiState])
 
   const courseOptions = useMemo(() => {
     const lessons = courseList.map((c) => ({
       id: c.id,
-      title: courseNameById[c.id] ?? '',
+      title: lessonTitleById[c.id] ?? '',
     }))
-    return mapCourseDropdownOptions(lessons, courseNameById)
-  }, [courseList, courseNameById])
+    return mapCourseDropdownOptions(lessons)
+  }, [courseList, lessonTitleById])
 
-  const courseSelectValue = selectedCourseId
+  const courseSelectValue = selectedLessonId
     ? {
-        value: selectedCourseId,
-        label: selectedCourseName,
+        value: selectedLessonId,
+        label: selectedLessonTitle,
       }
     : null
 
-  const lessonRows = useMemo(
-    () =>
-      mapSelectedLessonToMaterialRows(
-        selectedLessonId,
-        lessonTitleById,
-        lessonMetaById,
-        formatMaterialUploadDate,
-      ),
-    [selectedLessonId, lessonMetaById, lessonTitleById],
-  )
+  const materialRows = useMemo(() => {
+    if (
+      !selectedLessonId ||
+      materialsLoading ||
+      materialsLessonId !== selectedLessonId
+    ) {
+      return []
+    }
+    return mapMaterialsToTableRows(materials, formatMaterialUploadDate)
+  }, [materials, materialsLessonId, materialsLoading, selectedLessonId])
 
   const handleOpenCreateCourseModal = () => {
     if (!canMutateProfessorContent) {
@@ -164,35 +262,44 @@ export default function ProfessorMaterialContent() {
   }
 
   const handleCourseSelect = (option) => {
-    setSelectedCourseId(option.value)
+    resetMaterialUiState()
+    setSelectedLessonId(option.value)
     const next = new URLSearchParams(searchParams)
     next.set(PROFESSOR_MATERIALS_COURSE_QUERY_KEY, option.value)
     setSearchParams(next, { replace: true })
   }
 
   const handleOpenRenameCourseModal = () => {
-    if (!selectedCourseId) return
-    setEditingCourseName(selectedCourseName === '—' ? '' : selectedCourseName)
+    if (!selectedLessonId) return
+    setEditingCourseName(selectedLessonTitle === '—' ? '' : selectedLessonTitle)
     setIsRenameCourseModalOpen(true)
   }
 
-  const handleConfirmRenameCourse = () => {
-    if (!selectedCourseId) return
-    const name = editingCourseName.trim()
-    if (!name) {
+  const handleConfirmRenameCourse = async () => {
+    if (!selectedLessonId || isUpdatingCourseName) return
+    const title = editingCourseName.trim()
+    if (!title) {
       window.alert('강의명을 입력해주세요.')
       return
     }
-    writeCourseDisplayTitle(selectedCourseId, name)
-    setCourseNameById((prev) => ({ ...prev, [selectedCourseId]: name }))
-    setIsRenameCourseModalOpen(false)
+    setIsUpdatingCourseName(true)
+    try {
+      await updateLesson(selectedLessonId, { title })
+      setLessonTitleById((prev) => ({ ...prev, [selectedLessonId]: title }))
+      await reloadLessons()
+      setIsRenameCourseModalOpen(false)
+    } catch {
+      window.alert('강의명 수정에 실패했습니다.')
+    } finally {
+      setIsUpdatingCourseName(false)
+    }
   }
 
   const handleConfirmCreateCourse = async () => {
     const name = newCourseName.trim()
     if (!name) return
     try {
-      const res = await createLesson({ title: DEFAULT_LESSON_MATERIAL_TITLE })
+      const res = await createLesson({ title: name })
       const data = apiResponseData(res)
       const id = data?.id
       if (id == null) {
@@ -200,13 +307,9 @@ export default function ProfessorMaterialContent() {
         return
       }
       const lessonId = String(id)
-      writeCourseDisplayTitle(lessonId, name)
-      const list = await reloadLessons()
-      const created = list.find((l) => l.id === lessonId)
-      const lessonTitle = created?.title ?? DEFAULT_LESSON_MATERIAL_TITLE
-      setCourseNameById((prev) => ({ ...prev, [lessonId]: name }))
-      setLessonTitleById((prev) => ({ ...prev, [lessonId]: lessonTitle }))
-      setSelectedCourseId(lessonId)
+      await reloadLessons()
+      resetMaterialUiState()
+      setSelectedLessonId(lessonId)
       const urlParams = new URLSearchParams(searchParams)
       urlParams.set(PROFESSOR_MATERIALS_COURSE_QUERY_KEY, lessonId)
       setSearchParams(urlParams, { replace: true })
@@ -216,75 +319,136 @@ export default function ProfessorMaterialContent() {
     }
   }
 
-  const handleAddFileClick = () => {
-    window.alert(PDF_UPLOAD_ALERT)
+  const handleOpenCreateMaterialModal = () => {
+    if (!selectedLessonId) return
+    if (!canMutateProfessorContent) {
+      window.alert('관리자 승인 대기 중입니다. 승인 후 교안을 추가할 수 있습니다.')
+      return
+    }
+    setNewMaterialTitle(DEFAULT_MATERIAL_TITLE)
+    setIsCreateMaterialModalOpen(true)
   }
 
-  const handleReplaceFile = (lessonId) => {
-    const currentTitle = (lessonTitleById[lessonId] ?? '').trim()
-    setEditLessonId(lessonId)
-    setEditingLessonTitle(currentTitle)
-    setIsEditLessonModalOpen(true)
-  }
-
-  const handleConfirmEditLessonTitle = async () => {
-    const lessonId = editLessonId
-    if (!lessonId || isUpdatingLessonTitle) return
-    const title = editingLessonTitle.trim()
+  const handleConfirmCreateMaterial = async () => {
+    if (!selectedLessonId || isCreatingMaterial) return
+    const title = newMaterialTitle.trim()
     if (!title) {
       window.alert('교안명을 입력해주세요.')
       return
     }
-    const meta = lessonMetaById[lessonId]
-    const description =
-      typeof meta?.description === 'string' && meta.description.trim()
-        ? meta.description.trim()
-        : undefined
-    setIsUpdatingLessonTitle(true)
+    setIsCreatingMaterial(true)
     try {
-      await updateLesson(lessonId, { title, description })
-      setLessonTitleById((prev) => ({ ...prev, [lessonId]: title }))
-      await reloadLessons()
-      setIsEditLessonModalOpen(false)
-      setEditLessonId(null)
+      await createLessonMaterial(selectedLessonId, { title })
+      await reloadMaterialsForSelectedLesson()
+      setIsCreateMaterialModalOpen(false)
+      window.alert(PDF_UPLOAD_ALERT)
     } catch {
-      window.alert('교안명 수정에 실패했습니다.')
+      window.alert('교안 추가에 실패했습니다.')
     } finally {
-      setIsUpdatingLessonTitle(false)
+      setIsCreatingMaterial(false)
     }
   }
 
-  const handleDeleteFile = (lessonId) => {
-    setDeleteTargetLessonId(lessonId)
-    setIsDeleteModalOpen(true)
+  const handleReplaceFile = (materialId) => {
+    const material = findMaterialInActiveLesson(materialId)
+    if (!material || !assertMaterialMatchesSelectedLesson(material)) {
+      void handleMaterialLessonMismatch()
+      return
+    }
+    setEditMaterialId(materialId)
+    setEditingMaterialTitle((material.title ?? '').trim())
+    setIsEditMaterialModalOpen(true)
   }
 
-  const handleConfirmDelete = async () => {
-    if (!deleteTargetLessonId) return
+  const handleConfirmEditMaterialTitle = async () => {
+    const materialId = editMaterialId
+    if (!selectedLessonId || !materialId || isUpdatingMaterialTitle) return
+    const title = editingMaterialTitle.trim()
+    if (!title) {
+      window.alert('교안명을 입력해주세요.')
+      return
+    }
+    const material = findMaterialInActiveLesson(materialId)
+    if (!material || !assertMaterialMatchesSelectedLesson(material)) {
+      setIsEditMaterialModalOpen(false)
+      setEditMaterialId(null)
+      await handleMaterialLessonMismatch()
+      return
+    }
+    const description =
+      typeof material.description === 'string' && material.description.trim()
+        ? material.description.trim()
+        : undefined
+    setIsUpdatingMaterialTitle(true)
     try {
-      await deleteLesson(deleteTargetLessonId)
+      await updateLessonMaterial(material.lessonId, materialId, { title, description })
+      await reloadMaterialsForSelectedLesson()
+      setIsEditMaterialModalOpen(false)
+      setEditMaterialId(null)
+    } catch {
+      window.alert('교안명 수정에 실패했습니다.')
+    } finally {
+      setIsUpdatingMaterialTitle(false)
+    }
+  }
+
+  const handleDeleteFile = (materialId) => {
+    setDeleteTargetMaterialId(materialId)
+    setIsDeleteMaterialModalOpen(true)
+  }
+
+  const handleConfirmDeleteMaterial = async () => {
+    if (!selectedLessonId || !deleteTargetMaterialId || isDeletingMaterial) return
+    const material = findMaterialInActiveLesson(deleteTargetMaterialId)
+    if (!material || !assertMaterialMatchesSelectedLesson(material)) {
+      setIsDeleteMaterialModalOpen(false)
+      setDeleteTargetMaterialId(null)
+      await handleMaterialLessonMismatch()
+      return
+    }
+    setIsDeletingMaterial(true)
+    try {
+      await deleteLessonMaterial(material.lessonId, deleteTargetMaterialId)
+      await reloadMaterialsForSelectedLesson()
+      setIsDeleteMaterialModalOpen(false)
+      setDeleteTargetMaterialId(null)
+    } catch {
+      window.alert('교안 삭제 중 오류가 발생했습니다.')
+    } finally {
+      setIsDeletingMaterial(false)
+    }
+  }
+
+  const handleOpenDeleteCourseModal = () => {
+    if (!selectedLessonId) return
+    if (!canMutateProfessorContent) {
+      window.alert('관리자 승인 대기 중입니다. 승인 후 강의를 삭제할 수 있습니다.')
+      return
+    }
+    setDeleteTargetLessonId(selectedLessonId)
+    setIsDeleteCourseModalOpen(true)
+  }
+
+  const handleConfirmDeleteCourse = async () => {
+    const lessonId = deleteTargetLessonId
+    if (!lessonId || isDeletingCourse) return
+    setIsDeletingCourse(true)
+    try {
+      await deleteLesson(lessonId)
       await reloadLessons()
-      removeCourseDisplayTitle(deleteTargetLessonId)
-      setCourseNameById((prev) => {
-        const next = { ...prev }
-        delete next[deleteTargetLessonId]
-        return next
-      })
-      setLessonTitleById((prev) => {
-        const next = { ...prev }
-        delete next[deleteTargetLessonId]
-        return next
-      })
-      if (selectedCourseId === deleteTargetLessonId) {
-        setSelectedCourseId(null)
+      if (selectedLessonId === lessonId) {
+        setSelectedLessonId(null)
+        resetMaterialUiState()
         const next = new URLSearchParams(searchParams)
         next.delete(PROFESSOR_MATERIALS_COURSE_QUERY_KEY)
         setSearchParams(next, { replace: true })
       }
-      setIsDeleteModalOpen(false)
+      setIsDeleteCourseModalOpen(false)
       setDeleteTargetLessonId(null)
     } catch {
-      window.alert('삭제 중 오류가 발생했습니다.')
+      window.alert('강의 삭제 중 오류가 발생했습니다.')
+    } finally {
+      setIsDeletingCourse(false)
     }
   }
 
@@ -297,24 +461,29 @@ export default function ProfessorMaterialContent() {
     navigate(ROUTES.professorDashboard)
   }
 
-  const handleBeforeOpenViewer = async (fileId) => {
-    const lesson = await fetchLessonDetail(fileId)
-    if (!lesson) {
+  const handleBeforeOpenViewer = async (materialId) => {
+    const row = findMaterialInActiveLesson(materialId)
+    if (!row || !assertMaterialMatchesSelectedLesson(row)) {
+      await handleMaterialLessonMismatch()
+      return false
+    }
+    const material = await fetchMaterialDetail(row.lessonId, materialId)
+    if (!material) {
       window.alert('교안을 찾을 수 없습니다.')
       return false
     }
-    const pdfUrl = readPdfUrlFromLesson(lesson)
+    const pdfUrl = readPdfUrlFromLesson(material)
     if (!pdfUrl) {
       window.alert('PDF URL이 없습니다.')
       return false
     }
-    return true
+    return row.lessonId
   }
 
-  const handleOpenViewer = async (fileId) => {
-    const ok = await handleBeforeOpenViewer(fileId)
-    if (!ok) return
-    navigate(professorMaterialViewerPath(fileId, selectedCourseId ?? ''))
+  const handleOpenViewer = async (materialId) => {
+    const lessonIdForViewer = await handleBeforeOpenViewer(materialId)
+    if (!lessonIdForViewer) return
+    navigate(professorMaterialViewerPath(materialId, lessonIdForViewer))
   }
 
   return (
@@ -349,20 +518,31 @@ export default function ProfessorMaterialContent() {
           />
         </div>
 
-        {selectedCourseId ? (
+        {selectedLessonId ? (
           <div className="edu-mat__course-status-block" role="status">
             <div className="edu-mat__course-status-row">
               <p className="edu-mat__course-status">
-                선택된 강의: <strong>{selectedCourseName}</strong>
+                선택된 강의: <strong>{selectedLessonTitle}</strong>
               </p>
-              <Button
-                type="button"
-                variant="secondary"
-                className="edu-mat-rename-course-btn"
-                onClick={handleOpenRenameCourseModal}
-              >
-                강의명 수정
-              </Button>
+              <div className="edu-mat__course-actions">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="edu-mat-rename-course-btn"
+                  onClick={handleOpenRenameCourseModal}
+                >
+                  강의명 수정
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  className="edu-mat-delete-course-btn"
+                  disabled={!canMutateProfessorContent || isDeletingCourse}
+                  onClick={handleOpenDeleteCourseModal}
+                >
+                  강의 삭제
+                </Button>
+              </div>
             </div>
           </div>
         ) : null}
@@ -373,22 +553,24 @@ export default function ProfessorMaterialContent() {
               type="button"
               variant="secondary"
               className="edu-mat-add-file-btn"
-              disabled={!selectedCourseId || !canMutateProfessorContent}
-              onClick={handleAddFileClick}
+              disabled={!selectedLessonId || !canMutateProfessorContent || materialsLoading}
+              onClick={handleOpenCreateMaterialModal}
             >
               파일 추가
             </Button>
           </div>
           <MaterialFileTable
-            files={selectedCourseId ? lessonRows : []}
-            courseId={selectedCourseId ?? ''}
+            files={selectedLessonId ? materialRows : []}
+            courseId={selectedLessonId ?? ''}
             onReplaceFile={handleReplaceFile}
             onDeleteFile={handleDeleteFile}
             onOpenViewer={handleOpenViewer}
             emptyHint={
-              selectedCourseId
-                ? '등록된 교안 파일이 없습니다.'
-                : '강의를 선택하면 등록된 교안 목록이 표시됩니다.'
+              materialsLoading
+                ? '교안 목록을 불러오는 중…'
+                : selectedLessonId
+                  ? '등록된 교안이 없습니다.'
+                  : '강의를 선택하면 등록된 교안 목록이 표시됩니다.'
             }
           />
         </section>
@@ -426,13 +608,51 @@ export default function ProfessorMaterialContent() {
       </ConfirmModal>
 
       <ConfirmModal
+        isOpen={isCreateMaterialModalOpen}
+        title="교안 추가"
+        confirmText="추가"
+        cancelText="취소"
+        onConfirm={handleConfirmCreateMaterial}
+        onCancel={() => {
+          if (isCreatingMaterial) return
+          setIsCreateMaterialModalOpen(false)
+        }}
+        disableConfirm={!newMaterialTitle.trim() || isCreatingMaterial}
+        isConfirmLoading={isCreatingMaterial}
+        closeOnOverlayClick={!isCreatingMaterial}
+        closeOnEscape={!isCreatingMaterial}
+      >
+        <div className="edu-mat-modal-course">
+          <label className="edu-mat__label" htmlFor="edu-mat-new-material-title">
+            교안명
+          </label>
+          <input
+            id="edu-mat-new-material-title"
+            type="text"
+            className="edu-mat-input"
+            value={newMaterialTitle}
+            onChange={(e) => setNewMaterialTitle(e.target.value)}
+            placeholder="교안 이름을 입력하세요"
+            autoComplete="off"
+            disabled={isCreatingMaterial}
+          />
+        </div>
+      </ConfirmModal>
+
+      <ConfirmModal
         isOpen={isRenameCourseModalOpen}
         title="강의명 수정"
         confirmText="확인"
         cancelText="취소"
         onConfirm={handleConfirmRenameCourse}
-        onCancel={() => setIsRenameCourseModalOpen(false)}
-        disableConfirm={!editingCourseName.trim()}
+        onCancel={() => {
+          if (isUpdatingCourseName) return
+          setIsRenameCourseModalOpen(false)
+        }}
+        disableConfirm={!editingCourseName.trim() || isUpdatingCourseName}
+        isConfirmLoading={isUpdatingCourseName}
+        closeOnOverlayClick={!isUpdatingCourseName}
+        closeOnEscape={!isUpdatingCourseName}
       >
         <div className="edu-mat-modal-course">
           <label className="edu-mat__label" htmlFor="edu-mat-rename-course-name">
@@ -446,24 +666,25 @@ export default function ProfessorMaterialContent() {
             onChange={(e) => setEditingCourseName(e.target.value)}
             placeholder="강의 이름을 입력하세요"
             autoComplete="off"
+            disabled={isUpdatingCourseName}
           />
         </div>
       </ConfirmModal>
 
       <ConfirmModal
-        isOpen={isEditLessonModalOpen}
+        isOpen={isEditMaterialModalOpen}
         title="교안 수정"
         confirmText="확인"
         cancelText="취소"
-        onConfirm={handleConfirmEditLessonTitle}
+        onConfirm={handleConfirmEditMaterialTitle}
         onCancel={() => {
-          if (isUpdatingLessonTitle) return
-          setIsEditLessonModalOpen(false)
+          if (isUpdatingMaterialTitle) return
+          setIsEditMaterialModalOpen(false)
         }}
-        disableConfirm={!editingLessonTitle.trim() || isUpdatingLessonTitle}
-        isConfirmLoading={isUpdatingLessonTitle}
-        closeOnOverlayClick={!isUpdatingLessonTitle}
-        closeOnEscape={!isUpdatingLessonTitle}
+        disableConfirm={!editingMaterialTitle.trim() || isUpdatingMaterialTitle}
+        isConfirmLoading={isUpdatingMaterialTitle}
+        closeOnOverlayClick={!isUpdatingMaterialTitle}
+        closeOnEscape={!isUpdatingMaterialTitle}
       >
         <div className="edu-mat-modal-course">
           <label className="edu-mat__label" htmlFor="edu-mat-edit-file-name">
@@ -473,22 +694,42 @@ export default function ProfessorMaterialContent() {
             id="edu-mat-edit-file-name"
             type="text"
             className="edu-mat-input"
-            value={editingLessonTitle}
-            onChange={(e) => setEditingLessonTitle(e.target.value)}
+            value={editingMaterialTitle}
+            onChange={(e) => setEditingMaterialTitle(e.target.value)}
             autoComplete="off"
-            disabled={isUpdatingLessonTitle}
+            disabled={isUpdatingMaterialTitle}
           />
         </div>
       </ConfirmModal>
 
       <ConfirmModal
-        isOpen={isDeleteModalOpen}
-        message={DELETE_CONFIRM_MESSAGE}
+        isOpen={isDeleteMaterialModalOpen}
+        message={DELETE_MATERIAL_CONFIRM_MESSAGE}
         confirmText="삭제"
         cancelText="취소"
         confirmVariant="danger"
-        onConfirm={handleConfirmDelete}
-        onCancel={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDeleteMaterial}
+        onCancel={() => {
+          if (isDeletingMaterial) return
+          setIsDeleteMaterialModalOpen(false)
+        }}
+        disableConfirm={isDeletingMaterial}
+        isConfirmLoading={isDeletingMaterial}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteCourseModalOpen}
+        message={DELETE_COURSE_CONFIRM_MESSAGE}
+        confirmText="삭제"
+        cancelText="취소"
+        confirmVariant="danger"
+        onConfirm={handleConfirmDeleteCourse}
+        onCancel={() => {
+          if (isDeletingCourse) return
+          setIsDeleteCourseModalOpen(false)
+        }}
+        disableConfirm={isDeletingCourse}
+        isConfirmLoading={isDeletingCourse}
       />
 
       <ConfirmModal

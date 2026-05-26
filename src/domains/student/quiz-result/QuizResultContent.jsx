@@ -4,7 +4,7 @@ import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import PdfViewerSection from '../../../components/media/PdfViewerSection/PdfViewerSection.jsx'
 import { ROUTES } from '../../../shared/constants/routes.js'
-import { loadStudentQuizAttempt } from '../quiz/studentQuizData.js'
+import { loadStudentQuizAttempt, loadStudentQuizAttemptByQuizId } from '../quiz/studentQuizData.js'
 import QuestionResultNavigator from './QuestionResultNavigator.jsx'
 import ResultContent from './ResultContent.jsx'
 
@@ -20,7 +20,13 @@ export default function QuizResultContent({ attemptId }) {
     if (fromState?.attemptId === attemptId && Array.isArray(fromState.questions)) {
       return fromState
     }
-    return loadStudentQuizAttempt(attemptId)
+    const byAttemptId = loadStudentQuizAttempt(attemptId)
+    if (byAttemptId) return byAttemptId
+    const quizIdFromState = location.state?.quizId
+    if (quizIdFromState) {
+      return loadStudentQuizAttemptByQuizId(quizIdFromState)
+    }
+    return null
   }, [attemptId, location.state])
 
   const [resultQuestions] = useState(() => resultBundle?.questions ?? [])

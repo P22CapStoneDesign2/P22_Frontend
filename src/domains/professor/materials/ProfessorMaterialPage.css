@@ -54,6 +54,16 @@
   gap: 10px 16px;
 }
 
+.edu-mat__course-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .edu-mat__lesson-status {
   margin: 0;
   font-size: 0.875rem;

@@ -1,32 +1,29 @@
 import { useEffect, useState } from 'react'
-import { fetchLessonDetail, fetchLessonTitle } from './lessonCatalogService.js'
+import { fetchMaterialTitle } from './lessonCatalogService.js'
 
 /**
- * 라우트 `:materialId` / `:lessonId` 슬롯 — 명세상 교안(lesson) ID
- * @param {string|undefined|null} lessonOrQuizContextId — lessonId 우선, 없으면 quiz의 lessonId는 호출부에서 전달
- * @param {string|undefined|null} [lessonIdHint] 퀴즈 화면 등에서 lessonId를 알 때
+ * 교안(LessonMaterial) 표시명 — lessonId·materialId 둘 다 있을 때만 materials API 호출.
+ * quizId 단독으로 호출하지 말 것 (GET /api/lessons/{quizId} 404 방지).
+ *
+ * @param {string|undefined|null} lessonId — 강의 PK
+ * @param {string|undefined|null} materialId — 교안 PK
  */
-export function useLessonTitle(lessonOrQuizContextId, lessonIdHint) {
-  const lessonId = String(lessonIdHint ?? lessonOrQuizContextId ?? '').trim()
+export function useMaterialDisplayTitle(lessonId, materialId) {
+  const lid = String(lessonId ?? '').trim()
+  const mid = String(materialId ?? '').trim()
   const [label, setLabel] = useState('—')
 
   useEffect(() => {
-    if (!lessonId) return
+    if (!lid || !mid) return
     let cancelled = false
-    fetchLessonTitle(lessonId).then((title) => {
+    fetchMaterialTitle(lid, mid).then((title) => {
       if (!cancelled) setLabel(title)
     })
     return () => {
       cancelled = true
     }
-  }, [lessonId])
+  }, [lid, mid])
 
-  return lessonId ? label : '—'
+  if (!lid || !mid) return '—'
+  return label
 }
-
-/** @deprecated useLessonTitle — lessonId 기준 */
-export function useMaterialDisplayTitle(lessonId) {
-  return useLessonTitle(lessonId)
-}
-
-export { fetchLessonDetail }

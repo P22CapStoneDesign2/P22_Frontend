@@ -1,9 +1,9 @@
 /**
- * 교안 관리 — API lesson DTO → 피그마 UI ViewModel (강의명/교안명 분리)
+ * 교안 관리 — Lesson / LessonMaterial API → 피그마 UI ViewModel (강의·교안 분리)
  */
 
-/** 강의 추가 시 API lesson.title 기본값 (강의 표시명과 분리) */
-export const DEFAULT_LESSON_MATERIAL_TITLE = '새 교안'
+/** 교안(파일) 추가 시 기본 제목 */
+export const DEFAULT_MATERIAL_TITLE = '새 교안'
 
 /**
  * @param {Array<{ id: string, title: string }>} lessons
@@ -15,35 +15,35 @@ export function mapLessonsToCourseIdList(lessons) {
 }
 
 /**
+ * 강의 드롭다운 — lesson.title 만 (material.title 사용 금지)
  * @param {Array<{ id: string, title: string }>} lessons
- * @param {Record<string, string>} courseNameById
- * @returns {Array<{ value: string, label: string }>}
  */
-export function mapCourseDropdownOptions(lessons, courseNameById) {
+export function mapCourseDropdownOptions(lessons) {
   if (!Array.isArray(lessons)) return []
   return lessons.map((l) => ({
     value: l.id,
-    label: (courseNameById[l.id] ?? l.title ?? '').trim() || '—',
+    label: String(l.title ?? '—').trim() || '—',
   }))
 }
 
 /**
- * @param {string} lessonId
- * @param {Record<string, string>} lessonTitleById
- * @param {Record<string, { createdAt?: string, updatedAt?: string }>} lessonMetaById
+ * 교안 테이블 — material.title 만 (lesson.title fallback 금지)
+ * @param {Array<{ materialId: string, lessonId: string, title: string, createdAt: string, updatedAt: string }>} materials
  * @param {(date?: string) => string} formatDate
- * @returns {Array<{ id: string, fileName: string, createdAt: string, updatedAt: string }>}
  */
-export function mapSelectedLessonToMaterialRows(lessonId, lessonTitleById, lessonMetaById, formatDate) {
-  if (!lessonId) return []
-  const meta = lessonMetaById[lessonId]
-  const title = (lessonTitleById[lessonId] ?? '').trim() || '—'
-  return [
-    {
-      id: lessonId,
-      fileName: title,
-      createdAt: formatDate(meta?.createdAt),
-      updatedAt: formatDate(meta?.updatedAt),
-    },
-  ]
+export function mapMaterialsToTableRows(materials, formatDate) {
+  if (!Array.isArray(materials)) return []
+  return materials.map((m, index) => ({
+    materialId: m.materialId,
+    lessonId: m.lessonId,
+    title: m.title,
+    id: m.materialId,
+    fileName: m.title,
+    createdAt: formatDate(m.createdAt),
+    updatedAt: formatDate(m.updatedAt),
+    rowNumber: index + 1,
+  }))
 }
+
+/** @deprecated */
+export const DEFAULT_LESSON_MATERIAL_TITLE = DEFAULT_MATERIAL_TITLE

@@ -9,6 +9,7 @@ export default function QuestionContent({
   question,
   answer,
   mcLimitMessage = '',
+  readOnly = false,
   onToggleMcOption,
   onShortAnswerChange,
 }) {
@@ -33,12 +34,14 @@ export default function QuestionContent({
           requiredAnswerCount={question.requiredAnswerCount ?? 1}
           selectedOptionIds={selectedOptionIds}
           limitMessage={mcLimitMessage}
+          disabled={readOnly}
           onToggleOption={onToggleMcOption}
         />
       ) : (
         <ShortAnswerInput
           id={`sa-solve-${question.id}`}
           value={answer?.shortAnswer ?? ''}
+          disabled={readOnly}
           onChange={onShortAnswerChange}
         />
       )}

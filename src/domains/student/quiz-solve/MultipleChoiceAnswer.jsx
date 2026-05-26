@@ -10,6 +10,7 @@ export default function MultipleChoiceAnswer({
   requiredAnswerCount = 1,
   selectedOptionIds = [],
   limitMessage = '',
+  disabled = false,
   onToggleOption,
 }) {
   const maxCount = Math.max(1, requiredAnswerCount)
@@ -39,6 +40,7 @@ export default function MultipleChoiceAnswer({
                 variant={isSelected ? 'primary' : 'secondary'}
                 className={`edu-quiz-solve-mc__btn${isSelected ? ' edu-quiz-solve-mc__btn--selected' : ''}`}
                 aria-pressed={isSelected}
+                disabled={disabled}
                 onClick={() => onToggleOption(opt.id)}
               >
                 <span className="edu-quiz-solve-mc__badge">{index + 1}</span>

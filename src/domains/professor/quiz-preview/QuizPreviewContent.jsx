@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ROUTES } from '../../../shared/constants/routes.js'
-import { fetchLessonTitle } from '../../catalog/lessonCatalogService.js'
+import { fetchMaterialTitle } from '../../catalog/lessonCatalogService.js'
 import { fetchProfessorQuizEditBundle } from '../../catalog/quizCatalogService.js'
 import PreviewQuestionNavigator from './PreviewQuestionNavigator.jsx'
 import PreviewQuestionContent from './PreviewQuestionContent.jsx'
@@ -40,9 +40,16 @@ export default function QuizPreviewContent() {
         resolveInitialIndex(bundle.questions, bundle.initialActiveQuestionId),
       )
       setLoading(false)
-      if (bundle.lessonId) {
-        fetchLessonTitle(bundle.lessonId).then((title) => {
-          if (!cancelled) setMaterialLabel(title)
+      const label =
+        typeof bundle.quizTitle === 'string' && bundle.quizTitle.trim()
+          ? bundle.quizTitle.trim()
+          : ''
+      if (label) setMaterialLabel(label)
+      const lessonId = String(bundle.lessonId ?? '').trim()
+      const materialId = String(bundle.materialId ?? '').trim()
+      if (lessonId && materialId) {
+        fetchMaterialTitle(lessonId, materialId).then((title) => {
+          if (!cancelled && title && title !== '—') setMaterialLabel(title)
         })
       }
     })

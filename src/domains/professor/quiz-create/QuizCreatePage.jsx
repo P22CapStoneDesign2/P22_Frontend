@@ -10,13 +10,13 @@ export default function QuizCreatePage() {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const { isViewerMode } = useIsViewerMode()
-  const lessonId = resolveQuizCreateLessonId({
+  const materialId = resolveQuizCreateLessonId({
     materialIdParam,
     searchParams,
     locationState: location.state,
   })
-  // lessonId = 교안(lesson) ID. mid 등 미선언 별칭 사용 금지(ReferenceError 방지).
-  const materialLabel = useMaterialDisplayTitle(lessonId)
+  const lessonId = String(location.state?.courseId ?? '').trim()
+  const materialLabel = useMaterialDisplayTitle(lessonId, materialId)
   const displayNumberOffset = Number(location.state?.displayNumberOffset ?? 0) || 0
 
   return (
@@ -28,7 +28,7 @@ export default function QuizCreatePage() {
           <span className="edu-quiz-create-page__meta-v">{materialLabel}</span>
         </p>
       </header>
-      <QuizCreateContent lessonId={lessonId} displayNumberOffset={displayNumberOffset} />
+      <QuizCreateContent materialId={materialId} displayNumberOffset={displayNumberOffset} />
     </div>
   )
 }
