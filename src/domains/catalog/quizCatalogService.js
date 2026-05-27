@@ -13,6 +13,7 @@ import {
 } from '../quiz/mappers/quizManagementMapper.js'
 import { mapQuizDetailToSolveQuestions } from '../student/quiz/studentQuizSolveMapper.js'
 import { fetchDeleteQuizQuestionData } from '../quiz/api/quizApi.js'
+import { isQuizSubmittedForStudent } from '../student/quiz/studentQuizSubmittedStatus.js'
 
 const LIST_PAGE = { page: 0, size: 100 }
 
@@ -29,7 +30,7 @@ function pageContent(pageData) {
 
 /**
  * @param {string|number} lessonId
- * @returns {Promise<Array<{ value: string, label: string }>>}
+ * @returns {Promise<Array<{ value: string, label: string, submitted?: boolean }>>}
  */
 export async function fetchQuizOptionsForLesson(lessonId) {
   const id = String(lessonId ?? '').trim()
@@ -40,7 +41,12 @@ export async function fetchQuizOptionsForLesson(lessonId) {
       const quizId = item?.id
       if (quizId == null) return null
       const title = String(item.title ?? '퀴즈').trim() || '퀴즈'
-      return { value: String(quizId), label: title }
+      const value = String(quizId)
+      return {
+        value,
+        label: title,
+        submitted: isQuizSubmittedForStudent(value, item),
+      }
     }).filter(Boolean)
   } catch {
     return []

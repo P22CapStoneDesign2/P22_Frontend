@@ -3,6 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
+import { useToast } from '../../../components/ui/Toast/useToast.js'
+import { TOAST_MESSAGES } from '../../../shared/feedback/toastMessages.js'
 import {
   PROFESSOR_MATERIALS_COURSE_QUERY_KEY,
   ROUTES,
@@ -48,6 +51,7 @@ const MATERIAL_LESSON_MISMATCH_MESSAGE = '선택된 강의와 교안 정보가 �
 
 export default function ProfessorMaterialContent() {
   const { isProfessorPending, canMutateProfessorContent } = useProfessorAccountGate()
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -288,6 +292,7 @@ export default function ProfessorMaterialContent() {
       setLessonTitleById((prev) => ({ ...prev, [selectedLessonId]: title }))
       await reloadLessons()
       setIsRenameCourseModalOpen(false)
+      showToast(TOAST_MESSAGES.lessonUpdated)
     } catch {
       window.alert('강의명 수정에 실패했습니다.')
     } finally {
@@ -314,6 +319,7 @@ export default function ProfessorMaterialContent() {
       urlParams.set(PROFESSOR_MATERIALS_COURSE_QUERY_KEY, lessonId)
       setSearchParams(urlParams, { replace: true })
       setIsCreateCourseModalOpen(false)
+      showToast(TOAST_MESSAGES.lessonCreated)
     } catch {
       window.alert('강의 생성에 실패했습니다.')
     }
@@ -341,6 +347,7 @@ export default function ProfessorMaterialContent() {
       await createLessonMaterial(selectedLessonId, { title })
       await reloadMaterialsForSelectedLesson()
       setIsCreateMaterialModalOpen(false)
+      showToast(TOAST_MESSAGES.materialCreated)
       window.alert(PDF_UPLOAD_ALERT)
     } catch {
       window.alert('교안 추가에 실패했습니다.')
@@ -385,6 +392,7 @@ export default function ProfessorMaterialContent() {
       await reloadMaterialsForSelectedLesson()
       setIsEditMaterialModalOpen(false)
       setEditMaterialId(null)
+      showToast(TOAST_MESSAGES.materialUpdated)
     } catch {
       window.alert('교안명 수정에 실패했습니다.')
     } finally {
@@ -412,6 +420,7 @@ export default function ProfessorMaterialContent() {
       await reloadMaterialsForSelectedLesson()
       setIsDeleteMaterialModalOpen(false)
       setDeleteTargetMaterialId(null)
+      showToast(TOAST_MESSAGES.materialDeleted)
     } catch {
       window.alert('교안 삭제 중 오류가 발생했습니다.')
     } finally {
@@ -445,6 +454,7 @@ export default function ProfessorMaterialContent() {
       }
       setIsDeleteCourseModalOpen(false)
       setDeleteTargetLessonId(null)
+      showToast(TOAST_MESSAGES.lessonDeleted)
     } catch {
       window.alert('강의 삭제 중 오류가 발생했습니다.')
     } finally {
@@ -490,6 +500,7 @@ export default function ProfessorMaterialContent() {
     <div className="edu-mat">
       <div className="edu-mat__card">
         <h1 className="edu-mat__title">교안 관리</h1>
+        <PageBackButton fallbackPath={ROUTES.professorDashboard} />
 
         {isProfessorPending ? <ProfessorPendingNotice /> : null}
 
@@ -524,14 +535,14 @@ export default function ProfessorMaterialContent() {
               <p className="edu-mat__course-status">
                 선택된 강의: <strong>{selectedLessonTitle}</strong>
               </p>
-              <div className="edu-mat__course-actions">
+              <div className="edu-mat__course-actions edu-action-group">
                 <Button
                   type="button"
                   variant="secondary"
                   className="edu-mat-rename-course-btn"
                   onClick={handleOpenRenameCourseModal}
                 >
-                  강의명 수정
+                  강의 수정
                 </Button>
                 <Button
                   type="button"
@@ -551,12 +562,12 @@ export default function ProfessorMaterialContent() {
           <div className="edu-mat-table-section__head">
             <Button
               type="button"
-              variant="secondary"
+              variant="primary"
               className="edu-mat-add-file-btn"
               disabled={!selectedLessonId || !canMutateProfessorContent || materialsLoading}
               onClick={handleOpenCreateMaterialModal}
             >
-              파일 추가
+              교안 추가
             </Button>
           </div>
           <MaterialFileTable
@@ -641,7 +652,7 @@ export default function ProfessorMaterialContent() {
 
       <ConfirmModal
         isOpen={isRenameCourseModalOpen}
-        title="강의명 수정"
+        title="강의 수정"
         confirmText="확인"
         cancelText="취소"
         onConfirm={handleConfirmRenameCourse}

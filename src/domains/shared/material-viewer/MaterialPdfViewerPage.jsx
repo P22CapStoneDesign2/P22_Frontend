@@ -14,7 +14,9 @@ import {
 } from '../../../shared/constants/routes.js'
 import { resolvePdfFileForViewer } from './materialPdfAuth.js'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
 import { createHeaderLogoutHandler } from '../../../app/headerLogoutHandler.js'
+import { useAuthHeaderSession } from '../../../shared/auth/useAuthHeaderSession.js'
 import './MaterialPdfViewerPage.css'
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -40,7 +42,7 @@ export default function MaterialPdfViewerPage() {
   const courseIdFromQuery = searchParams.get(courseQueryKey) ?? ''
   const logoHref = isProfessorRoute ? ROUTES.professorDashboard : ROUTES.studentDashboard
 
-  const [userEmail] = useState('user@school.edu')
+  const { userEmail, userDisplayName, userRoleLabel } = useAuthHeaderSession()
 
   const [title, setTitle] = useState('')
   const [metaLoading, setMetaLoading] = useState(true)
@@ -254,12 +256,14 @@ export default function MaterialPdfViewerPage() {
   const headerProps = useMemo(
     () => ({
       userEmail,
+      userDisplayName,
+      userRoleLabel,
       onLogout,
       logoHref,
       logoLabel: 'EDU HUB',
       logoImageOnly: true,
     }),
-    [userEmail, onLogout, logoHref],
+    [userEmail, userDisplayName, userRoleLabel, onLogout, logoHref],
   )
 
   const subbarTitle = metaLoading
@@ -279,6 +283,13 @@ export default function MaterialPdfViewerPage() {
       <div className="edu-mat-pdf-viewer">
         <div className="edu-mat-pdf-viewer__body">
           <aside className="edu-mat-pdf-viewer__sidebar" aria-label="교안 뷰어 도구">
+            <PageBackButton
+              fallbackPath={
+                isProfessorRoute
+                  ? professorMaterialsPath(courseIdFromQuery || undefined)
+                  : studentMaterialsPath(courseIdFromQuery || undefined)
+              }
+            />
             <h1 className="edu-mat-pdf-viewer__doc-title">{subbarTitle}</h1>
 
             <div className="edu-mat-pdf-viewer__sidebar-tools">

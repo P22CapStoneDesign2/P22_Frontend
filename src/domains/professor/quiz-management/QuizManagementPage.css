@@ -88,6 +88,20 @@
   font-weight: 700;
 }
 
+.edu-quiz-table-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edu-quiz-table-section__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+}
+
 .edu-quiz-mgmt__toolbar {
   display: flex;
   flex-wrap: wrap;

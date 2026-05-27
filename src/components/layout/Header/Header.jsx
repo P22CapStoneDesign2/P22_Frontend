@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { EduHubBookIcon } from '../../../shared/icons/eduHubIcons.jsx'
+import { getAccessToken } from '../../../shared/auth/tokenStorage.js'
+import HeaderSessionControls from './HeaderSessionControls.jsx'
 import './Header.css'
 
 function isExternalHref(href) {
@@ -63,7 +65,9 @@ function HeaderLogo({ logoHref, logoLabel, showBrandIcon, logoImageOnly }) {
  * @typedef {{ label: string, to?: string }} BreadcrumbItem
  * @param {object} props
  * @param {'default' | 'public'} [props.variant] public: 로그인만 표시 (랜딩 등)
- * @param {string} [props.userEmail] variant default일 때 표시
+ * @param {string} [props.userEmail] variant default일 때 표시 (fallback)
+ * @param {string} [props.userDisplayName] 닉네임·이름 우선 표시
+ * @param {string} [props.userRoleLabel] 예: 교수 계정
  * @param {() => void} [props.onLogout] variant default일 때 로그아웃
  * @param {string} [props.loginHref] variant public일 때 로그인 링크
  * @param {string} [props.loginLabel]
@@ -81,6 +85,8 @@ function HeaderLogo({ logoHref, logoLabel, showBrandIcon, logoImageOnly }) {
 export default function Header({
   variant = 'default',
   userEmail,
+  userDisplayName,
+  userRoleLabel,
   onLogout,
   loginHref = '/login',
   loginLabel = '로그인',
@@ -96,7 +102,9 @@ export default function Header({
 }) {
   const location = useLocation()
   const isPublic = variant === 'public'
-  const showLoginLink = isPublic || Boolean(loginHref && !onLogout && !userEmail)
+  const hasSession = Boolean(getAccessToken())
+  const showLoginLink =
+    !hasSession && (isPublic || Boolean(loginHref && !onLogout && !userEmail))
   const logo = hideLogo ? null : (
     <HeaderLogo
       logoHref={logoHref}
@@ -116,6 +124,7 @@ export default function Header({
       <div className="edu-header__inner">
         <div className="edu-header__primary">
           {logo}
+          {hasSession ? <HeaderSessionControls /> : null}
           {showNavLinks ? (
             <nav className="edu-header__nav" aria-label="관리자 메뉴">
               {navLinks.map((item) => {
@@ -160,9 +169,14 @@ export default function Header({
             </Link>
           ) : (
             <>
-              <span className="edu-header__email" title={userEmail}>
-                {userEmail}
-              </span>
+              <div className="edu-header__user" title={userEmail || userDisplayName}>
+                <span className="edu-header__display-name">
+                  {userDisplayName || userEmail || '계정'}
+                </span>
+                {userRoleLabel ? (
+                  <span className="edu-header__role-badge">{userRoleLabel}</span>
+                ) : null}
+              </div>
               <button type="button" className="edu-header__logout" onClick={onLogout}>
                 로그아웃
               </button>

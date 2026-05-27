@@ -1,7 +1,10 @@
 // 어떤 url -> 어떤 페이지인지? (라우팅 지도)
 
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
+import { ToastProvider } from '../components/ui/Toast/ToastContext.jsx'
 import { ROUTES } from '../shared/constants/routes.js'
+import RoleAreaGuard from '../shared/auth/RoleAreaGuard.jsx'
+import SessionIdleProvider from '../shared/session/SessionIdleProvider.jsx'
 import { AdminAreaLayout, ProfessorAreaLayout, StudentAreaLayout } from './RouteLayouts.jsx'
 import AdminSubjectAccessPage from '../domains/admin/subject-access/AdminSubjectAccessPage.jsx'
 import AdminProfessorSignupPage from '../domains/admin/professor-signup/AdminProfessorSignupPage.jsx'
@@ -48,7 +51,7 @@ const professorMeta = {
     contentClassName: 'edu-quiz-create-app-layout-content',
     breadcrumbItems: [
       { label: '교안별 퀴즈 관리', to: ROUTES.professorQuizzes },
-      { label: '퀴즈 생성' },
+      { label: '퀴즈 추가' },
     ],
   },
 }
@@ -72,8 +75,19 @@ const studentMeta = {
   quizSolve: { contentClassName: 'edu-quiz-solve-app-layout-content' },
 }
 
+function AppSessionShell() {
+  return (
+    <SessionIdleProvider>
+      <Outlet />
+    </SessionIdleProvider>
+  )
+}
+
 // 앱 라우터
 const appRouter = createBrowserRouter([
+  {
+    element: <AppSessionShell />,
+    children: [
   { path: ROUTES.home, element: <LandingPage /> },
   { path: ROUTES.login, element: <LoginPage /> },
   { path: ROUTES.signup, element: <SignUpPage /> },
@@ -130,7 +144,11 @@ const appRouter = createBrowserRouter([
   },
   {
     path: '/professor/materials/:materialId/viewer',
-    element: <MaterialPdfViewerPage />,
+    element: (
+      <RoleAreaGuard area="professor">
+        <MaterialPdfViewerPage />
+      </RoleAreaGuard>
+    ),
   },
   {
     path: '/student',
@@ -170,13 +188,23 @@ const appRouter = createBrowserRouter([
   },
   {
     path: '/student/materials/:materialId/viewer',
-    element: <MaterialPdfViewerPage />,
+    element: (
+      <RoleAreaGuard area="student">
+        <MaterialPdfViewerPage />
+      </RoleAreaGuard>
+    ),
   },
   { path: '/dev/common-shell', element: <EduHubCommonShell /> },
+    ],
+  },
 ])
 
 
 
 export default function AppRoutes() {
-  return <RouterProvider router={appRouter} />
+  return (
+    <ToastProvider>
+      <RouterProvider router={appRouter} />
+    </ToastProvider>
+  )
 }

@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getAccessToken } from '../../shared/auth/tokenStorage.js'
+import { navigateAfterStart } from '../../shared/navigation/navigateAfterStart.js'
 import './LandingFloatingDock.css'
 
 const FOAM_DOTS = [
@@ -75,6 +78,7 @@ function resolveActiveFromScroll(scroller) {
 }
 
 export default function LandingFloatingDock() {
+  const navigate = useNavigate()
   const [active, setActive] = useState(/** @type {DockSection} */ ('intro'))
   const [selection, setSelection] = useState({ top: 0, height: 0 })
   const raftRef = useRef(/** @type {HTMLDivElement | null} */ (null))
@@ -124,6 +128,11 @@ export default function LandingFloatingDock() {
   }, [])
 
   function goTo(section, targetId, scrollAnchor) {
+    if (section === 'start') {
+      navigateAfterStart(navigate, Boolean(getAccessToken()))
+      return
+    }
+
     setActive(section)
     scrollLockRef.current = true
     if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current)

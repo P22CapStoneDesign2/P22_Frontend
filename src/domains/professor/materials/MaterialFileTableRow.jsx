@@ -48,7 +48,7 @@ export default function MaterialFileTableRow({
       <td className="edu-mat-table__td edu-mat-table__td--date">{file.createdAt}</td>
       <td className="edu-mat-table__td edu-mat-table__td--date">{file.updatedAt}</td>
       <td className="edu-mat-table__td edu-mat-table__td--actions">
-        <div className="edu-mat-table__actions">
+        <div className="edu-mat-table__actions edu-action-group">
           <button
             type="button"
             className="edu-mat-row-btn edu-mat-row-btn--edit"

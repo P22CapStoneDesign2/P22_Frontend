@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
 import { ROUTES } from '../../../shared/constants/routes.js'
 import { useQuizDisplayTitle } from '../../catalog/useQuizDisplayTitle.js'
 import { loadStudentQuizAttemptByQuizId } from '../quiz/studentQuizData.js'
@@ -37,7 +38,8 @@ export default function QuizSolvePage() {
 
   if (hasStoredResult) {
     return (
-      <ConfirmModal
+      <>
+        <ConfirmModal
         isOpen
         message={ALREADY_SUBMITTED_REDIRECT_MESSAGE}
         confirmText="확인"
@@ -46,11 +48,14 @@ export default function QuizSolvePage() {
         closeOnOverlayClick={false}
         closeOnEscape={false}
       />
+        <PageBackButton fallbackPath={ROUTES.studentQuizMaterials} />
+      </>
     )
   }
 
   return (
     <div className="edu-quiz-solve-page">
+      <PageBackButton fallbackPath={ROUTES.studentQuizMaterials} />
       <header className="edu-quiz-solve-page__header">
         <h1 className="edu-quiz-solve-page__title">퀴즈 풀이</h1>
         <p className="edu-quiz-solve-page__meta">

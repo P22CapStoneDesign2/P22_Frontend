@@ -41,6 +41,16 @@
   text-align: center;
 }
 
+.edu-stu-quiz-mat__practice-status {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #475569;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
 .edu-stu-quiz-mat__intro {
   margin: 0;
   text-align: center;

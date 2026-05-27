@@ -18,6 +18,6 @@ export function clearClientSessionForLogout() {
 export function createHeaderLogoutHandler(navigate) {
   return () => {
     clearClientSessionForLogout()
-    navigate(ROUTES.home, { replace: true })
+    navigate(ROUTES.login, { replace: true })
   }
 }

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
+import { ROUTES } from '../../../shared/constants/routes.js'
 import QuizEditContent from './QuizEditContent.jsx'
 import { fetchProfessorQuizEditBundle } from '../../catalog/quizCatalogService.js'
 import { fetchMaterialTitle } from '../../catalog/lessonCatalogService.js'
@@ -83,6 +85,7 @@ export default function QuizEditPage() {
       <div className="edu-quiz-create-page">
         <header className="edu-quiz-create-page__header">
           <h1 className="edu-quiz-create-page__title">{isViewerMode ? '퀴즈 보기' : '퀴즈 수정'}</h1>
+          <PageBackButton fallbackPath={ROUTES.professorQuizzes} />
           <p className="edu-quiz-create-page__meta">
             <span className="edu-quiz-create-page__meta-label">교안</span>{' '}
             <span className="edu-quiz-create-page__meta-v">{displayMaterialLabel}</span>
@@ -97,6 +100,7 @@ export default function QuizEditPage() {
 
   return (
     <div className="edu-quiz-create-page">
+      <PageBackButton fallbackPath={ROUTES.professorQuizzes} />
       <header className="edu-quiz-create-page__header">
         <h1 className="edu-quiz-create-page__title">{isViewerMode ? '퀴즈 보기' : '퀴즈 수정'}</h1>
         <p className="edu-quiz-create-page__meta">

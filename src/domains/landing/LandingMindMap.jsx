@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom'
 import eduhubLogo from '../../assets/eduhub_logo.png'
-import { ROUTES } from '../../shared/constants/routes.js'
+import LandingStartLink from './LandingStartLink.jsx'
 import {
   LANDING_WAVE_BACK_PATH,
   LANDING_WAVE_FRONT_PATH,
@@ -192,7 +191,7 @@ export default function LandingMindMap() {
               </p>
               <span className="landing-mindmap__start-click-arrow" />
             </div>
-            <Link className="landing-mindmap__start-boat-btn" to={ROUTES.login}>
+            <LandingStartLink className="landing-mindmap__start-boat-btn">
               <span className="landing-mindmap__start-boat-visual">
                 <svg className="landing-mindmap__start-boat-icon" viewBox="0 0 400 220" aria-hidden="true">
                   <polygon
@@ -212,7 +211,7 @@ export default function LandingMindMap() {
                   </span>
                 </span>
               </span>
-            </Link>
+            </LandingStartLink>
           </div>
         </div>
       </div>

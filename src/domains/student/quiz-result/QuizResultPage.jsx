@@ -1,4 +1,6 @@
 import { useParams } from 'react-router-dom'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
+import { ROUTES } from '../../../shared/constants/routes.js'
 import { useQuizDisplayTitle } from '../../catalog/useQuizDisplayTitle.js'
 import { loadStudentQuizAttempt } from '../quiz/studentQuizData.js'
 import QuizResultContent from './QuizResultContent.jsx'
@@ -13,6 +15,7 @@ export default function QuizResultPage() {
 
   return (
     <div className="edu-quiz-result-page">
+      <PageBackButton fallbackPath={ROUTES.studentQuizMaterials} />
       <header className="edu-quiz-result-page__header">
         <h1 className="edu-quiz-result-page__title">퀴즈 결과</h1>
         {materialLabel ? (

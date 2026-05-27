@@ -155,6 +155,90 @@
   max-width: min(40vw, 280px);
 }
 
+.edu-header__user {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: min(48vw, 360px);
+}
+
+.edu-header__display-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edu-header__role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  white-space: nowrap;
+}
+
+.edu-header__session {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.edu-header__session-extend {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #93c5fd;
+  background: #fff;
+  color: #1d4ed8;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.edu-header__session-extend:hover {
+  background: #eff6ff;
+}
+
+.edu-header__session-extend:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.edu-header__session-time {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.edu-header__session-time-value {
+  font-weight: 600;
+  color: #334155;
+}
+
+.edu-header__session-time--urgent,
+.edu-header__session-time--urgent .edu-header__session-time-value {
+  color: #dc2626;
+}
+
 .edu-header__logout,
 .edu-header__login {
   font: inherit;

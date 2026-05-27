@@ -10,6 +10,8 @@ import QuestionContent from './QuestionContent.jsx'
 import QuizNavigationButtons from './QuizNavigationButtons.jsx'
 import { buildQuizSubmitDto } from './quizSolveSubmitDto.js'
 import { toggleMultipleChoiceSelection } from './multipleChoiceSelectionUtils.js'
+import { useToast } from '../../../components/ui/Toast/useToast.js'
+import { TOAST_MESSAGES } from '../../../shared/feedback/toastMessages.js'
 import {
   buildResultBundleFromSubmitResponse,
   getQuizSubmitErrorMessage,
@@ -23,6 +25,7 @@ function scrollSolveToTop() {
 
 /** @param {{ quizId: string }} props — 라우트 `quiz/:materialId` 슬롯 값 = quizId */
 export default function QuizSolveContent({ quizId: quizIdFromRoute }) {
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const mainRef = useRef(null)
 
@@ -135,6 +138,7 @@ export default function QuizSolveContent({ quizId: quizIdFromRoute }) {
       const apiData = await fetchSubmitQuizData(quizId, payload)
       const graded = buildResultBundleFromSubmitResponse(apiData, quizId, questions)
       setIsSubmitModalOpen(false)
+      showToast(TOAST_MESSAGES.quizSubmitted)
       navigateToQuizResult(navigate, graded)
     } catch (err) {
       setIsSubmitModalOpen(false)

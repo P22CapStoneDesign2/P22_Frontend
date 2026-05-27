@@ -392,14 +392,14 @@
 }
 
 .edu-mat-row-btn--delete {
-  background: #fff8f8;
+  background: #fef2f2;
   color: #b91c1c;
-  border-color: #f5c4c4;
+  border-color: #fecaca;
 }
 
 .edu-mat-row-btn--delete:hover {
-  background: #fef2f2;
-  border-color: #ef9999;
+  background: #fee2e2;
+  border-color: #fca5a5;
   color: #991b1b;
 }
 

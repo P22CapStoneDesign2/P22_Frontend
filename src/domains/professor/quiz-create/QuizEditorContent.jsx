@@ -1,6 +1,8 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
+import { useToast } from '../../../components/ui/Toast/useToast.js'
+import { TOAST_MESSAGES } from '../../../shared/feedback/toastMessages.js'
 import QuizQuestionFormList from './QuizQuestionFormList.jsx'
 import QuestionNavigator from './QuestionNavigator.jsx'
 import QuizEditorFloatingActions from './QuizEditorFloatingActions.jsx'
@@ -51,6 +53,7 @@ export default function QuizEditorContent({
   professorFeaturesLocked = false,
 }) {
   const isEditable = !isViewerMode && !professorFeaturesLocked
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const formRefs = useRef({})
 
@@ -286,7 +289,7 @@ export default function QuizEditorContent({
         initialPersistedQuestionIds,
       })
       void dto
-      window.alert('저장되었습니다.')
+      showToast(quizId ? TOAST_MESSAGES.quizUpdated : TOAST_MESSAGES.quizSaved)
       setSaveModalOpen(false)
       navigate(ROUTES.professorQuizzes, {
         state: { lessonId: resolvedLessonId, courseId: resolvedLessonId },

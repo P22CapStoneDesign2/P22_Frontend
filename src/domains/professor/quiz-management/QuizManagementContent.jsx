@@ -3,6 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import SelectDropdown from '../../../components/ui/SelectDropdown/SelectDropdown.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
+import { useToast } from '../../../components/ui/Toast/useToast.js'
+import { TOAST_MESSAGES } from '../../../shared/feedback/toastMessages.js'
 import { useIsViewerMode } from '../../../shared/auth/useUserRole.js'
 import {
   ROUTES,
@@ -32,6 +35,7 @@ const DELETE_CONFIRM_MESSAGE = '선택한 퀴즈를 삭제하시겠습니까?'
 const TABLE_IDLE_HINT = '교안을 선택하면 해당 교안의 퀴즈 목록이 표시됩니다.'
 
 export default function QuizManagementContent() {
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const location = useLocation()
   const { isViewerMode } = useIsViewerMode()
@@ -198,7 +202,7 @@ export default function QuizManagementContent() {
       await deleteQuizQuestionsForSelection(selectedDeleteItems)
       await refreshQuizzes(selectedMaterial.value)
       clearSelection()
-      window.alert('선택한 퀴즈가 삭제되었습니다.')
+      showToast(TOAST_MESSAGES.quizDeleted)
       setIsDeleteModalOpen(false)
     } catch {
       window.alert('퀴즈 삭제 중 오류가 발생했습니다.')
@@ -226,6 +230,7 @@ export default function QuizManagementContent() {
     <div className="edu-quiz-mgmt">
       <div className="edu-quiz-mgmt__card">
         <h1 className="edu-quiz-mgmt__title">교안별 퀴즈 관리</h1>
+        <PageBackButton fallbackPath={ROUTES.professorDashboard} />
 
         {isProfessorPending ? <ProfessorPendingNotice /> : null}
 
@@ -281,26 +286,16 @@ export default function QuizManagementContent() {
           </p>
         )}
 
-        <QuizTable
-          quizzes={selectedMaterial && !quizzesLoading ? quizzes : []}
-          selectedQuestionIds={selectedQuestionIds}
-          onToggleQuestion={handleToggleQuestion}
-          onToggleAll={handleToggleAll}
-          selectionDisabled={isDeleting || !selectedMaterial}
-          onViewQuiz={handleViewQuiz}
-          emptyHint={tableEmptyHint}
-        />
-
-        <div className="edu-quiz-mgmt__actions">
+        <div className="edu-quiz-table-section">
           {!isViewerMode ? (
-            <>
+            <div className="edu-quiz-table-section__toolbar edu-action-group">
               <Button
                 type="button"
                 variant="primary"
                 disabled={!selectedMaterial || !canMutateProfessorContent}
                 onClick={handleCreateQuiz}
               >
-                퀴즈 생성
+                퀴즈 추가
               </Button>
               <Button
                 type="button"
@@ -310,8 +305,17 @@ export default function QuizManagementContent() {
               >
                 퀴즈 삭제
               </Button>
-            </>
+            </div>
           ) : null}
+          <QuizTable
+            quizzes={selectedMaterial && !quizzesLoading ? quizzes : []}
+            selectedQuestionIds={selectedQuestionIds}
+            onToggleQuestion={handleToggleQuestion}
+            onToggleAll={handleToggleAll}
+            selectionDisabled={isDeleting || !selectedMaterial}
+            onViewQuiz={handleViewQuiz}
+            emptyHint={tableEmptyHint}
+          />
         </div>
       </div>
 

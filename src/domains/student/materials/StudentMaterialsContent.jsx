@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { STUDENT_MATERIALS_COURSE_QUERY_KEY } from '../../../shared/constants/routes.js'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
+import { ROUTES, STUDENT_MATERIALS_COURSE_QUERY_KEY } from '../../../shared/constants/routes.js'
 import { fetchStudentLessonTableRows } from '../../catalog/lessonCatalogService.js'
 import StudentMaterialsTable from './StudentMaterialsTable.jsx'
 
@@ -39,6 +40,7 @@ export default function StudentMaterialsContent() {
     <div className="edu-stu-mat-list">
       <div className="edu-stu-mat-list__card">
         <h1 className="edu-stu-mat-list__title">교안 보기</h1>
+        <PageBackButton fallbackPath={ROUTES.studentDashboard} />
         <p className="edu-stu-mat-list__intro">
           승인된 교안 목록입니다. 제목을 눌러 상세·PDF를 확인할 수 있습니다.
         </p>
