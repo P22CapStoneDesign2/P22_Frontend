@@ -12,10 +12,12 @@ import {
 import './LandingPage.css'
 
 export default function LandingPage() {
-  const headerProps = useLandingHeaderProps()
+  const { headerProps, logoutConfirmModal } = useLandingHeaderProps()
 
   return (
-    <AppLayout
+    <>
+      {logoutConfirmModal}
+      <AppLayout
       className="landing"
       contentClassName="landing__content"
       headerProps={headerProps}
@@ -82,5 +84,6 @@ export default function LandingPage() {
 
       <LandingFloatingDock />
     </AppLayout>
+    </>
   )
 }

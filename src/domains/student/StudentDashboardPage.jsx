@@ -16,7 +16,7 @@ const STUDENT_MENU_ITEMS = [
   },
   {
     id: 'course-apply',
-    title: '강의 신청',
+    title: '강의 수강 신청',
     to: ROUTES.studentCourseApply,
     icon: '📚',
   },

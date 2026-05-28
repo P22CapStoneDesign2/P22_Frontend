@@ -183,6 +183,23 @@
   background: #ddd6fe !important;
 }
 
+.edu-student-course-apply__course-tr--approved td {
+  background: #e5e7eb !important;
+  color: #475569;
+}
+
+.edu-student-course-apply__course-tr--approved .edu-student-course-apply__course-select {
+  color: #475569;
+}
+
+.edu-student-course-apply__course-tr--approved .edu-student-course-apply__course-select:hover {
+  color: #334155;
+}
+
+.edu-student-course-apply__course-tr--approved.edu-student-course-apply__course-tr--selected td {
+  background: #d1d5db !important;
+}
+
 .edu-student-course-apply__course-select {
   display: block;
   width: 100%;
@@ -251,7 +268,13 @@
   border-radius: 10px;
   background: #f8fafc;
   border-color: #cbd5e1;
+  color: #0f172a;
   font-weight: 400;
+}
+
+.edu-student-course-apply__apply-btn.edu-btn--primary:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .edu-student-course-apply__apply-btn:hover:not(:disabled) {

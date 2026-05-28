@@ -1,24 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { getMe } from '../../api/auth.js'
-import { logoutAndNavigate } from './performLogout.js'
-import { ROUTES } from '../constants/routes.js'
+import { useLogoutWithConfirm } from './useLogoutWithConfirm.js'
 import { getAccessToken } from './tokenStorage.js'
 import { getRoleDisplayLabel } from './roleDisplayLabel.js'
 import { setStoredUserRole } from './roleUtils.js'
 
 /**
- * 인증 영역·랜딩 Header용 — GET /api/users/me 프로필 + 로그아웃 핸들러.
- * @param {unknown} [refreshKey] 바뀔 때 프로필 재조회 (예: 랜딩 pathname)
- * @returns {{
- *   userEmail: string,
- *   userDisplayName: string,
- *   userRoleLabel: string,
- *   onLogout: () => void
- * }}
+ * @param {unknown} [refreshKey]
+ * @param {{ logoutMode?: 'api' | 'client' }} [options]
  */
-export function useAuthHeaderSession(refreshKey) {
-  const navigate = useNavigate()
+export function useAuthHeaderSession(refreshKey, options = {}) {
+  const { logoutMode = 'api' } = options
+  const { requestLogout, logoutConfirmModal } = useLogoutWithConfirm({ mode: logoutMode })
   const [userEmail, setUserEmail] = useState('')
   const [userDisplayName, setUserDisplayName] = useState('')
   const [userRoleLabel, setUserRoleLabel] = useState('')
@@ -56,7 +49,5 @@ export function useAuthHeaderSession(refreshKey) {
     }
   }, [syncSession, refreshKey])
 
-  const onLogout = useCallback(() => logoutAndNavigate(navigate, ROUTES.login), [navigate])
-
-  return { userEmail, userDisplayName, userRoleLabel, onLogout }
+  return { userEmail, userDisplayName, userRoleLabel, onLogout: requestLogout, logoutConfirmModal }
 }

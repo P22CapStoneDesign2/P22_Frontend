@@ -44,6 +44,13 @@ export async function getLessonsForAdmin(params = {}) {
 export const getMyLessons = (params = {}) => instance.get('/api/lessons/my', { params })
 
 /**
+ * GET /api/lessons/my/enrollments — 학생 본인 수강 신청 목록 (lessonId·status)
+ * @param {{ status?: 'PENDING' | 'APPROVED' | 'REJECTED', page?: number, size?: number }} [params]
+ */
+export const getMyLessonEnrollments = (params = {}) =>
+  instance.get('/api/lessons/my/enrollments', { params })
+
+/**
  * POST /api/lessons/{id}/enrollments — 수강 신청 (PENDING)
  * @param {string|number} lessonId
  */

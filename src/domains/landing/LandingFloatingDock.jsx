@@ -1,18 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getAccessToken } from '../../shared/auth/tokenStorage.js'
-import { navigateAfterStart } from '../../shared/navigation/navigateAfterStart.js'
 import './LandingFloatingDock.css'
-
-const FOAM_DOTS = [
-  { y: 7, size: 5, delay: 0 },
-  { y: 22, size: 6, delay: 0.55 },
-  { y: 41, size: 4, delay: 1.15 },
-  { y: 57, size: 5, delay: 0.25 },
-  { y: 76, size: 6, delay: 0.9 },
-  { y: 91, size: 4, delay: 1.45 },
-  { y: 33, size: 5, delay: 1.7 },
-]
 
 /** @typedef {'intro' | 'mindmap' | 'start'} DockSection */
 
@@ -78,7 +65,6 @@ function resolveActiveFromScroll(scroller) {
 }
 
 export default function LandingFloatingDock() {
-  const navigate = useNavigate()
   const [active, setActive] = useState(/** @type {DockSection} */ ('intro'))
   const [selection, setSelection] = useState({ top: 0, height: 0 })
   const raftRef = useRef(/** @type {HTMLDivElement | null} */ (null))
@@ -128,11 +114,6 @@ export default function LandingFloatingDock() {
   }, [])
 
   function goTo(section, targetId, scrollAnchor) {
-    if (section === 'start') {
-      navigateAfterStart(navigate, Boolean(getAccessToken()))
-      return
-    }
-
     setActive(section)
     scrollLockRef.current = true
     if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current)
@@ -149,42 +130,6 @@ export default function LandingFloatingDock() {
     <aside className="landing-dock" aria-label="빠른 이동">
       <div className="landing-dock__bob">
         <div ref={raftRef} className="landing-dock__raft">
-          <div className="landing-dock__waves" aria-hidden="true">
-            <svg
-              className="landing-dock__waves-svg"
-              viewBox="0 0 48 120"
-              preserveAspectRatio="xMinYMid slice"
-              aria-hidden="true"
-            >
-              <path
-                className="landing-dock__wave-layer landing-dock__wave-layer--back"
-                d="M0,0 L0,120 L8,120 C14,111 3,102 12,91 C19,79 5,67 10,53 C17,41 4,27 9,14 C15,6 6,2 7,0 Z"
-              />
-              <path
-                className="landing-dock__wave-layer landing-dock__wave-layer--mid"
-                d="M0,0 L0,120 L13,120 C22,108 6,96 18,82 C28,68 9,56 17,41 C27,27 11,15 20,6 L14,0 Z"
-              />
-              <path
-                className="landing-dock__wave-layer landing-dock__wave-layer--front"
-                d="M0,0 L0,120 L16,120 C27,107 10,93 24,77 C35,61 12,47 22,31 C34,17 14,9 19,0 Z"
-              />
-            </svg>
-
-            <div className="landing-dock__foam">
-              {FOAM_DOTS.map((dot) => (
-                <span
-                  key={`${dot.y}-${dot.delay}`}
-                  className="landing-dock__foam-dot"
-                  style={{
-                    '--foam-y': `${dot.y}%`,
-                    '--foam-size': `${dot.size}px`,
-                    '--foam-delay': `${dot.delay}s`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-
           <span
             className="landing-dock__selection"
             style={{

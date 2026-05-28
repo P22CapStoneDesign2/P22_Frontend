@@ -525,18 +525,18 @@
   --bubble-grow: 0.5s;
   --bubble-text-in: 0.28s;
   --bubble-text-delay: 0.38s;
+  --bubble-icon-slot: clamp(calc(48px * var(--ls)), calc(10vw * var(--ls)), calc(60px * var(--ls)));
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0;
   box-sizing: border-box;
   width: clamp(calc(80px * var(--ls)), calc(15vw * var(--ls)), calc(100px * var(--ls)));
   height: clamp(calc(80px * var(--ls)), calc(15vw * var(--ls)), calc(100px * var(--ls)));
-  padding-block: 0;
-  padding-inline: calc((100% - clamp(calc(44px * var(--ls)), calc(9vw * var(--ls)), calc(56px * var(--ls)))) / 2);
+  padding: 0;
   border: 2px solid color-mix(in srgb, var(--edu-login-bg) 55%, #ffffff);
   border-radius: calc(24px * var(--ls));
   background: #fff;
@@ -555,6 +555,7 @@
 
 .landing-mindmap__bubble:hover,
 .landing-mindmap__bubble:focus-visible {
+  justify-content: flex-start;
   gap: 0.85rem;
   width: min(calc(400px * var(--ls)), 94vw);
   height: clamp(calc(9.5rem * var(--ls)), calc(26vw * var(--ls)), calc(12.75rem * var(--ls)));
@@ -576,8 +577,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;
-  width: clamp(calc(48px * var(--ls)), calc(10vw * var(--ls)), calc(60px * var(--ls)));
+  flex: 0 0 var(--bubble-icon-slot);
+  width: var(--bubble-icon-slot);
+  height: var(--bubble-icon-slot);
   color: #2563eb;
   pointer-events: none;
 }
@@ -585,8 +587,10 @@
 .landing-mindmap__bubble-icon .edu-login__role-icon,
 .landing-mindmap__bubble-icon .landing-mindmap__node-icon-svg {
   display: block;
+  flex-shrink: 0;
   width: clamp(calc(44px * var(--ls)), calc(9vw * var(--ls)), calc(56px * var(--ls)));
   height: clamp(calc(44px * var(--ls)), calc(9vw * var(--ls)), calc(56px * var(--ls)));
+  margin: 0;
   color: #2563eb;
 }
 

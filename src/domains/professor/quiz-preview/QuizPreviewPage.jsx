@@ -12,10 +12,13 @@ import './QuizPreviewPage.css'
  */
 function QuizPreviewPageInner() {
   const { quizId } = useParams()
-  const { userEmail, userDisplayName, userRoleLabel, onLogout } = useAuthHeaderSession()
+  const { userEmail, userDisplayName, userRoleLabel, onLogout, logoutConfirmModal } =
+    useAuthHeaderSession()
 
   return (
-    <AppLayout
+    <>
+      {logoutConfirmModal}
+      <AppLayout
       headerProps={{
         userEmail,
         userDisplayName,
@@ -44,6 +47,7 @@ function QuizPreviewPageInner() {
         <QuizPreviewContent key={quizId ?? ''} />
       </div>
     </AppLayout>
+    </>
   )
 }
 

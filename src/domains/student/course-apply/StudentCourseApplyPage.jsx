@@ -3,7 +3,7 @@ import {
   cancelLessonEnrollment,
   enrollInLesson,
   getLessons,
-  getMyLessons,
+  getMyLessonEnrollments,
   lessonPageContent,
 } from '../../../api/lessons.js'
 import Button from '../../../components/ui/Button/Button.jsx'
@@ -49,18 +49,17 @@ function normalizeEnrollmentStatus(raw) {
 
 /**
  * @param {unknown} item
- * @param {Set<string>} approvedLessonIds
+ * @param {Map<string, EnrollmentStatus>} enrollmentByLessonId
  */
-function mapLessonToRow(item, approvedLessonIds) {
+function mapLessonToRow(item, enrollmentByLessonId) {
   if (!item || typeof item !== 'object') return null
   const id = item.id
   if (id === undefined || id === null) return null
   const idStr = String(id)
 
-  let enrollmentStatus = 'NONE'
-  if (approvedLessonIds.has(idStr)) {
-    enrollmentStatus = 'APPROVED'
-  } else {
+  const fromMap = enrollmentByLessonId.get(idStr)
+  let enrollmentStatus = fromMap ?? 'NONE'
+  if (!fromMap) {
     const fromItem =
       item.enrollmentStatus ??
       item.myEnrollmentStatus ??
@@ -103,20 +102,21 @@ export default function StudentCourseApplyPage() {
     try {
       const lessonsRes = await getLessons({ page: 0, size: 200, sort: 'createdAt,DESC' })
 
-      const approvedIds = new Set()
+      /** @type {Map<string, EnrollmentStatus>} */
+      const enrollmentByLessonId = new Map()
       try {
-        const myLessonsRes = await getMyLessons({ page: 0, size: 200 })
-        for (const item of lessonPageContent(myLessonsRes)) {
-          if (item && typeof item === 'object' && item.id != null) {
-            approvedIds.add(String(item.id))
+        const myEnrollmentsRes = await getMyLessonEnrollments({ page: 0, size: 200 })
+        for (const item of lessonPageContent(myEnrollmentsRes)) {
+          if (item && typeof item === 'object' && item.lessonId != null) {
+            enrollmentByLessonId.set(String(item.lessonId), normalizeEnrollmentStatus(item.status))
           }
         }
       } catch {
-        /* 승인 목록(§29) 실패 시에도 전체 교안 목록(§10)은 표시 */
+        /* 내 신청 목록 실패 시에도 전체 강의 목록(§10)은 표시 */
       }
 
       const rows = lessonPageContent(lessonsRes)
-        .map((item) => mapLessonToRow(item, approvedIds))
+        .map((item) => mapLessonToRow(item, enrollmentByLessonId))
         .filter(Boolean)
 
       setCourses(rows)
@@ -252,9 +252,9 @@ export default function StudentCourseApplyPage() {
 
   return (
     <div className="edu-student-course-apply">
-      <h1 className="edu-student-course-apply__title">교안 수강 신청</h1>
+      <h1 className="edu-student-course-apply__title">강의 수강 신청</h1>
       <p className="edu-student-course-apply__lead">
-        교안을 선택해 수강을 신청하면 교수 승인 후 교안·퀴즈를 이용할 수 있습니다.
+        강의를 선택해 수강을 신청하면 교수 승인 후 교안·퀴즈를 이용할 수 있습니다.
       </p>
 
       <form
@@ -326,7 +326,13 @@ export default function StudentCourseApplyPage() {
                     return (
                       <tr
                         key={course.id}
-                        className={`edu-student-course-apply__course-tr${isSelected ? ' edu-student-course-apply__course-tr--selected' : ''}`}
+                        className={[
+                          'edu-student-course-apply__course-tr',
+                          isSelected && 'edu-student-course-apply__course-tr--selected',
+                          status === 'APPROVED' && 'edu-student-course-apply__course-tr--approved',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
                       >
                         <td>
                           <button

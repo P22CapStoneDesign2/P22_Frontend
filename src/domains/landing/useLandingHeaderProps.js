@@ -9,17 +9,21 @@ import { ROUTES } from '../../shared/constants/routes.js'
  */
 export function useLandingHeaderProps() {
   const { pathname } = useLocation()
-  const { userEmail, userDisplayName, userRoleLabel, onLogout } = useAuthHeaderSession(pathname)
+  const { userEmail, userDisplayName, userRoleLabel, onLogout, logoutConfirmModal } =
+    useAuthHeaderSession(pathname)
   const isLoggedIn = Boolean(getAccessToken())
 
   return useMemo(
     () => ({
-      logoImageOnly: true,
-      logoHref: ROUTES.home,
-      ...(isLoggedIn
-        ? { userEmail, userDisplayName, userRoleLabel, onLogout }
-        : { loginHref: ROUTES.login }),
+      headerProps: {
+        logoImageOnly: true,
+        logoHref: ROUTES.home,
+        ...(isLoggedIn
+          ? { userEmail, userDisplayName, userRoleLabel, onLogout }
+          : { loginHref: ROUTES.login }),
+      },
+      logoutConfirmModal: isLoggedIn ? logoutConfirmModal : null,
     }),
-    [pathname, isLoggedIn, userEmail, userDisplayName, userRoleLabel, onLogout],
+    [pathname, isLoggedIn, userEmail, userDisplayName, userRoleLabel, onLogout, logoutConfirmModal],
   )
 }

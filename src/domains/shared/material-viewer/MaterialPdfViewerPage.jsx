@@ -15,7 +15,6 @@ import {
 import { resolvePdfFileForViewer } from './materialPdfAuth.js'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
 import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
-import { createHeaderLogoutHandler } from '../../../app/headerLogoutHandler.js'
 import { useAuthHeaderSession } from '../../../shared/auth/useAuthHeaderSession.js'
 import './MaterialPdfViewerPage.css'
 
@@ -42,7 +41,8 @@ export default function MaterialPdfViewerPage() {
   const courseIdFromQuery = searchParams.get(courseQueryKey) ?? ''
   const logoHref = isProfessorRoute ? ROUTES.professorDashboard : ROUTES.studentDashboard
 
-  const { userEmail, userDisplayName, userRoleLabel } = useAuthHeaderSession()
+  const { userEmail, userDisplayName, userRoleLabel, onLogout, logoutConfirmModal } =
+    useAuthHeaderSession(undefined, { logoutMode: 'client' })
 
   const [title, setTitle] = useState('')
   const [metaLoading, setMetaLoading] = useState(true)
@@ -251,8 +251,6 @@ export default function MaterialPdfViewerPage() {
     navigate(studentMaterialsPath(courseId || undefined))
   }, [navigate, isProfessorRoute, courseIdFromQuery, mid])
 
-  const onLogout = useCallback(() => createHeaderLogoutHandler(navigate)(), [navigate])
-
   const headerProps = useMemo(
     () => ({
       userEmail,
@@ -275,7 +273,9 @@ export default function MaterialPdfViewerPage() {
         : '교안 뷰어'
 
   return (
-    <AppLayout
+    <>
+      {logoutConfirmModal}
+      <AppLayout
       className="edu-app-layout--material-pdf-fullbleed"
       headerProps={headerProps}
       contentClassName="edu-mat-pdf-viewer-layout-content"
@@ -413,5 +413,6 @@ export default function MaterialPdfViewerPage() {
         </div>
       </div>
     </AppLayout>
+    </>
   )
 }
