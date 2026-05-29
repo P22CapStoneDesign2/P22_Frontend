@@ -111,13 +111,6 @@ export default function QuizMaterialSelectContent() {
     navigate(studentQuizSolvePath(target.value, selectedLesson.value))
   }
 
-  const renderLessonOptionLabel = (opt) => {
-    const base = opt.label ?? ''
-    if (opt.practiceComplete === undefined) return base
-    const status = formatLessonPracticeStatusLabel(opt.practiceComplete)
-    return `${base} · ${status}`
-  }
-
   const canStartQuiz =
     Boolean(selectedLesson) &&
     !lessonStatusLoading &&
@@ -145,7 +138,6 @@ export default function QuizMaterialSelectContent() {
               onSelect={handleLessonSelect}
               disabled={lessonsLoading}
               emptyMessage="등록된 강의가 없습니다."
-              getOptionLabel={renderLessonOptionLabel}
             />
           </div>
 
