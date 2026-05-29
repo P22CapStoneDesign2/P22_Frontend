@@ -220,19 +220,25 @@
 }
 
 .landing-intro,
-.landing-bridge,
 .landing-mindmap__canvas {
   transform: translateX(var(--landing-content-shift-x));
 }
 
-.landing-main {
+.landing-stack {
   display: flex;
   flex-direction: column;
   gap: var(--landing-section-gap);
   width: 100%;
-  max-width: min(calc(960px * var(--ls)), 100%);
   margin: 0 auto;
   overflow: visible;
+}
+
+.landing-intro,
+.landing-mindmap {
+  width: 100%;
+  max-width: min(calc(960px * var(--ls)), 100%);
+  margin-inline: auto;
+  box-sizing: border-box;
 }
 
 /* 페이지 상단 브랜드 */
@@ -291,13 +297,19 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  max-width: none;
   box-sizing: border-box;
-  padding: 0 clamp(calc(28px * var(--ls)), calc(6vw * var(--ls)), calc(56px * var(--ls)));
+  padding: 0;
   text-align: center;
 }
 
 .landing-bridge__title {
-  margin: 0 0 clamp(calc(16px * var(--ls)), calc(3vh * var(--ls)), calc(28px * var(--ls)));
+  width: 100%;
+  max-width: min(calc(960px * var(--ls)), 100%);
+  padding-inline: clamp(calc(28px * var(--ls)), calc(6vw * var(--ls)), calc(56px * var(--ls)));
+  box-sizing: border-box;
+  margin: clamp(calc(60px * var(--ls)), calc(14vh * var(--ls)), calc(180px * var(--ls))) 0
+    clamp(calc(16px * var(--ls)), calc(3vh * var(--ls)), calc(28px * var(--ls)));
   font-size: clamp(calc(1.75rem * var(--ls)), calc(5vw * var(--ls)), calc(2.5rem * var(--ls)));
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -305,19 +317,90 @@
   color: #0f172a;
 }
 
-.landing-bridge__lead {
-  margin: 0;
-  max-width: 28em;
-  font-size: clamp(calc(1.05rem * var(--ls)), calc(2.8vw * var(--ls)), calc(1.25rem * var(--ls)));
-  font-weight: 600;
-  line-height: 1.55;
-  color: #334155;
+.landing-bridge__scroll-arrow {
+  display: block;
+  width: 0;
+  height: 0;
+  margin: clamp(calc(8px * var(--ls)), calc(1.5vh * var(--ls)), calc(16px * var(--ls))) auto 0;
+  border-top: clamp(calc(10px * var(--ls)), calc(2vw * var(--ls)), calc(14px * var(--ls))) solid #334155;
+  border-right: clamp(calc(8px * var(--ls)), calc(1.6vw * var(--ls)), calc(11px * var(--ls))) solid transparent;
+  border-left: clamp(calc(8px * var(--ls)), calc(1.6vw * var(--ls)), calc(11px * var(--ls))) solid transparent;
 }
 
 .landing-bridge__visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(calc(160px * var(--ls)), calc(28vh * var(--ls)), calc(320px * var(--ls)));
+  width: min(1035px, 100%);
+  max-width: 1035px;
+  margin-top: clamp(calc(120px * var(--ls)), calc(20vh * var(--ls)), calc(240px * var(--ls)));
+  margin-inline: auto;
+}
+
+.landing-bridge__visual-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: clamp(calc(20px * var(--ls)), calc(3vh * var(--ls)), calc(36px * var(--ls)));
   width: 100%;
-  max-width: min(calc(920px * var(--ls)), 100%);
-  margin-top: clamp(calc(36px * var(--ls)), calc(7vh * var(--ls)), calc(72px * var(--ls)));
+  margin: 0;
+}
+
+.landing-bridge__visual-label {
+  margin: 0;
+  width: 100%;
+  font-size: clamp(calc(1.2rem * var(--ls)), calc(3.2vw * var(--ls)), calc(1.45rem * var(--ls)));
+  font-weight: 800;
+  line-height: 1.35;
+  color: #0f172a;
+  text-align: left;
+}
+
+.landing-bridge__typewriter {
+  display: inline-grid;
+  align-items: center;
+  max-width: 100%;
+}
+
+.landing-bridge__typewriter-placeholder {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  user-select: none;
+  pointer-events: none;
+}
+
+.landing-bridge__typewriter-layer {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+}
+
+.landing-bridge__typewriter-text {
+  line-height: 1;
+}
+
+.landing-bridge__typewriter-cursor {
+  display: block;
+  flex-shrink: 0;
+  width: 2px;
+  height: 0.95em;
+  background: currentColor;
+  animation: landing-bridge-typewriter-cursor 1s step-end infinite;
+}
+
+@keyframes landing-bridge-typewriter-cursor {
+  0%,
+  49.9% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
 }
 
 .landing-bridge__gif {
@@ -907,8 +990,12 @@
     animation: none;
   }
 
+  .landing-bridge__typewriter-cursor {
+    animation: none;
+    opacity: 1;
+  }
+
   .landing-intro,
-  .landing-bridge,
   .landing-mindmap__canvas {
     transform: none;
   }

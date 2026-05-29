@@ -56,7 +56,7 @@ export function ProfessorAreaLayout() {
 function AdminAreaLayoutInner() {
   const meta = layoutMetaFromMatches(useMatches())
   const adminNavLinks = [
-    { label: '교안 수강 신청 관리', to: ROUTES.adminSubjectAccess },
+    { label: '강의 수강 신청 관리', to: ROUTES.adminSubjectAccess },
     { label: '교수 가입 승인', to: ROUTES.adminProfessorSignups },
   ]
   const { logoutConfirmModal, ...headerProps } = useHeaderSessionProps(ROUTES.adminSubjectAccess, {

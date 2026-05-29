@@ -18,13 +18,13 @@ import {
 import './AdminSubjectAccessPage.css'
 
 /**
- * 관리자 — 교안 수강 신청 관리 (§14·§30~§32)
+ * 관리자 — 강의 수강 신청 관리 (§14·§30~§32)
  */
 export default function AdminSubjectAccessPage() {
   const [lessons, setLessons] = useState(/** @type {import('./adminSubjectAccessUtils.js').LessonSummary[]} */ ([]))
   const [lessonsLoading, setLessonsLoading] = useState(true)
   const [lessonsError, setLessonsError] = useState('')
-  /** @type {string | null} null이면 전체 교안 */
+  /** @type {string | null} null이면 전체 강의 */
   const [selectedLessonId, setSelectedLessonId] = useState(null)
 
   const [enrolled, setEnrolled] = useState(/** @type {import('./adminSubjectAccessUtils.js').EnrollmentRow[]} */ ([]))
@@ -94,7 +94,7 @@ export default function AdminSubjectAccessPage() {
           reason?.reason?.response?.data?.message || '수강 신청 목록을 불러오지 못했습니다.',
         )
       } else if (failedLessons > 0) {
-        setEnrollmentsError('일부 교안의 수강 신청만 불러왔습니다.')
+        setEnrollmentsError('일부 강의의 수강 신청만 불러왔습니다.')
       }
     } catch (error) {
       setEnrolled([])
@@ -121,7 +121,7 @@ export default function AdminSubjectAccessPage() {
       setLessons([])
       setEnrolled([])
       setApplicants([])
-      setLessonsError(error.response?.data?.message || '교안 목록을 불러오지 못했습니다.')
+      setLessonsError(error.response?.data?.message || '강의 목록을 불러오지 못했습니다.')
       setEnrollmentsLoading(false)
     } finally {
       setLessonsLoading(false)
@@ -169,9 +169,9 @@ export default function AdminSubjectAccessPage() {
         totalCount: lessons.length,
         searchQuery: lessonSearchQuery,
         emptyLabels: {
-          loading: '교안 목록을 불러오는 중…',
+          loading: '강의 목록을 불러오는 중…',
           noSelection: '',
-          noData: '등록된 교안이 없습니다.',
+          noData: '등록된 강의가 없습니다.',
           noSearch: '검색 결과가 없습니다.',
         },
       }),
@@ -337,7 +337,7 @@ export default function AdminSubjectAccessPage() {
         <th scope="col" className="edu-admin-access__th-check" aria-hidden={!withCheckboxLabel}>
           {withCheckboxLabel ? <span className="edu-admin-access__sr-only">선택</span> : null}
         </th>
-        <th scope="col">교안명</th>
+        <th scope="col">강의명</th>
         <th scope="col">학생명</th>
         <th scope="col">닉네임</th>
         <th scope="col">신청일</th>
@@ -397,7 +397,7 @@ export default function AdminSubjectAccessPage() {
       <div className="edu-admin-access__grid">
         <section className="edu-admin-access__panel" aria-labelledby="admin-panel-lessons">
           <h2 id="admin-panel-lessons" className="edu-admin-access__col-head edu-admin-access__col-head--c1">
-            교안
+            강의
           </h2>
           <form
             className="edu-admin-access__search edu-admin-access__search--c1"
@@ -409,11 +409,11 @@ export default function AdminSubjectAccessPage() {
             <input
               type="search"
               className="edu-admin-access__search-input"
-              placeholder="교안명, 담당 교수 검색"
+              placeholder="강의명, 담당 교수 검색"
               value={lessonSearchInput}
               onChange={(e) => setLessonSearchInput(e.target.value)}
               disabled={lessonsLoading}
-              aria-label="교안 검색"
+              aria-label="강의 검색"
             />
             <Button
               type="submit"
@@ -428,14 +428,14 @@ export default function AdminSubjectAccessPage() {
             <div className="edu-admin-access__table-area">
               <div className="edu-admin-access__table-head">
                 <table className="edu-admin-access__table">
-                  <caption className="edu-admin-access__caption">교안 목록</caption>
+                  <caption className="edu-admin-access__caption">강의 목록</caption>
                   <colgroup>
                     <col />
                     <col />
                   </colgroup>
                   <thead>
                     <tr>
-                      <th scope="col">교안명</th>
+                      <th scope="col">강의명</th>
                       <th scope="col">담당 교수</th>
                     </tr>
                   </thead>
@@ -502,7 +502,7 @@ export default function AdminSubjectAccessPage() {
             <input
               type="search"
               className="edu-admin-access__search-input"
-              placeholder="교안명, 학생명, 닉네임, 학생 ID 검색"
+              placeholder="강의명, 학생명, 닉네임, 학생 ID 검색"
               value={enrolledSearchInput}
               onChange={(e) => setEnrolledSearchInput(e.target.value)}
               disabled={listsLoading}
@@ -546,7 +546,7 @@ export default function AdminSubjectAccessPage() {
             <input
               type="search"
               className="edu-admin-access__search-input"
-              placeholder="교안명, 학생명, 닉네임, 학생 ID 검색"
+              placeholder="강의명, 학생명, 닉네임, 학생 ID 검색"
               value={applicantSearchInput}
               onChange={(e) => setApplicantSearchInput(e.target.value)}
               disabled={listsLoading}
