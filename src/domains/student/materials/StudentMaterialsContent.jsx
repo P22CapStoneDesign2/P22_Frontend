@@ -2,12 +2,9 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
 import { ROUTES, STUDENT_MATERIALS_COURSE_QUERY_KEY } from '../../../shared/constants/routes.js'
-import { fetchStudentLessonTableRows } from '../../catalog/lessonCatalogService.js'
+import { fetchStudentLessonTableRows, fetchLessonMaterialsForLesson } from '../../catalog/lessonCatalogService.js'
 import StudentMaterialsTable from './StudentMaterialsTable.jsx'
 
-/**
- * 학생 교안 보기 — GET /api/lessons/my
- */
 export default function StudentMaterialsContent() {
   const [searchParams] = useSearchParams()
   const courseIdFromUrl = searchParams.get(STUDENT_MATERIALS_COURSE_QUERY_KEY) ?? ''
@@ -17,21 +14,28 @@ export default function StudentMaterialsContent() {
 
   useEffect(() => {
     let cancelled = false
-    fetchStudentLessonTableRows().then((list) => {
+    ;(async () => {
+      const lessonRows = await fetchStudentLessonTableRows()
       if (cancelled) return
+
+      const materialLists = await Promise.all(
+        lessonRows.map((r) => fetchLessonMaterialsForLesson(r.lessonId))
+      )
+      if (cancelled) return
+
+      const allMaterials = materialLists.flat()
       setRows(
-        list.map((r) => ({
-          materialId: r.lessonId,
-          fileName: r.title,
-          uploadDateDisplay: r.dateLabel,
-          rowNumber: r.rowNumber,
-        })),
+        allMaterials.map((m, i) => ({
+          materialId: m.materialId,
+          lessonId: m.lessonId,
+          fileName: m.title,
+          uploadDateDisplay: m.createdAt,
+          rowNumber: i + 1,
+        }))
       )
       setLoading(false)
-    })
-    return () => {
-      cancelled = true
-    }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   const tableState = loading ? 'idle' : rows.length === 0 ? 'empty' : 'rows'

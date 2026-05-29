@@ -6,7 +6,7 @@ import { studentMaterialViewerPath } from '../../../shared/constants/routes.js'
  * @param {string} [props.courseId]
  */
 export default function StudentMaterialsTableRow({ row, courseId = '' }) {
-  const courseIdForViewer = (courseId || row.materialId || '').trim()
+  const courseIdForViewer = (row.lessonId || row.materialId || '').trim()
 
   return (
     <tr className="edu-stu-mat-table__row">
