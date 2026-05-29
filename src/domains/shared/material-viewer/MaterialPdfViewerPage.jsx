@@ -4,7 +4,7 @@ import { Document, Page, pdfjs } from 'react-pdf'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import { parseAspectRatioString, readPdfUrlFromLesson } from '../../../shared/utils/pdfMeta.js'
-import { fetchLessonDetail } from '../../catalog/lessonCatalogService.js'
+import { fetchMaterialDetail } from '../../catalog/lessonCatalogService.js'
 import {
   PROFESSOR_MATERIALS_COURSE_QUERY_KEY,
   ROUTES,
@@ -130,7 +130,8 @@ export default function MaterialPdfViewerPage() {
     setAspectRatioCss('16 / 9')
     ;(async () => {
       try {
-        const lesson = await fetchLessonDetail(mid)
+        const courseId = searchParams.get(courseQueryKey) ?? ''
+        const lesson = await fetchMaterialDetail(courseId, mid)
         if (cancelled) return
 
         if (!lesson) {

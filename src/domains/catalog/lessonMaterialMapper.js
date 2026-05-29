@@ -13,6 +13,7 @@ export function mapLessonMaterialDto(item) {
     lessonId: item.lessonId != null ? String(item.lessonId) : '',
     title: String(item.title ?? '—').trim() || '—',
     description: item.description != null ? String(item.description) : '',
+    fileUrl: item.fileUrl != null ? String(item.fileUrl) : null, // 파일 URL
     createdAt: item.createdAt != null ? String(item.createdAt) : '',
     updatedAt: item.updatedAt != null ? String(item.updatedAt) : '',
   }
@@ -35,6 +36,7 @@ export function mapLessonMaterialsToTableRows(materials, formatDate) {
   return materials.map((m, index) => ({
     id: m.materialId,
     fileName: m.title,
+    fileUrl: m.fileUrl ?? null, // 파일 URL
     createdAt: formatDate(m.createdAt),
     updatedAt: formatDate(m.updatedAt),
     rowNumber: index + 1,
