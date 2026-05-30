@@ -61,6 +61,9 @@ export default function MaterialPdfViewerPage() {
   const [jumpError, setJumpError] = useState(null)
 
   const scrollRef = useRef(null)
+  const pageNumberRef = useRef(pageNumber)
+  const numPagesRef = useRef(numPages)
+  const pageScrollIntentRef = useRef(null)
   const [frameWidth, setFrameWidth] = useState(640)
 
   const pageQuery = searchParams.get('page')
@@ -78,6 +81,14 @@ export default function MaterialPdfViewerPage() {
   useEffect(() => {
     setJumpInput(String(pageNumber))
   }, [pageNumber])
+
+  useEffect(() => {
+    pageNumberRef.current = pageNumber
+  }, [pageNumber])
+
+  useEffect(() => {
+    numPagesRef.current = numPages
+  }, [numPages])
 
   useEffect(() => {
     if (metaLoading || metaError) return
@@ -107,8 +118,51 @@ export default function MaterialPdfViewerPage() {
 
   useEffect(() => {
     const el = scrollRef.current
-    if (el) el.scrollTop = 0
+    if (!el) return
+
+    if (pageScrollIntentRef.current === 'prev') {
+      el.scrollTop = el.scrollHeight
+    } else {
+      el.scrollTop = 0
+    }
+    pageScrollIntentRef.current = null
   }, [pageNumber])
+
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el || !pdfFile) return
+
+    const edgeThreshold = 2
+
+    const onWheel = (e) => {
+      const maxPages = numPagesRef.current
+      if (maxPages <= 0) return
+
+      const { scrollTop, scrollHeight, clientHeight } = el
+      const atTop = scrollTop <= edgeThreshold
+      const atBottom = scrollTop + clientHeight >= scrollHeight - edgeThreshold
+
+      if (e.deltaY > 0 && atBottom) {
+        const cur = pageNumberRef.current
+        if (cur >= maxPages) return
+        e.preventDefault()
+        pageScrollIntentRef.current = 'next'
+        setPageNumber(cur + 1)
+        return
+      }
+
+      if (e.deltaY < 0 && atTop) {
+        const cur = pageNumberRef.current
+        if (cur <= 1) return
+        e.preventDefault()
+        pageScrollIntentRef.current = 'prev'
+        setPageNumber(cur - 1)
+      }
+    }
+
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [pdfFile])
 
   useEffect(() => {
     let cancelled = false

@@ -156,3 +156,20 @@ export const updateLessonMaterial = (lessonId, materialId, body) =>
  */
 export const deleteLessonMaterial = (lessonId, materialId) =>
   instance.delete(`${materialsBasePath(lessonId)}/${encodeURIComponent(String(materialId))}`)
+
+
+/**
+ * POST /api/lessons/{lessonId}/pdf — PDF 업로드
+ * @param {string|number} lessonId
+ * @param {File} file
+ */
+export const uploadLessonPdf = (lessonId, file,title) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('title', title)
+  return instance.post(
+    `/api/lessons/${encodeURIComponent(String(lessonId))}/pdf`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  )
+}

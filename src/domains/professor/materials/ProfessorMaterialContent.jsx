@@ -37,6 +37,7 @@ import { useProfessorAccountGate } from '../hooks/useProfessorAccountGate.js'
 import ProfessorPendingNotice from '../components/ProfessorPendingNotice.jsx'
 import { formatMaterialUploadDate } from './materialUtils.js'
 import './ProfessorMaterialPage.css'
+import { uploadLessonPdf } from '../../../api/lessons.js'
 
 const DELETE_MATERIAL_CONFIRM_MESSAGE =
   '교안 파일을 삭제하면 관련된 퀴즈들도 모두 삭제됩니다. 정말 삭제하시겠습니까?'
@@ -75,6 +76,7 @@ export default function ProfessorMaterialContent() {
   const [isCreateMaterialModalOpen, setIsCreateMaterialModalOpen] = useState(false)
   const [newMaterialTitle, setNewMaterialTitle] = useState('')
   const [isCreatingMaterial, setIsCreatingMaterial] = useState(false)
+  const [newMaterialFile, setNewMaterialFile] = useState(null)
 
   const [editMaterialId, setEditMaterialId] = useState(null)
   const [editingMaterialTitle, setEditingMaterialTitle] = useState('')
@@ -342,13 +344,17 @@ export default function ProfessorMaterialContent() {
       window.alert('교안명을 입력해주세요.')
       return
     }
+    if (!newMaterialFile) {
+      window.alert('PDF 파일을 선택해주세요.')
+      return
+    }
     setIsCreatingMaterial(true)
     try {
-      await createLessonMaterial(selectedLessonId, { title })
+      await uploadLessonPdf(selectedLessonId, newMaterialFile, title)
       await reloadMaterialsForSelectedLesson()
       setIsCreateMaterialModalOpen(false)
+      setNewMaterialFile(null)
       showToast(TOAST_MESSAGES.materialCreated)
-      window.alert(PDF_UPLOAD_ALERT)
     } catch {
       window.alert('교안 추가에 실패했습니다.')
     } finally {
@@ -627,6 +633,7 @@ export default function ProfessorMaterialContent() {
         onCancel={() => {
           if (isCreatingMaterial) return
           setIsCreateMaterialModalOpen(false)
+          setNewMaterialFile(null)
         }}
         disableConfirm={!newMaterialTitle.trim() || isCreatingMaterial}
         isConfirmLoading={isCreatingMaterial}
@@ -645,6 +652,18 @@ export default function ProfessorMaterialContent() {
             onChange={(e) => setNewMaterialTitle(e.target.value)}
             placeholder="교안 이름을 입력하세요"
             autoComplete="off"
+            disabled={isCreatingMaterial}
+          />
+          <label className="edu-mat__label" htmlFor="edu-mat-new-material-file"
+            style={{ marginTop: '12px' }}>
+            PDF 파일
+          </label>
+          <input
+            id="edu-mat-new-material-file"
+            type="file"
+            accept=".pdf"
+            className="edu-mat-input"
+            onChange={(e) => setNewMaterialFile(e.target.files?.[0] ?? null)}
             disabled={isCreatingMaterial}
           />
         </div>
