@@ -1,2 +1,154 @@
 # P22_Frontend
-capstone design
+
+
+### 팀원
+| 정세영 | 윤정수 |
+|------|------|
+홈 랜딩 화면 구현
+로그인 / 회원가입 화면 구현
+학생 강의 수강 신청 화면 구현
+pdf 교안 뷰어 화면 구현
+관리자 화면 구현-학생 강의 수강 신청 승인
+관리자 화면 구현-교수 회원가입 신청 승인 |
+
+<br><br>
+
+### 프로그램 구조
+```
+src/
+├── main.jsx                          # 앱 진입점 — React DOM 마운트, AppRoutes 로드
+├── index.css                         # 전역 베이스 스타일
+│
+├── app/                              # 라우팅·레이아웃 (앱 골격)
+│   ├── AppRoutes.jsx                 # URL → 페이지 매핑 (React Router v7)
+│   ├── RouteLayouts.jsx              # ADMIN / PROF / USER 영역 공통 레이아웃
+│   ├── EduHubCommonShell.jsx         # 공통 셸 UI (개발용)
+│   ├── headerLogoutHandler.js        # 헤더 로그아웃 처리
+│   └── layoutMetaFromMatches.js      # 라우트별 breadcrumb·content class 메타
+│
+├── config/
+│   └── env.js                        # VITE_* 환경 변수 export (API URL, OAuth 등)
+│
+├── api/                              # 백엔드 REST API 호출
+│   ├── axios.js                      # Axios 인스턴스, JWT 첨부, 401 재발급 인터셉터
+│   ├── auth.js                       # 로그인·회원가입·로그아웃·내 정보
+│   ├── lessons.js                    # 교안(강의) API
+│   ├── quiz.js                       # 퀴즈 API
+│   ├── adminUsers.js                 # 관리자 사용자 API
+│   ├── apiResponse.js                # ApiResponse<T> 파싱 유틸
+│   └── apiErrorMessage.js            # API 오류 메시지 추출
+│
+├── components/                       # 도메인 공통 UI 컴포넌트
+│   ├── layout/
+│   │   ├── AppLayout/                # 페이지 공통 레이아웃 (헤더 + 본문)
+│   │   └── Header/                   # 상단 헤더, 세션 타이머
+│   ├── media/
+│   │   └── PdfViewerSection/         # PDF 뷰어 UI 블록
+│   └── ui/
+│       ├── Button/                   # 공통 버튼
+│       ├── ConfirmModal/             # 확인 모달
+│       ├── MenuCard/                 # 대시보드 메뉴 카드
+│       ├── PageBackButton/           # 뒤로가기 버튼
+│       ├── SelectDropdown/           # 드롭다운 선택
+│       └── Toast/                    # 토스트 알림
+│
+├── shared/                           # 전역 공통 유틸·상수
+│   ├── constants/
+│   │   └── routes.js                 # ROUTES 상수 (경로 문자열 단일 출처)
+│   ├── auth/
+│   │   ├── tokenStorage.js           # localStorage 토큰 read/write
+│   │   ├── roleUtils.js              # PROF / USER / ADMIN 역할 판별
+│   │   ├── RoleAreaGuard.jsx         # 역할별 URL 접근 가드
+│   │   ├── useUserRole.js            # JWT claim 기반 역할 훅
+│   │   └── performLogout.js          # 로그아웃·토큰 삭제
+│   ├── session/
+│   │   ├── SessionIdleProvider.jsx   # 세션 유휴 타이머 Provider
+│   │   └── useSessionIdle.js         # 남은 세션 시간 표시
+│   ├── navigation/
+│   │   ├── getRoleHomePath.js        # 역할별 홈 경로
+│   │   └── usePageBackNavigation.js  # 뒤로가기 네비게이션
+│   ├── styles/
+│   │   ├── eduTokens.css             # 디자인 토큰 (색상·간격)
+│   │   ├── buttons.css               # 공통 버튼 스타일
+│   │   └── index.css                 # shared 스타일 진입점
+│   ├── icons/
+│   │   └── eduHubIcons.jsx           # SVG 아이콘 컴포넌트
+│   └── utils/
+│       └── pdfMeta.js                # PDF 메타데이터 유틸
+│
+├── domains/                          # 기능별 화면 (도메인 단위)
+│   │
+│   ├── landing/                      # 랜딩 페이지
+│   │   ├── LandingPage.jsx           # 메인 랜딩 (로고·소개·마인드맵)
+│   │   ├── LandingFloatingDock.jsx   # 우측 플로팅 네비 (소개/알아보기/시작하기)
+│   │   ├── LandingTypewriterText.jsx # 소개 문구 타이프라이터 효과
+│   │   ├── LandingMindMap.jsx        # 서비스 마인드맵 섹션
+│   │   └── landingDockScrollLock.js  # 도크 클릭 스크롤 중 UI 잠금
+│   │
+│   ├── auth/                         # 인증·회원가입
+│   │   ├── LoginPage.jsx             # 로그인
+│   │   ├── SignUpPage.jsx            # 일반 회원가입
+│   │   ├── KakaoCallbackPage.jsx     # 카카오 OAuth 콜백 (토큰 수신)
+│   │   ├── KakaoRegisterPage.jsx     # 카카오 신규 가입 완료
+│   │   ├── PasswordResetPage.jsx     # 비밀번호 재설정
+│   │   └── FindPasswordModal.jsx     # 비밀번호 찾기 모달
+│   │
+│   ├── professor/                    # 교수(강사) 영역
+│   │   ├── ProfessorDashboardPage.jsx    # 교수 대시보드
+│   │   ├── materials/
+│   │   │   ├── ProfessorMaterialPage.jsx # 교안 관리 목록
+│   │   │   └── ProfessorMaterialContent.jsx
+│   │   ├── quiz-management/
+│   │   │   ├── QuizManagementPage.jsx    # 교안별 퀴즈 관리
+│   │   │   └── QuizManagementContent.jsx
+│   │   ├── quiz-create/
+│   │   │   ├── QuizCreatePage.jsx        # 퀴즈 추가
+│   │   │   ├── MultipleChoiceEditor.jsx  # 객관식 문항 편집
+│   │   │   └── ShortAnswerEditor.jsx     # 단답형 문항 편집
+│   │   ├── quiz-edit/
+│   │   │   └── QuizEditPage.jsx          # 퀴즈 수정
+│   │   └── quiz-preview/
+│   │       └── QuizPreviewPage.jsx       # 퀴즈 미리보기
+│   │
+│   ├── student/                      # 학생 영역
+│   │   ├── StudentDashboardPage.jsx      # 학생 대시보드
+│   │   ├── course-apply/
+│   │   │   └── StudentCourseApplyPage.jsx # 강의 수강 신청
+│   │   ├── materials/
+│   │   │   └── StudentMaterialsPage.jsx  # 교안 목록·보기
+│   │   ├── quiz-material-select/
+│   │   │   └── QuizMaterialSelectPage.jsx # 퀴즈 풀 교안 선택
+│   │   ├── quiz-solve/
+│   │   │   ├── QuizSolvePage.jsx         # 퀴즈 풀이
+│   │   │   └── QuizSolveContent.jsx
+│   │   └── quiz-result/
+│   │       ├── QuizResultPage.jsx        # 퀴즈 결과·해설
+│   │       └── QuizResultContent.jsx
+│   │
+│   ├── admin/                        # 관리자 영역
+│   │   ├── subject-access/
+│   │   │   └── AdminSubjectAccessPage.jsx  # 강의 수강 신청 관리
+│   │   └── professor-signup/
+│   │       └── AdminProfessorSignupPage.jsx # 교수 가입 승인
+│   │
+│   ├── shared/                       # 역할 공통 도메인 UI
+│   │   └── material-viewer/
+│   │       └── MaterialPdfViewerPage.jsx   # PDF 교안 뷰어
+│   │
+│   ├── quiz/                         # 퀴즈 공통 로직
+│   │   ├── api/quizApi.js            # 퀴즈 도메인 API
+│   │   ├── mappers/                  # API 응답 → 화면 모델 변환
+│   │   │   ├── quizDetailMapper.js
+│   │   │   ├── quizManagementMapper.js
+│   │   │   └── quizResultMapper.js
+│   │   └── quizPersistenceService.js # 퀴즈 임시 저장(localStorage)
+│   │
+│   └── catalog/                      # 교안·퀴즈 카탈로그 조회
+│       ├── lessonCatalogService.js
+│       └── quizCatalogService.js
+│
+└── assets/                           # 정적 리소스 (이미지, GIF 등)
+    ├── introduce_1.gif
+    ├── introduce_2.png
+    └── introduce_3.png
+```
