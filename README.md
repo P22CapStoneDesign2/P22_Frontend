@@ -1,5 +1,7 @@
 # P22_Frontend
 
+Figma를 이용해 와이어프레임을 그리고, API 명세서를 기반으로 화면을 구현해 기능이 동작할 수 있게 하는 것을 목표로 합니다.
+<br>
 
 ### 팀원
 | 정세영 | 윤정수 |
@@ -10,6 +12,18 @@
 pdf 교안 뷰어 화면 구현
 관리자 화면 구현-학생 강의 수강 신청 승인
 관리자 화면 구현-교수 회원가입 신청 승인 |
+
+<br><br>
+
+### 사용 기술
+| 구분 | 기술 |
+|------|------|
+언어 | JavaScript (JSX)
+UI | React 19
+빌드/개발 서버 | Vite 8
+라우팅 | React Router v7
+HTTP | Axios
+PDF | react-pdf + pdfjs-dist
 
 <br><br>
 
@@ -152,3 +166,7 @@ src/
     ├── introduce_2.png
     └── introduce_3.png
 ```
+<br><br>
+
+### 화면
+
