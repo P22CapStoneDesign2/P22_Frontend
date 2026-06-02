@@ -1,0 +1,75 @@
+.edu-quiz-result-mc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edu-quiz-result-mc__label {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.edu-quiz-result-mc__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/*
+ * 보기 결과 항목.
+ * 기본(normal): 흰색 배경 + 연한 회색 보더.
+ * 정답(correct): 연한 초록 배경 + 초록 보더.
+ * 오답이면서 사용자가 고른 보기(wrong): 연한 빨강 배경 + 빨간 보더.
+ * 색상 대비를 흰 결과 카드 위에서도 또렷하게 유지.
+ */
+.edu-quiz-result-mc__item {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+
+.edu-quiz-result-mc__item--correct {
+  border-color: #86efac;
+  background: #ecfdf5;
+}
+
+.edu-quiz-result-mc__item--wrong {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.edu-quiz-result-mc__num {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.edu-quiz-result-mc__text {
+  font-size: 0.9rem;
+  color: #0f172a;
+  line-height: 1.45;
+}
+
+.edu-quiz-result-mc__tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.edu-quiz-result-mc__item--correct .edu-quiz-result-mc__tag {
+  color: #166534;
+}
+
+.edu-quiz-result-mc__item--wrong .edu-quiz-result-mc__tag {
+  color: #991b1b;
+}

@@ -1,0 +1,366 @@
+.edu-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  min-height: 56px;
+  padding: 10px clamp(8px, 1.5vw, 12px);
+  box-sizing: border-box;
+  /*
+   * Figma 톤: 흰색 배경 + 옅은 하늘색 하단 보더로 본문 sky 그라데이션과 자연스럽게 이어짐.
+   */
+  background: #ffffff;
+  border-bottom: 1px solid #dbeafe;
+  font-family: system-ui, 'Segoe UI', 'Malgun Gothic', sans-serif;
+}
+
+.edu-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.edu-header__primary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.edu-header__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.edu-header__breadcrumb {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.edu-header__breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.edu-header__breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edu-header__breadcrumb-item:not(:last-child)::after {
+  content: '›';
+  color: #cbd5e1;
+  font-weight: 500;
+  margin-left: 2px;
+  user-select: none;
+}
+
+.edu-header__breadcrumb-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.edu-header__breadcrumb-link:hover {
+  text-decoration: underline;
+  color: #1d4ed8;
+}
+
+.edu-header__breadcrumb-current {
+  color: #0f172a;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+}
+
+.edu-header__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.edu-header__nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.edu-header__nav-link:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.edu-header__nav-link--active {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.edu-header__nav-link:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.edu-header__logo {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.edu-header__logo:hover {
+  text-decoration: underline;
+}
+
+.edu-header__email {
+  font-size: 0.875rem;
+  color: #4b5563;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: min(40vw, 280px);
+}
+
+.edu-header__user {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  max-width: min(48vw, 360px);
+}
+
+.edu-header__display-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edu-header__role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  white-space: nowrap;
+}
+
+.edu-header__session {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.edu-header__session-extend {
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid #93c5fd;
+  background: #fff;
+  color: #1d4ed8;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.edu-header__session-extend:hover {
+  background: #eff6ff;
+}
+
+.edu-header__session-extend:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.edu-header__session-time {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.edu-header__session-time-value {
+  font-weight: 600;
+  color: #334155;
+}
+
+.edu-header__session-time--urgent,
+.edu-header__session-time--urgent .edu-header__session-time-value {
+  color: #dc2626;
+}
+
+.edu-header__logout,
+.edu-header__login {
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.edu-header__logout {
+  cursor: pointer;
+}
+
+.edu-header__login {
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.edu-header__logout:hover,
+.edu-header__login:hover {
+  background: #f3f4f6;
+  text-decoration: none;
+}
+
+.edu-header__logout:focus-visible,
+.edu-header__login:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* 관리자 등: 로고 중앙, 계정·로그아웃 우측 (Figma 시안) */
+.edu-header--logo-centered .edu-header__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.edu-header--logo-centered .edu-header__primary {
+  grid-column: 2;
+  justify-self: center;
+  flex: none;
+}
+
+.edu-header--logo-centered .edu-header__right {
+  grid-column: 3;
+  justify-self: end;
+}
+
+/* 랜딩 등 비로그인 화면 */
+.edu-header--public {
+  background: #ffffff;
+  border-bottom-color: #dbeafe;
+  padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right));
+}
+
+/* 비로그인: 로고 왼쪽 · 로그인 오른쪽 */
+.edu-header--public .edu-header__inner {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+}
+
+.edu-header--public .edu-header__primary {
+  flex: 0 1 auto;
+}
+
+.edu-header--public.edu-header--no-logo .edu-header__inner {
+  justify-content: flex-end;
+}
+
+.edu-header--public.edu-header--no-logo .edu-header__primary:empty {
+  display: none;
+}
+
+.edu-header__logo--image {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.edu-header__logo--image:hover {
+  text-decoration: none;
+  opacity: 0.92;
+}
+
+.edu-header__logo--image .edu-login__brand-icon {
+  display: block;
+  width: auto;
+  height: clamp(32px, 5vw, 44px);
+  max-width: min(220px, 42vw);
+  object-fit: contain;
+  margin: 0;
+  transform: none;
+}
+
+.edu-header__logo--brand-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+}
+
+.edu-header__logo--brand-icon:hover {
+  text-decoration: none;
+}
+
+.edu-header__brand-text {
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.edu-header__logo--brand-icon .edu-login__brand-icon {
+  width: auto;
+  height: clamp(28px, 5vw, 36px);
+  margin: 0;
+  transform: none;
+}
+

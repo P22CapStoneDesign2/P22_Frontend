@@ -1,0 +1,191 @@
+.edu-quiz-result-app-layout-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-quiz-result-page {
+  --edu-quiz-result-layout-max: 1520px;
+  --edu-quiz-result-panel-width: 680px;
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: var(--edu-hub-page-padding-y) 32px;
+}
+
+.edu-quiz-result-page__header {
+  width: 100%;
+  max-width: var(--edu-quiz-result-layout-max);
+  margin: 0 auto 16px;
+  text-align: center;
+}
+
+.edu-quiz-result-page__title {
+  margin: 0 0 8px;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.edu-quiz-result-page__meta {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #475569;
+}
+
+.edu-quiz-result-page__meta-label {
+  font-weight: 600;
+}
+
+.edu-quiz-result-page__meta-value {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.edu-quiz-result-layout--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 20px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.edu-quiz-result-layout__empty-msg {
+  margin: 0;
+  text-align: center;
+  color: #475569;
+  font-size: 0.9375rem;
+}
+
+/* 좌: PDF(남은 공간 전부) · 우: 결과 카드(680px 고정) */
+.edu-quiz-result-layout {
+  width: calc(100% - 32px);
+  max-width: var(--edu-quiz-result-layout-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--edu-quiz-result-panel-width);
+  gap: 32px;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+.edu-quiz-result-layout__pdf {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 220px);
+}
+
+.edu-quiz-result-layout__pdf .edu-pdf-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: calc(100vh - 220px);
+  height: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  border-radius: var(--edu-hub-card-radius);
+  border: 1px solid #e2e8f0;
+  box-shadow: var(--edu-hub-card-shadow);
+}
+
+.edu-quiz-result-layout__pdf .edu-pdf-section__placeholder {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.edu-quiz-result-layout__pdf .edu-pdf-section__frame {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: none;
+}
+
+/* 내부 padding·grid는 기존 유지 — 바깥 너비만 고정 */
+.edu-quiz-result-layout__result-card {
+  width: var(--edu-quiz-result-panel-width);
+  max-width: var(--edu-quiz-result-panel-width);
+  flex-shrink: 0;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--edu-hub-card-radius);
+  background: var(--edu-hub-card-bg);
+  border: var(--edu-hub-card-border);
+  box-shadow: var(--edu-hub-card-shadow);
+  padding: clamp(14px, 2vw, 18px);
+  box-sizing: border-box;
+}
+
+.edu-quiz-result-layout__result-grid {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-quiz-result-layout__nav,
+.edu-quiz-result-layout__detail {
+  min-width: 0;
+}
+
+@media (max-width: 1200px) {
+  .edu-quiz-result-layout {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .edu-quiz-result-layout__result-card {
+    width: 100%;
+    max-width: var(--edu-quiz-result-panel-width);
+    justify-self: stretch;
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  .edu-quiz-result-layout__pdf {
+    min-height: 0;
+  }
+
+  .edu-quiz-result-layout__pdf .edu-pdf-section {
+    min-height: min(72vh, 820px);
+    height: min(72vh, 820px);
+  }
+}
+
+@media (max-width: 768px) {
+  .edu-quiz-result-page {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .edu-quiz-result-layout__result-card {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .edu-quiz-result-layout__result-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edu-quiz-result-layout__pdf .edu-pdf-section {
+    min-height: min(56vh, 560px);
+    height: min(56vh, 560px);
+  }
+}

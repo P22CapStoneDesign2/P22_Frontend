@@ -1,0 +1,34 @@
+# EQH FrontEnd — Cursor Rules
+
+## 프로젝트 개요
+- 교수(강사)와 학생을 위한 교안 관리 및 퀴즈(문제 은행) 플랫폼 — 프론트엔드
+- 진입점: src/main.jsx
+
+## 기술 스택
+- React 19, Vite 8, react-router-dom v7
+- HTTP: Axios (src/api/axios.js 인스턴스)
+- 인증: JWT (Access 30분 / Refresh 7일, Rotation) + Kakao OAuth2
+- UI 텍스트는 항상 한국어
+
+## 아키텍처 규칙
+- 모든 API 호출은 src/api/axios.js의 instance 경유 — axios 직접 import 금지
+- 라우트 경로는 src/shared/constants/routes.js의 ROUTES 상수만 사용
+- 401 처리·토큰 갱신은 인터셉터에서만 — 컴포넌트 레벨 중복 처리 금지
+- Token은 localStorage에만 저장 (키: accessToken, refreshToken)
+
+## 코딩 컨벤션
+- 컴포넌트: PascalCase (.jsx)
+- 유틸/상수: camelCase (.js)
+- CSS 파일명은 컴포넌트 파일명과 동일 (예: LoginPage.jsx → LoginPage.css)
+- 공용 스타일은 src/shared/styles/ 에 위치
+
+## 폴더 구조
+- src/api/ : HTTP 호출 모듈
+- src/shared/constants/ : 앱 전역 상수
+- src/shared/styles/ : 공용 CSS
+- src/shared/icons/ : SVG 아이콘 컴포넌트
+
+## 참고 문서
+- 서비스 기획: docs/PRD.md
+- 컴포넌트 구조: docs/ARCHITECTURE.md
+- 보안: docs/SECURITY.md

@@ -1,0 +1,580 @@
+@import '../../shared/styles/index.css';
+
+.edu-signup {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: clamp(1rem, 3.5vh, 1.85rem) clamp(16px, 4vw, 40px)
+    clamp(3.5rem, 12vh, 5.75rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* #root { text-align: center } 상속으로 입력/힌트가 가운데로 몰리는 것 방지 */
+  text-align: left;
+  background: var(--edu-login-bg);
+  font-family: var(--edu-font-sans);
+  color: #1e293b;
+}
+
+/* 페이지 상단(스크롤 컨테이너 기준) — 스크롤 시 함께 올라감 */
+.edu-signup__logo-corner {
+  position: absolute;
+  top: clamp(0.35rem, 1vw, 0.55rem);
+  left: clamp(0.35rem, 1vw, 0.55rem);
+  z-index: 2;
+}
+
+.edu-signup__brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-decoration: none;
+  color: #0f172a;
+}
+
+.edu-signup__brand:hover {
+  opacity: 0.85;
+}
+
+.edu-signup__logo-corner .edu-login__brand-icon {
+  display: block;
+  height: clamp(52px, 14vw, 96px);
+  width: auto;
+  max-width: min(88vw, 380px);
+  object-fit: contain;
+}
+
+.edu-signup__layout {
+  width: min(860px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2.15rem, 5vw, 3.15rem);
+  /* 좌측 상단 고정 로고와 겹치지 않도록 */
+  padding-top: clamp(1.65rem, 5.5vw, 3.15rem);
+  padding-bottom: clamp(1.75rem, 5vh, 2.75rem);
+}
+
+.edu-signup__welcome {
+  margin: clamp(0.85rem, 3vw, 1.5rem) 0;
+  font-size: clamp(1.65rem, 5vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.18;
+  color: #0f172a;
+  text-align: center;
+}
+
+.edu-signup__card {
+  width: 100%;
+  padding: 2rem clamp(2.85rem, 7vw, 3.65rem) 2.15rem;
+  border-radius: 20px;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+/* 넓은 반투명 카드 안에서 입력 블록 폭만 이전 수준으로 제한 — 왼쪽 정렬 */
+.edu-signup__card > * {
+  max-width: min(520px, 100%);
+  width: 100%;
+  margin-inline: 0;
+  align-self: flex-start;
+  box-sizing: border-box;
+}
+
+.edu-signup__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+}
+
+.edu-signup__field--row {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+/* 이름·닉네임·비밀번호 줄 — 메일 블록보다 좁게 */
+.edu-signup__card > .edu-signup__field--narrow {
+  max-width: min(360px, 100%);
+}
+
+/* 비밀번호 확인 — 입력 폭은 narrow(360px)와 동일, 안내 문구는 카드 행 오른쪽 빈 영역 */
+.edu-signup__card > .edu-signup__field--confirm-row {
+  max-width: min(520px, 100%);
+}
+
+.edu-signup__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.edu-signup__segment {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edu-signup__segment-btn {
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: #fff;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.edu-signup__segment-btn:hover {
+  border-color: #93c5fd;
+}
+
+/* 고정 직책 표시 — 버튼 아님 */
+.edu-signup__segment-current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
+}
+
+.edu-signup__segment-btn--disabled,
+.edu-signup__segment-btn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  border-color: rgba(148, 163, 184, 0.45);
+  background: rgba(255, 255, 255, 0.78);
+  color: #64748b;
+}
+
+.edu-signup__segment-btn--disabled:hover,
+.edu-signup__segment-btn:disabled:hover {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.edu-signup__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  background: #fff;
+  font: inherit;
+  font-size: 0.92rem;
+  color: #0f172a;
+  outline: none;
+}
+
+.edu-signup__input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.edu-signup__input--grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.edu-signup__email-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* 메일 줄 | 인증 줄 분리 → 줄 바꿈 시 인증칸·확인이 한 줄 전체로 벌어지지 않음 */
+.edu-signup__mail-verify-block {
+  --edu-signup-email-gap: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--edu-signup-email-gap);
+}
+
+.edu-signup__email-row--mail-line {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--edu-signup-email-gap);
+}
+
+.edu-signup__email-row--mail-line > .edu-signup__input--grow {
+  flex: 1 1 11rem;
+  min-width: 0;
+}
+
+.edu-signup__code-line {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  min-width: 0;
+}
+
+.edu-signup__code-timer {
+  flex-shrink: 0;
+  min-width: 2.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: #dc2626;
+}
+
+.edu-signup__sent-mark {
+  flex-shrink: 0;
+  width: 1.35rem;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #16a34a;
+}
+
+/* 인증번호 칸↔확인 간격 = 메일↔인증번호 받기와 동일 (--edu-signup-email-gap) */
+.edu-signup__code-confirm-cluster {
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: var(--edu-signup-email-gap, 0.4rem);
+  flex: none;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.edu-signup__code-confirm-cluster .edu-signup__verify-confirm-btn {
+  margin-inline: 0;
+}
+
+.edu-signup__input-wrap--verify-inline {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+}
+
+.edu-signup__input--verify-code {
+  box-sizing: border-box;
+  width: 7.35rem;
+  min-width: 6.75rem;
+  max-width: 100%;
+  flex-shrink: 0;
+
+
+
+
+
+
+
+
+
+  
+  text-align: center;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.edu-signup__send-code-btn,
+.edu-signup__verify-confirm-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.edu-signup__send-code-btn:disabled,
+.edu-signup__verify-confirm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.edu-signup__input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.edu-signup__input-wrap .edu-signup__input {
+  padding-right: 2.1rem;
+}
+
+/* 비밀번호 — 로그인과 동일 보기/숨기기, 검증 배지 오른쪽 */
+.edu-signup__input-wrap--password .edu-signup__input {
+  padding-right: 3.95rem;
+}
+
+.edu-signup__input-wrap--password input[type='password']::-ms-reveal {
+  display: none;
+}
+
+.edu-signup__input-wrap--password input[type='password']::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
+
+.edu-signup__input-wrap--password input[type='password']::-webkit-textfield-decoration-container {
+  display: none !important;
+}
+
+.edu-signup__password-toggle {
+  position: absolute;
+  right: 1.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0.3rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  line-height: 0;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.edu-signup__password-toggle:hover {
+  color: #334155;
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.edu-signup__password-toggle:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.edu-signup__input-wrap--password .edu-signup__field-status {
+  right: 0.45rem;
+}
+
+.edu-signup__input-wrap--verify-inline .edu-signup__input {
+  padding: 0.52rem 1.5rem 0.52rem 0.42rem;
+}
+
+.edu-signup__check {
+  position: absolute;
+  right: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.35rem;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: transparent;
+  pointer-events: none;
+}
+
+.edu-signup__check--ok {
+  color: #16a34a;
+}
+
+/* 닉네임·비밀번호·비밀번호 확인 — 원형 배지 */
+.edu-signup__field-status {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.58rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  pointer-events: none;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+}
+
+.edu-signup__field-status--ok {
+  background: #16a34a;
+}
+
+.edu-signup__field-status--bad {
+  background: #dc2626;
+}
+
+.edu-signup__confirm-side-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  gap: 0.5rem 0.65rem;
+  width: 100%;
+}
+
+.edu-signup__confirm-side-row > .edu-signup__input-wrap {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  width: min(360px, 100%);
+  max-width: 360px;
+  box-sizing: border-box;
+}
+
+.edu-signup__confirm-side-row > .edu-signup__field-error {
+  flex: 0 0 auto;
+  align-self: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #dc2626;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.edu-signup__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.edu-signup__hint--sent {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.edu-signup__hint--ok {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+/* 닉네임 입력칸 + 중복 확인 버튼 한 줄 배치 */
+.edu-signup__nickname-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.4rem;
+  width: 100%;
+}
+
+.edu-signup__input-wrap--grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.edu-signup__nickname-check-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.edu-signup__nickname-check-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.edu-signup__email-row .edu-signup__check {
+  position: static;
+  transform: none;
+  flex-shrink: 0;
+  width: 1.35rem;
+  align-self: center;
+}
+
+.edu-signup__checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: #334155;
+  cursor: pointer;
+}
+
+.edu-signup__checkbox-label input {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.edu-signup__policy-link {
+  display: inline;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.edu-signup__policy-link:hover {
+  color: #1e40af;
+}
+
+/* 동의 줄 + 가입하기만 가운데 정렬 */
+.edu-signup__card > .edu-signup__sign-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  width: 100%;
+  max-width: min(520px, 100%);
+  gap: 0.75rem;
+  box-sizing: border-box;
+  /* 위 입력란과 동의 구역 사이 */
+  margin-top: clamp(2rem, 5.5vw, 3.35rem);
+}
+
+.edu-signup__sign-block .edu-signup__field {
+  width: 100%;
+  align-items: center;
+  text-align: center;
+}
+
+/* 한 줄(row) 안에서 체크+문구 블록 전체를 가운데 */
+.edu-signup__sign-block .edu-signup__field--row {
+  justify-content: center;
+}
+
+.edu-signup__sign-block .edu-signup__checkbox-label {
+  justify-content: center;
+  text-align: center;
+}
+
+.edu-signup__submit {
+  margin-top: 0;
+  width: min(360px, 100%);
+  box-sizing: border-box;
+}
+
+/* 좁은 화면: 비밀번호 확인 + 오류 문구가 한 줄에 갇혀 옆으로 밀리지 않도록 */
+@media (max-width: 520px) {
+  .edu-signup__confirm-side-row {
+    flex-wrap: wrap;
+  }
+
+  .edu-signup__confirm-side-row > .edu-signup__field-error {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .edu-signup__email-row--mail-line {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .edu-signup__email-row--mail-line .edu-signup__send-code-btn {
+    width: 100%;
+  }
+}

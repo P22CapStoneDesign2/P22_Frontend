@@ -1,0 +1,31 @@
+import { useParams } from 'react-router-dom'
+import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
+import { ROUTES } from '../../../shared/constants/routes.js'
+import { useQuizDisplayTitle } from '../../catalog/useQuizDisplayTitle.js'
+import { loadStudentQuizAttempt } from '../quiz/studentQuizData.js'
+import QuizResultContent from './QuizResultContent.jsx'
+import './QuizResultPage.css'
+
+export default function QuizResultPage() {
+  const { attemptId } = useParams()
+  const aid = attemptId ?? ''
+  const attempt = loadStudentQuizAttempt(aid)
+  const quizId = attempt?.quizId ?? attempt?.materialId ?? ''
+  const materialLabel = useQuizDisplayTitle(quizId)
+
+  return (
+    <div className="edu-quiz-result-page">
+      <PageBackButton fallbackPath={ROUTES.studentQuizMaterials} />
+      <header className="edu-quiz-result-page__header">
+        <h1 className="edu-quiz-result-page__title">퀴즈 결과</h1>
+        {materialLabel ? (
+          <p className="edu-quiz-result-page__meta">
+            <span className="edu-quiz-result-page__meta-label">교안</span>{' '}
+            <span className="edu-quiz-result-page__meta-value">{materialLabel}</span>
+          </p>
+        ) : null}
+      </header>
+      <QuizResultContent key={aid} attemptId={aid} />
+    </div>
+  )
+}

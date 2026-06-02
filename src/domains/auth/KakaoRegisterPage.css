@@ -1,0 +1,281 @@
+@import '../../shared/styles/index.css';
+
+.kakao-register {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: clamp(1rem, 3.5vh, 1.85rem) clamp(16px, 4vw, 40px)
+    clamp(3.5rem, 12vh, 5.75rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  text-align: left;
+  background: var(--edu-login-bg);
+  font-family: var(--edu-font-sans);
+  color: #1e293b;
+}
+
+.kakao-register__logo {
+  position: absolute;
+  top: clamp(0.45rem, 1.4vw, 0.75rem);
+  display: inline-flex;
+  align-items: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.kakao-register__logo--left {
+  left: clamp(0.6rem, 2vw, 1.25rem);
+}
+
+.kakao-register__logo .edu-login__brand-icon {
+  display: block;
+  height: clamp(46px, 11vw, 78px);
+  width: auto;
+  max-width: min(70vw, 280px);
+  object-fit: contain;
+}
+
+.kakao-register__layout {
+  width: min(720px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(3rem, 8vw, 5rem);
+  padding-top: clamp(2.85rem, 8vw, 4.5rem);
+  padding-bottom: clamp(1.5rem, 4vh, 2.5rem);
+}
+
+.kakao-register__welcome {
+  margin: 0;
+  font-size: clamp(1.65rem, 5vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.18;
+  color: #0f172a;
+  text-align: center;
+}
+
+.kakao-register__card {
+  --kakao-label-width: 4.5rem;
+  --kakao-row-gap: 0.85rem;
+  --kakao-field-width: min(360px, 100%);
+  width: 100%;
+  padding: clamp(1.5rem, 4vw, 2.25rem) clamp(1.25rem, 5vw, 2.75rem);
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.95rem, 2.5vw, 1.4rem);
+}
+
+.kakao-register__field {
+  width: var(--kakao-field-width);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.kakao-register__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: var(--kakao-row-gap);
+  width: 100%;
+}
+
+.kakao-register__label {
+  flex: 0 0 auto;
+  width: var(--kakao-label-width);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #334155;
+  text-align: left;
+}
+
+.kakao-register__segment {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.kakao-register__segment-btn,
+.kakao-register__segment-current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
+}
+
+.kakao-register__segment-current {
+  border: 1px solid #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.kakao-register__segment-btn--disabled {
+  opacity: 0.55;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(255, 255, 255, 0.35);
+  color: #64748b;
+}
+
+.kakao-register__input-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.kakao-register__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 2.1rem 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: #fff;
+  font: inherit;
+  font-size: 0.92rem;
+  color: #0f172a;
+  outline: none;
+}
+
+.kakao-register__input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+}
+
+.kakao-register__field-status {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  pointer-events: none;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1);
+}
+
+.kakao-register__input-wrap .kakao-register__field-status {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.kakao-register__field-status--ok {
+  background: #16a34a;
+}
+
+.kakao-register__field-status--bad {
+  background: #dc2626;
+}
+
+.kakao-register__hint {
+  margin: 0;
+  padding-left: calc(var(--kakao-label-width) + var(--kakao-row-gap));
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.kakao-register__nickname-action {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.55);
+  background: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1d4ed8;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.kakao-register__nickname-action:hover:not(:disabled) {
+  border-color: #2563eb;
+  background: rgba(37, 99, 235, 0.06);
+}
+
+.kakao-register__nickname-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.kakao-register__field--agree {
+  padding-left: 0;
+  align-items: center;
+  margin-top: -0.5rem;
+}
+
+.kakao-register__checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.kakao-register__checkbox-label input[type='checkbox'] {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.kakao-register__policy-link {
+  display: inline;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  color: #1f2937;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.kakao-register__policy-link:hover {
+  color: #1d4ed8;
+}
+
+.kakao-register__submit-row {
+  width: var(--kakao-field-width);
+  display: flex;
+  justify-content: center;
+  margin-top: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.kakao-register__submit {
+  width: min(180px, 100%);
+  box-sizing: border-box;
+}
+
+.kakao-register__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  .kakao-register__card {
+    --kakao-label-width: 3.5rem;
+    --kakao-row-gap: 0.6rem;
+  }
+}

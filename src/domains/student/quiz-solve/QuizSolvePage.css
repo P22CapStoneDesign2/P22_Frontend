@@ -1,0 +1,113 @@
+.edu-quiz-solve-app-layout-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-quiz-solve-page {
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: var(--edu-hub-page-padding-y) var(--edu-hub-page-padding-x);
+}
+
+.edu-quiz-solve-page__header {
+  width: 100%;
+  max-width: var(--edu-hub-container-wide);
+  margin: 0 auto 20px;
+  text-align: center;
+}
+
+.edu-quiz-solve-page__title {
+  margin: 0 0 8px;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.edu-quiz-solve-page__meta {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #475569;
+}
+
+.edu-quiz-solve-page__meta-label {
+  font-weight: 600;
+}
+
+.edu-quiz-solve-page__meta-value {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.edu-quiz-solve-page__meta-code {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+
+.edu-quiz-solve-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: var(--edu-hub-container-wide);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.edu-quiz-solve-layout__aside {
+  min-width: 0;
+}
+
+.edu-quiz-solve-layout__main {
+  min-width: 0;
+}
+
+.edu-quiz-solve-layout__progress {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.edu-quiz-solve-layout--empty {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.edu-quiz-solve-layout__empty-msg {
+  margin: 0 0 16px;
+  text-align: center;
+  color: #475569;
+  font-size: 0.9375rem;
+}
+
+.edu-quiz-solve-layout__card {
+  border-radius: var(--edu-hub-card-radius);
+  background: var(--edu-hub-card-bg);
+  border: var(--edu-hub-card-border);
+  box-shadow: var(--edu-hub-card-shadow);
+  padding: clamp(18px, 2.5vw, 26px);
+  box-sizing: border-box;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .edu-quiz-solve-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .edu-quiz-solve-layout__aside {
+    order: -1;
+  }
+}

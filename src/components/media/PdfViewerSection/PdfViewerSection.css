@@ -1,0 +1,36 @@
+/*
+ * Figma 톤: 흰색 큰 박스 (대시 보더 그대로 유지 — placeholder 임을 시각적으로 표시).
+ */
+.edu-pdf-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  min-width: 0;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+  background: #ffffff;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.edu-pdf-section__placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: center;
+  font-family: system-ui, 'Segoe UI', 'Malgun Gothic', sans-serif;
+}
+
+.edu-pdf-section__frame {
+  flex: 1;
+  width: 100%;
+  min-height: 480px;
+  border: none;
+  background: #ffffff;
+}

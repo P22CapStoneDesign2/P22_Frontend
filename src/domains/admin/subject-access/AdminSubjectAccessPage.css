@@ -1,0 +1,385 @@
+@import '../../../shared/styles/index.css';
+
+/* #root(1126px) 밖으로 — 교안 PDF 뷰어와 동일하게 뷰포트 전체 배경 */
+.edu-app-layout--admin-fullbleed {
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.edu-admin-access-app-layout-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: calc(100svh - 5.5rem);
+  min-height: calc(100dvh - 5.5rem);
+  box-sizing: border-box;
+}
+
+.edu-admin-access {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  --edu-admin-section-gap: 12px;
+  padding: clamp(20px, 3vh, 32px) clamp(20px, 3vw, 40px) clamp(24px, 3vh, 36px);
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #e8f4fc 0%, #dbeafe 45%, #eff6ff 100%);
+  background-attachment: fixed;
+  font-family: system-ui, 'Segoe UI', 'Malgun Gothic', sans-serif;
+  color: #0f172a;
+  /* #root { text-align: center } 상속 보정 — 본문·테이블은 열 기준 가운데 */
+  text-align: center;
+}
+
+.edu-admin-access__grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.35fr) minmax(0, 1.35fr);
+  grid-template-rows: auto auto 1fr auto;
+  column-gap: clamp(12px, 1.5vw, 20px);
+  row-gap: var(--edu-admin-section-gap);
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  align-items: stretch;
+  padding-top: 0;
+}
+
+.edu-admin-access__panel {
+  display: contents;
+}
+
+.edu-admin-access__col-head {
+  margin: 0;
+  font-size: clamp(0.9375rem, 1.5vw, 1.0625rem);
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  align-self: end;
+  min-height: 1.5rem;
+}
+
+.edu-admin-access__col-head--c1 {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.edu-admin-access__col-head--c2 {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.edu-admin-access__col-head--c3 {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.edu-admin-access__search--c1 {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.edu-admin-access__search--c2 {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.edu-admin-access__search--c3 {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.edu-admin-access__table-wrap--c1 {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.edu-admin-access__table-wrap--c2 {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.edu-admin-access__table-wrap--c3 {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+.edu-admin-access__actions--c1 {
+  grid-column: 1;
+  grid-row: 4;
+  min-height: 2.5rem;
+}
+
+.edu-admin-access__actions--c2 {
+  grid-column: 2;
+  grid-row: 4;
+}
+
+.edu-admin-access__actions--c3 {
+  grid-column: 3;
+  grid-row: 4;
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .edu-admin-access__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .edu-admin-access__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .edu-admin-access__col-head--c1,
+  .edu-admin-access__col-head--c2,
+  .edu-admin-access__col-head--c3,
+  .edu-admin-access__search--c1,
+  .edu-admin-access__search--c2,
+  .edu-admin-access__search--c3,
+  .edu-admin-access__table-wrap--c1,
+  .edu-admin-access__table-wrap--c2,
+  .edu-admin-access__table-wrap--c3,
+  .edu-admin-access__actions--c1,
+  .edu-admin-access__actions--c2,
+  .edu-admin-access__actions--c3 {
+    grid-column: unset;
+    grid-row: unset;
+  }
+
+  .edu-admin-access__actions--c1 {
+    display: none;
+  }
+}
+
+.edu-admin-access__search {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.edu-admin-access__search-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #0f172a;
+  background: #fff;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.edu-admin-access__search-input::placeholder {
+  color: #94a3b8;
+}
+
+.edu-admin-access__search-input:focus {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+  border-color: #60a5fa;
+}
+
+.edu-admin-access__search-input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.edu-admin-access__search-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.edu-admin-access__table-wrap {
+  min-height: 12rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.edu-admin-access__table-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* 목업: 헤더(과목명·담당 교수 등) — 회색 띠, 본문과 분리 */
+.edu-admin-access__table-head {
+  flex-shrink: 0;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.edu-admin-access__table-body {
+  flex: 1 1 auto;
+  min-height: 8rem;
+  overflow: auto;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.edu-admin-access__table-body--enrollment {
+  scrollbar-gutter: stable;
+}
+
+.edu-admin-access__table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: clamp(0.8125rem, 1.2vw, 0.9375rem);
+}
+
+/* 수강·신청 패널 — 헤더/본문 동일 5열(체크 44px + 데이터 4열) */
+.edu-admin-access__table--enrollment col.edu-admin-access__col-check {
+  width: 44px;
+}
+
+.edu-admin-access__table--enrollment col.edu-admin-access__col-lesson {
+  width: 22%;
+}
+
+.edu-admin-access__table--enrollment col.edu-admin-access__col-name {
+  width: 18%;
+}
+
+.edu-admin-access__table--enrollment col.edu-admin-access__col-nick {
+  width: 22%;
+}
+
+.edu-admin-access__table--enrollment col.edu-admin-access__col-date {
+  width: 27%;
+}
+
+.edu-admin-access__caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.edu-admin-access__table-head .edu-admin-access__table th {
+  text-align: center;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #e2e8f0;
+  border: none;
+  white-space: nowrap;
+}
+
+.edu-admin-access__table-body .edu-admin-access__table td {
+  padding: 10px 12px;
+  color: #334155;
+  background: #fff;
+  border-bottom: 1px solid #94a3b8;
+  vertical-align: middle;
+  text-align: center;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edu-admin-access__table-body--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edu-admin-access__empty-msg--error {
+  color: #b91c1c;
+}
+
+.edu-admin-access__empty-msg {
+  margin: 0;
+  padding: 24px 16px;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.edu-admin-access__table--enrollment .edu-admin-access__th-check,
+.edu-admin-access__table--enrollment .edu-admin-access__cell-check {
+  width: 44px;
+  max-width: 44px;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: center;
+  vertical-align: middle;
+  box-sizing: border-box;
+  overflow: visible;
+  white-space: normal;
+}
+
+.edu-admin-access__table--enrollment .edu-admin-access__cell-check input[type='checkbox'] {
+  margin: 0;
+  vertical-align: middle;
+}
+
+.edu-admin-access__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.edu-admin-access__subject-tr--selected td {
+  background: #eff6ff !important;
+}
+
+.edu-admin-access__subject-select {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edu-admin-access__subject-select:hover {
+  color: #1d4ed8;
+}
+
+.edu-admin-access__actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 2.5rem;
+}

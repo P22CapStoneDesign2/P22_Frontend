@@ -1,0 +1,41 @@
+/**
+ * 화면 내 액션 버튼 그룹 — 수정/삭제 등 나란히 배치
+ */
+.edu-action-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.edu-action-group .edu-btn {
+  min-height: 2.25rem;
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+}
+
+.edu-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.edu-badge--submitted,
+.edu-badge--complete {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.edu-badge--incomplete {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}

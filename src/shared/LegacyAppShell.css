@@ -1,0 +1,251 @@
+/* 우측 전체 높이 툴바입니다. 공통으로 사용하면 될 듯 합니다. */
+
+.app-layout {
+  position: relative;
+  min-height: 100svh;
+}
+
+.app-toolbar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1990;
+  background: rgba(15, 23, 42, 0.38);
+  animation: app-toolbar-backdrop-in 180ms ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-toolbar-backdrop {
+    background: rgba(0, 0, 0, 0.55);
+  }
+}
+
+@keyframes app-toolbar-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.app-nav-shell {
+  position: relative;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.app-nav-shell .app-fab-toolbar,
+.app-nav-shell .app-fab-root {
+  pointer-events: auto;
+}
+
+.app-fab-root {
+  position: fixed;
+  top: 12px;
+  right: 16px;
+  z-index: 2010;
+}
+
+.app-fab-toolbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 2000;
+  box-sizing: border-box;
+  width: min(220px, 100vw);
+  height: 100svh;
+  margin: 0;
+  padding: 5.5rem 10px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-left: 1px solid #e2e2e6;
+  border-radius: 0;
+  background: #fff;
+  box-shadow:
+    -8px 0 32px rgba(15, 23, 42, 0.12),
+    -2px 0 8px rgba(15, 23, 42, 0.06);
+  animation: app-fab-toolbar-slide 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-fab-toolbar {
+    background: #22232a;
+    border-left-color: #353640;
+    box-shadow:
+      -10px 0 40px rgba(0, 0, 0, 0.45),
+      -2px 0 8px rgba(0, 0, 0, 0.25);
+  }
+}
+
+@keyframes app-fab-toolbar-slide {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toolbar-backdrop {
+    animation: none;
+  }
+
+  .app-fab-toolbar {
+    animation: none;
+  }
+}
+
+.app-fab-tool-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: #f4f4f6;
+  color: #1a1a1e;
+  cursor: pointer;
+  white-space: nowrap;
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.app-fab-tool-btn:hover {
+  background: #e8e8ed;
+}
+
+.app-fab-tool-btn:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.app-fab-tool-btn--active {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #3730a3;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-fab-tool-btn {
+    background: #2e303a;
+    color: #e8e8ec;
+  }
+
+  .app-fab-tool-btn:hover {
+    background: #3a3d4a;
+  }
+
+  .app-fab-tool-btn--active {
+    background: rgba(99, 102, 241, 0.22);
+    border-color: rgba(129, 140, 248, 0.45);
+    color: #e0e7ff;
+  }
+}
+
+.app-fab-trigger {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid #e2e2e6;
+  background: #fff;
+  color: #1a1a1e;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 4px 14px rgba(15, 23, 42, 0.1),
+    0 1px 3px rgba(15, 23, 42, 0.06);
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.app-fab-trigger:hover {
+  background: #f8f8fa;
+}
+
+.app-fab-trigger:active {
+  transform: scale(0.96);
+}
+
+.app-fab-trigger:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.app-fab-trigger[aria-expanded='true'] {
+  background: #1a1a1e;
+  color: #fff;
+  border-color: #1a1a1e;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-fab-trigger {
+    background: #22232a;
+    border-color: #353640;
+    color: #e8e8ec;
+    box-shadow:
+      0 4px 18px rgba(0, 0, 0, 0.35),
+      0 1px 3px rgba(0, 0, 0, 0.25);
+  }
+
+  .app-fab-trigger:hover {
+    background: #2a2c35;
+  }
+
+  .app-fab-trigger[aria-expanded='true'] {
+    background: #f4f4f5;
+    color: #111;
+    border-color: #f4f4f5;
+  }
+}
+
+.app-placeholder {
+  box-sizing: border-box;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+  background: #ececef;
+  color: #1a1a1e;
+  font-family: system-ui, 'Segoe UI', 'Malgun Gothic', sans-serif;
+}
+
+.app-placeholder h1 {
+  margin: 0 0 12px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.app-placeholder p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #52525b;
+  max-width: 28rem;
+  line-height: 1.55;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-placeholder {
+    background: #1a1b20;
+    color: #e8e8ec;
+  }
+
+  .app-placeholder p {
+    color: #a1a1aa;
+  }
+}
