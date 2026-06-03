@@ -4,7 +4,7 @@
 Figma를 이용해 와이어프레임을 그리고, API 명세서를 기반으로 화면을 구현해 기능이 동작할 수 있게 하는 것을 목표로 합니다.
 <br>
 
-### 팀원
+### 🌟팀원
 | 정세영 | 윤정수 |
 |------|------|
 홈 랜딩 화면 구현 | 학생/교수 메인페이지 UI 설계 및 구현
@@ -16,7 +16,7 @@ pdf 교안 뷰어 화면 구현 | 퀴즈 결과 및 해설 조회 화면 구현
 
 <br><br>
 
-### 사용 기술
+### 🌟사용 기술
 | 구분 | 기술 |
 |------|------|
 언어 | JavaScript (JSX)
@@ -28,7 +28,7 @@ PDF | react-pdf + pdfjs-dist
 
 <br><br>
 
-### 프로그램 구조
+### 🌟프로그램 구조
 ```
 src/
 ├── main.jsx                          # 앱 진입점 — React DOM 마운트, AppRoutes 로드
@@ -169,5 +169,48 @@ src/
 ```
 <br><br>
 
-### 화면
+### 🌟화면
 
+#### 🔥랜딩 페이지
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/6cf29017-a004-40ed-a3ba-4ddedf9b54b4" />
+
+<br><br>
+
+#### 🔥로그인
+<img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/cffec67b-d2ce-4da7-a05b-cc896e23d58f" />
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/26f1cb94-7742-4147-b683-4969b9299a73" />
+
+<br><br>
+
+#### 🔥회원가입/비밀번호 찾기-재설정
+<img width="1919" height="946" alt="image" src="https://github.com/user-attachments/assets/433a185c-e70c-463e-8237-1674f5277cb2" />
+<img width="1919" height="930" alt="image" src="https://github.com/user-attachments/assets/6e32a2d7-5366-42eb-ad28-99f28d5efdb8" />
+<img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/e0ca619c-9230-4162-bf2a-c80585d6c809" />
+
+<br><br>
+
+#### 🔥교수(PROFESSOR)
+
+<img width="1919" height="937" alt="image" src="https://github.com/user-attachments/assets/45b20a31-4350-42c9-b9af-c9fffd72cf55" />
+<img width="1918" height="938" alt="image" src="https://github.com/user-attachments/assets/8f99df10-5f16-4e2e-a3c3-b81091983e2b" />
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/70016445-0ae5-420a-adab-34bc4cb88919" />
+<img width="1919" height="937" alt="image" src="https://github.com/user-attachments/assets/bcad2027-be9b-4bef-96c1-a420a676647c" />
+
+<br><br>
+
+#### 🔥학생(STUDENT)
+<img width="1918" height="940" alt="image" src="https://github.com/user-attachments/assets/cb57a416-f575-4720-9edf-6d8adf0338d9" />
+<img width="1919" height="936" alt="image" src="https://github.com/user-attachments/assets/ac5fa5ec-3a2b-4e83-b838-e7ddfcfef2a6" />
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/480aae87-94be-441b-8c75-0d532f946fa3" />
+<img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/d3b2adce-a240-4ac1-b478-0f71e736dd10" />
+<img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/1e52fbcb-0e54-40f3-8c17-030a04748421" />
+<img width="1919" height="936" alt="image" src="https://github.com/user-attachments/assets/1ea8a4d8-550d-4f88-bc81-8acb1d578cd4" />
+<img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/62ebb5bd-6961-4664-becf-9e491a7e4712" />
+
+<br><br>
+
+#### 🔥관리자(ADMIN)
+<img width="1917" height="939" alt="image" src="https://github.com/user-attachments/assets/bd41f37f-c7e8-4747-8ad0-e25d41ebc667" />
+<img width="1917" height="935" alt="image" src="https://github.com/user-attachments/assets/23cf5574-52db-4895-8426-47eac15f83ef" />
+
+<br><br>
