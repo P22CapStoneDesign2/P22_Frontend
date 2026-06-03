@@ -14,7 +14,6 @@ import {
 } from '../../../shared/constants/routes.js'
 import { resolvePdfFileForViewer } from './materialPdfAuth.js'
 import AppLayout from '../../../components/layout/AppLayout/AppLayout.jsx'
-import PageBackButton from '../../../components/ui/PageBackButton/PageBackButton.jsx'
 import { useAuthHeaderSession } from '../../../shared/auth/useAuthHeaderSession.js'
 import './MaterialPdfViewerPage.css'
 
@@ -338,13 +337,6 @@ export default function MaterialPdfViewerPage() {
       <div className="edu-mat-pdf-viewer">
         <div className="edu-mat-pdf-viewer__body">
           <aside className="edu-mat-pdf-viewer__sidebar" aria-label="교안 뷰어 도구">
-            <PageBackButton
-              fallbackPath={
-                isProfessorRoute
-                  ? professorMaterialsPath(courseIdFromQuery || undefined)
-                  : studentMaterialsPath(courseIdFromQuery || undefined)
-              }
-            />
             <h1 className="edu-mat-pdf-viewer__doc-title">{subbarTitle}</h1>
 
             <div className="edu-mat-pdf-viewer__sidebar-tools">

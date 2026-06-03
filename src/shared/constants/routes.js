@@ -33,7 +33,7 @@ export const ROUTES = {
   /** `/student/quiz/:materialId` 의 공통 접두 (표시·조립용) */
   studentQuizRoot: '/student/quiz',
 
-  /** 관리자(ADMIN) — 교안 수강 신청 관리 */
+  /** 관리자(ADMIN) — 강의 수강 신청 관리 */
   adminSubjectAccess: '/admin/subject-access',
   /** 관리자(ADMIN) — 교수 회원가입 승인 */
   adminProfessorSignups: '/admin/professor-signups',

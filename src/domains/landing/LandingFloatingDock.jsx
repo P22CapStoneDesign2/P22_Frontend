@@ -1,10 +1,20 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import {
+  beginLandingDockScroll,
+  endLandingDockScroll,
+  isLandingDockScrollLocked,
+} from './landingDockScrollLock.js'
 import './LandingFloatingDock.css'
 
 /** @typedef {'intro' | 'mindmap' | 'start'} DockSection */
 
 const DOCK_ITEMS = [
-  { section: 'intro', label: '소개', targetId: 'landing-bridge', scrollAnchor: 'upper' },
+  {
+    section: 'intro',
+    label: '소개',
+    targetId: 'landing-intro',
+    scrollAnchor: 'top',
+  },
   { section: 'mindmap', label: '알아보기', targetId: 'landing-mindmap', scrollAnchor: 'upper' },
   {
     section: 'start',
@@ -14,7 +24,50 @@ const DOCK_ITEMS = [
   },
 ]
 
-/** @typedef {'upper' | 'lower' | 'bottom'} DockScrollAnchor */
+/** @typedef {'top' | 'alignTop' | 'upper' | 'lower' | 'bottom'} DockScrollAnchor */
+
+/**
+ * @param {HTMLElement} scroller
+ * @param {DockScrollAnchor} scrollAnchor
+ */
+function getViewportOffset(scroller, scrollAnchor) {
+  if (scrollAnchor === 'bottom' || scrollAnchor === 'top') return 0
+  if (scrollAnchor === 'alignTop') return scroller.clientHeight * 0.04
+  if (scrollAnchor === 'lower') return scroller.clientHeight * 0.58
+  return scroller.clientHeight * 0.22
+}
+
+/**
+ * @param {HTMLElement} scroller
+ * @param {() => void} onSettled
+ * @returns {() => void}
+ */
+function waitForScrollSettled(scroller, onSettled) {
+  let settledTimer = /** @type {ReturnType<typeof setTimeout> | null} */ (null)
+  let maxTimer = /** @type {ReturnType<typeof setTimeout> | null} */ (null)
+  let sawScroll = false
+
+  const finish = () => {
+    scroller.removeEventListener('scroll', onScroll)
+    if (settledTimer) clearTimeout(settledTimer)
+    if (maxTimer) clearTimeout(maxTimer)
+    onSettled()
+  }
+
+  const onScroll = () => {
+    sawScroll = true
+    if (settledTimer) clearTimeout(settledTimer)
+    settledTimer = setTimeout(finish, 160)
+  }
+
+  scroller.addEventListener('scroll', onScroll, { passive: true })
+  settledTimer = setTimeout(() => {
+    if (!sawScroll) finish()
+  }, 240)
+  maxTimer = setTimeout(finish, 3000)
+
+  return finish
+}
 
 /**
  * @param {string} id
@@ -24,26 +77,42 @@ function scrollToId(id, scrollAnchor = 'upper') {
   const scroller = document.querySelector('.landing-scroll')
   if (!scroller) return
 
+  scroller.scrollTo({ top: scroller.scrollTop, behavior: 'auto' })
+
   const maxTop = scroller.scrollHeight - scroller.clientHeight
 
   if (scrollAnchor === 'bottom') {
-    scroller.scrollTo({ top: maxTop, behavior: 'smooth' })
+    requestAnimationFrame(() => {
+      scroller.scrollTo({ top: maxTop, behavior: 'smooth' })
+    })
+    return
+  }
+
+  if (scrollAnchor === 'top') {
+    requestAnimationFrame(() => {
+      scroller.scrollTo({ top: 0, behavior: 'smooth' })
+    })
     return
   }
 
   const target = document.getElementById(id)
   if (!target) return
 
-  const viewportOffset =
-    scrollAnchor === 'lower' ? scroller.clientHeight * 0.58 : scroller.clientHeight * 0.22
+  const viewportOffset = getViewportOffset(scroller, scrollAnchor)
 
-  const top =
-    target.getBoundingClientRect().top -
-    scroller.getBoundingClientRect().top +
-    scroller.scrollTop -
-    viewportOffset
-
-  scroller.scrollTo({ top: Math.min(maxTop, Math.max(0, top)), behavior: 'smooth' })
+  requestAnimationFrame(() => {
+    const top = Math.min(
+      maxTop,
+      Math.max(
+        0,
+        target.getBoundingClientRect().top -
+          scroller.getBoundingClientRect().top +
+          scroller.scrollTop -
+          viewportOffset,
+      ),
+    )
+    scroller.scrollTo({ top, behavior: 'smooth' })
+  })
 }
 
 /** @param {HTMLElement} scroller */
@@ -69,8 +138,7 @@ export default function LandingFloatingDock() {
   const [selection, setSelection] = useState({ top: 0, height: 0 })
   const raftRef = useRef(/** @type {HTMLDivElement | null} */ (null))
   const itemRefs = useRef(/** @type {Partial<Record<DockSection, HTMLButtonElement | null>>} */ ({}))
-  const scrollLockRef = useRef(false)
-  const scrollLockTimerRef = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null))
+  const scrollEndCleanupRef = useRef(/** @type {(() => void) | null} */ (null))
 
   const measureSelection = useCallback((section) => {
     const raft = raftRef.current
@@ -97,7 +165,7 @@ export default function LandingFloatingDock() {
     if (!scroller) return
 
     const syncActiveFromScroll = () => {
-      if (scrollLockRef.current) return
+      if (isLandingDockScrollLocked()) return
       const next = resolveActiveFromScroll(scroller)
       setActive((prev) => (prev === next ? prev : next))
     }
@@ -109,20 +177,32 @@ export default function LandingFloatingDock() {
     return () => {
       scroller.removeEventListener('scroll', syncActiveFromScroll)
       window.removeEventListener('resize', syncActiveFromScroll)
-      if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current)
+      scrollEndCleanupRef.current?.()
+      scrollEndCleanupRef.current = null
+      endLandingDockScroll()
     }
   }, [])
 
   function goTo(section, targetId, scrollAnchor) {
+    const scroller = document.querySelector('.landing-scroll')
+    if (!scroller) return
+
+    scrollEndCleanupRef.current?.()
+    scrollEndCleanupRef.current = null
+
     setActive(section)
-    scrollLockRef.current = true
-    if (scrollLockTimerRef.current) clearTimeout(scrollLockTimerRef.current)
-    scrollLockTimerRef.current = setTimeout(() => {
-      scrollLockRef.current = false
-      scrollLockTimerRef.current = null
-    }, 900)
+    beginLandingDockScroll()
 
     scrollToId(targetId, scrollAnchor)
+
+    scrollEndCleanupRef.current = waitForScrollSettled(scroller, () => {
+      scrollEndCleanupRef.current = null
+      endLandingDockScroll()
+      measureSelection(section)
+      const next = resolveActiveFromScroll(scroller)
+      setActive(next)
+    })
+
     requestAnimationFrame(() => measureSelection(section))
   }
 
