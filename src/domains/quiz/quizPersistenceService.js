@@ -8,7 +8,6 @@ import {
 import { getApiErrorMessage } from '../../api/apiErrorMessage.js'
 import {
   buildQuizCreateApiPayload,
-  isPersistedQuestionId,
   mapEditorQuestionToApiQuestionPayload,
   mapEditorQuestionToApiQuestionUpdatePayload,
   parseLessonIdForApi,
@@ -47,7 +46,6 @@ export async function persistQuizWithQuestions({
       description,
       questions,
     })
-    console.log('QUIZ CREATE PAYLOAD', JSON.stringify(payload, null, 2))
     try {
       const created = await fetchCreateQuizData(payload)
       if (created?.id == null) {
@@ -65,17 +63,24 @@ export async function persistQuizWithQuestions({
   await fetchUpdateQuizData(effectiveQuizId, { title, description })
 
   const questionOverrides = {}
-  const currentIds = new Set(questions.map((q) => q.id).filter(Boolean))
+  const currentIds = new Set(
+    questions
+      .map((q) => (q?.id == null ? '' : String(q.id).trim()))
+      .filter(Boolean),
+  )
   const initialSet = new Set(
-    (initialPersistedQuestionIds ?? []).filter((id) => isPersistedQuestionId(id)),
+    (initialPersistedQuestionIds ?? [])
+      .map((id) => (id == null ? '' : String(id).trim()))
+      .filter(Boolean),
   )
 
   for (const q of questions) {
     const score = typeof q.score === 'number' ? q.score : 10
-    if (isPersistedQuestionId(q.id) && initialSet.has(q.id)) {
+    const questionId = q?.id == null ? '' : String(q.id).trim()
+    if (questionId && initialSet.has(questionId)) {
       await fetchUpdateQuizQuestionData(
         effectiveQuizId,
-        q.id,
+        questionId,
         mapEditorQuestionToApiQuestionUpdatePayload(q, { ...questionOverrides, score }),
       )
     } else {

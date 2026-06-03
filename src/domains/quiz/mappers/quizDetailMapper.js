@@ -5,6 +5,9 @@
  * correctOptionIds / shortAnswer 를 채워 정답 UI를 preload 할 것.
  */
 
+import { readApiOptionId } from './quizMapper.js'
+import { genQuizItemId } from '../../professor/quiz-create/quizCreateUtils.js'
+
 const API_MC = 'MULTIPLE_CHOICE'
 const API_SA = 'SHORT_ANSWER'
 
@@ -33,11 +36,18 @@ function mapApiQuestionToEditorQuestion(q, { includeCorrect = false } = {}) {
   const type = qt === API_MC ? 'multipleChoice' : 'shortAnswer'
 
   const options = Array.isArray(q?.options)
-    ? q.options.map((o) => ({
-        id: String(o?.id ?? ''),
-        text: o?.optionText != null ? String(o.optionText) : '',
-      }))
+    ? q.options.map((o) => {
+        const serverOptionId = readApiOptionId(o)
+        return {
+          id: serverOptionId || genQuizItemId(),
+          serverOptionId: serverOptionId || undefined,
+          text: o?.optionText != null ? String(o.optionText) : '',
+        }
+      })
     : []
+  const persistedOptionIds = options
+    .map((o) => o.serverOptionId ?? o.id)
+    .filter((id) => id !== '' && /^\d+$/.test(String(id)))
 
   let correctOptionIds = []
   let shortAnswer = ''
@@ -70,6 +80,7 @@ function mapApiQuestionToEditorQuestion(q, { includeCorrect = false } = {}) {
     content: q?.questionText != null ? String(q.questionText) : '',
     type,
     options,
+    persistedOptionIds,
     correctOptionIds,
     shortAnswer,
     explanation: q?.explanation != null ? String(q.explanation) : '',

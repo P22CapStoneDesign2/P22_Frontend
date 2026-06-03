@@ -31,6 +31,7 @@ export default function QuizSolveContent({ quizId: quizIdFromRoute }) {
 
   const [questions, setQuestions] = useState([])
   const [quizId, setQuizId] = useState('')
+  const [materialId, setMaterialId] = useState('')
   const [loadedQuizKey, setLoadedQuizKey] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -47,9 +48,11 @@ export default function QuizSolveContent({ quizId: quizIdFromRoute }) {
     if (!loadKey.trim()) return
     fetchStudentSolveSessionByQuizId(loadKey).then((session) => {
       if (cancelled) return
+      console.log('session:', session)
       if (session) {
         setQuestions(session.questions)
         setQuizId(session.quizId)
+        setMaterialId(session.materialId)
       } else {
         setQuestions([])
         setQuizId('')
@@ -136,7 +139,7 @@ export default function QuizSolveContent({ quizId: quizIdFromRoute }) {
     try {
       const payload = mapSolveStateToSubmitRequest(questions, answers)
       const apiData = await fetchSubmitQuizData(quizId, payload)
-      const graded = buildResultBundleFromSubmitResponse(apiData, quizId, questions)
+      const graded = buildResultBundleFromSubmitResponse(apiData, quizId, questions, materialId)
       setIsSubmitModalOpen(false)
       showToast(TOAST_MESSAGES.quizSubmitted)
       navigateToQuizResult(navigate, graded)

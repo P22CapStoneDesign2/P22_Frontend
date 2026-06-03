@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   adminUserPageContent,
   approveProfessorSignup,
-  getAdminProfessorSignups,
+  fetchAdminProfessorSignupsForPage,
   rejectProfessorSignup,
 } from '../../../api/adminUsers.js'
 import Button from '../../../components/ui/Button/Button.jsx'
@@ -30,7 +30,7 @@ export default function AdminProfessorSignupPage() {
     setListLoading(true)
     setListError('')
     try {
-      const res = await getAdminProfessorSignups({ status: 'PENDING', page: 0, size: 200, sort: 'requestedAt,ASC' })
+      const res = await fetchAdminProfessorSignupsForPage()
       const mapped = adminUserPageContent(res)
         .map(mapProfessorSignupToRow)
         .filter(Boolean)

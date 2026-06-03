@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import ConfirmModal from '../../../components/ui/ConfirmModal/ConfirmModal.jsx'
 import Button from '../../../components/ui/Button/Button.jsx'
 import PdfViewerSection from '../../../components/media/PdfViewerSection/PdfViewerSection.jsx'
 import { ROUTES } from '../../../shared/constants/routes.js'
+import instance from '../../../api/axios.js'
 import { loadStudentQuizAttempt, loadStudentQuizAttemptByQuizId } from '../quiz/studentQuizData.js'
 import QuestionResultNavigator from './QuestionResultNavigator.jsx'
 import ResultContent from './ResultContent.jsx'
+
 
 /**
  * 퀴즈 결과/해설 본문 (교수 저장 퀴즈 + 학생 제출 답 기준 채점)
@@ -35,6 +37,21 @@ export default function QuizResultContent({ attemptId }) {
 
   const materialId = resultBundle?.materialId ?? ''
   const materialLabel = materialId ? `교안 ID ${materialId}` : '—'
+
+  console.log('resultBundle:', resultBundle)
+  console.log('materialId:', materialId)
+
+  const [pdfUrl, setPdfUrl] = useState('')
+
+  useEffect(() => {
+    if (!materialId) return
+    instance.get(`/api/materials/${materialId}`)
+      .then(res => {
+        const url = res.data?.data?.fileUrl ?? ''
+        setPdfUrl(url)
+      })
+      .catch(() => {})
+  }, [materialId])
 
   const total = resultQuestions.length
   const currentQuestion = total > 0 ? resultQuestions[currentQuestionIndex] : null
@@ -83,6 +100,7 @@ export default function QuizResultContent({ attemptId }) {
           <PdfViewerSection
             className="edu-pdf-section--quiz-result"
             placeholderText={`교안: ${materialLabel}`}
+            pdfUrl={pdfUrl}
           />
         </section>
 

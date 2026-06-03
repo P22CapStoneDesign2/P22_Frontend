@@ -48,7 +48,7 @@ export function mapProfessorSignupToRow(item) {
     email: String(item.email ?? '—'),
     nickname: String(item.nickname ?? '—'),
     requestedDate: formatApiDate(item.requestedAt ?? item.createdAt),
-    status: normalizeSignupStatus(item.status ?? item.signupStatus),
+    status: normalizeSignupStatus(item.status ?? item.signupStatus ?? item.signup_status),
   }
 }
 

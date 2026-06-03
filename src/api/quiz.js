@@ -8,9 +8,11 @@ import instance from './axios.js'
 export const getQuizzes = (params = {}) => {
   const { lessonId, materialId, ...rest } = params ?? {}
   const query = { ...rest }
-  const mid = materialId ?? lessonId
-  if (mid != null && String(mid).trim() !== '') {
-    query.materialId = mid
+  if (materialId != null && String(materialId).trim() !== '') {
+    query.materialId = materialId
+  }
+  if (lessonId != null && String(lessonId).trim() !== '') {
+    query.lessonId = lessonId
   }
   return instance.get('/api/quiz', { params: query })
 }

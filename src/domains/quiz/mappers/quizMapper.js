@@ -73,6 +73,67 @@ export function isPersistedQuestionId(id) {
   return /^\d+$/.test(s)
 }
 
+/** @param {unknown} id */
+export function isPersistedOptionId(id) {
+  return isPersistedQuestionId(id)
+}
+
+/**
+ * @param {unknown} id
+ * @returns {number|null}
+ */
+function parsePersistedIdForApi(id) {
+  if (!isPersistedQuestionId(id)) return null
+  const n = typeof id === 'number' ? id : Number.parseInt(String(id).trim(), 10)
+  return Number.isFinite(n) ? n : null
+}
+
+/**
+ * GET 응답 보기 객체에서 서버 option id 추출 (백엔드 필드명 차이 대응)
+ * @param {object|null|undefined} option
+ * @returns {string}
+ */
+export function readApiOptionId(option) {
+  if (!option || typeof option !== 'object') return ''
+  const candidates = [option.id, option.optionId, option.quizOptionId]
+  for (const c of candidates) {
+    if (c != null && c !== '') return String(c).trim()
+  }
+  return ''
+}
+
+/**
+ * PUT 수정 시 보기에 실을 서버 id (옵션 객체 id → serverOptionId → persistedOptionIds[index])
+ * @param {object} editorQuestion
+ * @param {object} option
+ * @param {number} index
+ * @returns {number|null}
+ */
+function resolvePersistedOptionIdForUpdate(editorQuestion, option, index) {
+  const candidates = [option?.serverOptionId, option?.id]
+  for (const c of candidates) {
+    const parsed = parsePersistedIdForApi(c)
+    if (parsed != null) return parsed
+  }
+
+  const persistedList = Array.isArray(editorQuestion?.persistedOptionIds)
+    ? editorQuestion.persistedOptionIds
+    : []
+  if (index >= 0 && index < persistedList.length) {
+    return parsePersistedIdForApi(persistedList[index])
+  }
+  return null
+}
+
+/**
+ * @param {{ id?: number, optionId?: number, optionText: string, correct: boolean }} entry
+ * @param {number} persistedId
+ */
+function attachPersistedOptionIdsToApiEntry(entry, persistedId) {
+  entry.id = persistedId
+  entry.optionId = persistedId
+}
+
 /**
  * 프론트 편집기 문항 → API 문제 추가/수정용 본문 (명세 §20~21)
  *
@@ -86,10 +147,11 @@ export function isPersistedQuestionId(id) {
  * @param {string} [editorQuestion.explanation]
  * @param {object} [overrides]
  * @param {number} [overrides.score] — 기본 10
+ * @param {boolean} [overrides.forUpdate] — true면 기존 보기에 서버 option id 포함 (PUT 시 목록 교체)
  * @returns {{
  *   questionText: string,
  *   questionType: string,
- *   options: Array<{ optionText: string, correct: boolean }>,
+ *   options: Array<{ id?: number, optionText: string, correct: boolean }>,
  *   correctAnswer: string,
  *   explanation: string,
  *   score: number,
@@ -99,9 +161,10 @@ export function isPersistedQuestionId(id) {
  * }}
  */
 export function mapEditorQuestionToApiQuestionPayload(editorQuestion, overrides = {}) {
+  const { forUpdate = false, score: scoreOverride } = overrides
   const score =
-    typeof overrides.score === 'number' && Number.isFinite(overrides.score)
-      ? Math.trunc(overrides.score)
+    typeof scoreOverride === 'number' && Number.isFinite(scoreOverride)
+      ? Math.trunc(scoreOverride)
       : DEFAULT_SCORE
   const isMc = normalizeEditorQuestionType(editorQuestion?.type) === 'multipleChoice'
   const questionType = isMc ? API_QUESTION_TYPE.MULTIPLE_CHOICE : API_QUESTION_TYPE.SHORT_ANSWER
@@ -128,13 +191,19 @@ export function mapEditorQuestionToApiQuestionPayload(editorQuestion, overrides 
     })
 
     const options = srcOpts
-      .map((o) => {
+      .map((o, index) => {
         const optionText = String(o?.text ?? '').trim()
-        const oid = o?.id != null ? String(o.id) : ''
-        return {
+        const oid = o?.id != null ? String(o.id).trim() : ''
+        /** @type {{ id?: number, optionId?: number, optionText: string, correct: boolean }} */
+        const entry = {
           optionText,
           correct: oid ? idSet.has(oid) : false,
         }
+        if (forUpdate) {
+          const persistedId = resolvePersistedOptionIdForUpdate(editorQuestion, o, index)
+          if (persistedId != null) attachPersistedOptionIdsToApiEntry(entry, persistedId)
+        }
+        return entry
       })
       .filter((o) => o.optionText.length > 0)
 
@@ -178,7 +247,10 @@ export function mapEditorQuestionToApiQuestionPayload(editorQuestion, overrides 
  * @returns {Omit<ReturnType<typeof mapEditorQuestionToApiQuestionPayload>, 'questionType'>}
  */
 export function mapEditorQuestionToApiQuestionUpdatePayload(editorQuestion, overrides = {}) {
-  const full = mapEditorQuestionToApiQuestionPayload(editorQuestion, overrides)
+  const full = mapEditorQuestionToApiQuestionPayload(editorQuestion, {
+    ...overrides,
+    forUpdate: true,
+  })
   const { questionType: _questionTypeOmitted, ...updatePayload } = full
   return updatePayload
 }

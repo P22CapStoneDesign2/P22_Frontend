@@ -59,11 +59,11 @@ export function handleQuizAlreadySubmittedError(err, quizId, questions, navigate
  * @param {string} quizId
  * @param {object[]} questions
  */
-export function buildResultBundleFromSubmitResponse(apiData, quizId, questions) {
+export function buildResultBundleFromSubmitResponse(apiData, quizId, questions, materialId = '') {
   const enrichment = buildQuestionEnrichmentByIdFromSolveQuestions(questions)
   return mapSubmitResponseToResultBundle(apiData, {
     quizId,
-    materialId: '',
+    materialId: String(materialId ?? ''),
     questionEnrichmentById: enrichment,
   })
 }

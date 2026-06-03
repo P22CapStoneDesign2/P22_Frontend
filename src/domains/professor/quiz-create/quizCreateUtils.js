@@ -80,5 +80,6 @@ export function cloneQuestionsForState(questions) {
     ...q,
     options: (q.options ?? []).map((o) => ({ ...o })),
     correctOptionIds: Array.isArray(q.correctOptionIds) ? [...q.correctOptionIds] : [],
+    persistedOptionIds: Array.isArray(q.persistedOptionIds) ? [...q.persistedOptionIds] : undefined,
   }))
 }

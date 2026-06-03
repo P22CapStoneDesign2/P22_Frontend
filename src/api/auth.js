@@ -54,12 +54,16 @@ export const login = (email, password) =>
 export const requestPasswordReset = (email) => {
   const body = { email }
   if (APP_PUBLIC_URL) body.frontendBaseUrl = APP_PUBLIC_URL
-  return instance.post('/api/auth/password/reset-request', body)
+  return instance.post('/api/v1/auth/password/reset-request', body)
 }
 
 /** 메일의 재설정 링크 클릭 후 — 토큰·새 비밀번호 전송 (백엔드 DTO에 맞게 필드명 조정) */
 export const confirmPasswordReset = (data) =>
-  instance.post('/api/auth/password/reset', data);
+  instance.post('/api/v1/auth/password/reset', {
+    token: data.token,
+    newPassword: data.password,
+    confirmPassword: data.passwordConfirm,
+  });
 
 /* POST /api/auth/reissue — { refreshToken } */
 export const reissue = (refreshToken) =>
