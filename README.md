@@ -185,6 +185,8 @@ src/
 #### 🔥회원가입/비밀번호 찾기-재설정
 <img width="1919" height="946" alt="image" src="https://github.com/user-attachments/assets/433a185c-e70c-463e-8237-1674f5277cb2" />
 <img width="1919" height="930" alt="image" src="https://github.com/user-attachments/assets/6e32a2d7-5366-42eb-ad28-99f28d5efdb8" />
+<img width="1919" height="939" alt="image" src="https://github.com/user-attachments/assets/58ee5a74-331f-475e-9d02-c7e773e4b951" />
+
 <img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/e0ca619c-9230-4162-bf2a-c80585d6c809" />
 
 <br><br>
@@ -205,7 +207,8 @@ src/
 <img width="1919" height="941" alt="image" src="https://github.com/user-attachments/assets/d3b2adce-a240-4ac1-b478-0f71e736dd10" />
 <img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/1e52fbcb-0e54-40f3-8c17-030a04748421" />
 <img width="1919" height="936" alt="image" src="https://github.com/user-attachments/assets/1ea8a4d8-550d-4f88-bc81-8acb1d578cd4" />
-<img width="1919" height="943" alt="image" src="https://github.com/user-attachments/assets/62ebb5bd-6961-4664-becf-9e491a7e4712" />
+<img width="1919" height="937" alt="image" src="https://github.com/user-attachments/assets/ffaa818e-f13b-4f2a-a490-4318fd7c0ba8" />
+
 
 <br><br>
 
